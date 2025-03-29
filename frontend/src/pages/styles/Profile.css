@@ -1,0 +1,493 @@
+.page-content {
+    min-height: calc(100vh - 64px);
+    background: #f8f9fa;
+    padding: 84px 2rem 2rem;
+}
+
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-header {
+    background: linear-gradient(to right, rgba(44, 62, 80, 0.95), rgba(52, 152, 219, 0.95));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: white;
+    padding: 4rem 5%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.profile-header h1 {
+    font-size: 3.5rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.profile-header p {
+    font-size: 1.4rem;
+    margin-top: 0.5rem;
+    opacity: 0.9;
+}
+
+.profile-content {
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    /* Adjusted ratio for better layout */
+    gap: 2rem;
+}
+
+.side-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.profile-information-section {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.profile-information-section h2 {
+    color: #1e3c72;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.detail-row {
+    display: flex;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.detail-row:hover {
+    background: #f0f2f5;
+    transform: translateX(5px);
+}
+
+.detail-label {
+    flex: 1;
+    color: #1e3c72;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.detail-value {
+    flex: 2;
+    color: #2c3e50;
+    font-size: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    color: #1e3c72;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.875rem;
+    border: 2px solid #e1e1e1;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #2a5298;
+    box-shadow: 0 0 0 4px rgba(42, 82, 152, 0.1);
+}
+
+.form-control:disabled {
+    background: #f8f9fa;
+    cursor: not-allowed;
+}
+
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.button-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.edit-button,
+.save-button,
+.cancel-button {
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.edit-button {
+    background: #1e3c72;
+    color: white;
+    width: auto;
+}
+
+.edit-button:hover {
+    background: #2a5298;
+    transform: translateY(-2px);
+}
+
+.save-button {
+    background: #2ecc71;
+    color: white;
+    flex: 1;
+}
+
+.save-button:hover {
+    background: #27ae60;
+    transform: translateY(-2px);
+}
+
+.cancel-button {
+    background: #e74c3c;
+    color: white;
+    flex: 1;
+}
+
+.cancel-button:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+}
+
+.connected-devices-section,
+.settings-section {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.connected-devices-section h2,
+.settings-section h2 {
+    color: #1e3c72;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.device-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.device-item {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.device-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.device-info p {
+    margin: 0;
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+.device-info strong {
+    color: #1e3c72;
+}
+
+.device-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.device-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.device-button.connect {
+    background: #2ecc71;
+    color: white;
+}
+
+.device-button.disconnect {
+    background: #e74c3c;
+    color: white;
+}
+
+.device-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.device-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+}
+
+.device-button.connect:hover:not(:disabled) {
+    background: #27ae60;
+}
+
+.device-button.disconnect:hover:not(:disabled) {
+    background: #c0392b;
+}
+
+.change-password-button {
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.change-password-button:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.change-password-form {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.password-input-container {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.toggle-password:hover {
+    color: #1e3c72;
+}
+
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #1e3c72;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* SweetAlert2 Toast Customization */
+.swal2-container.swal2-top-right>.swal2-popup {
+    margin-right: 1rem !important;
+}
+
+.profile-toast {
+    padding: 0.75rem 1.25rem !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .profile-content {
+        padding: 2rem 3%;
+    }
+}
+
+@media (max-width: 1024px) {
+    .profile-content {
+        grid-template-columns: 1fr;
+    }
+
+    .side-sections {
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-content {
+        padding: 1rem;
+    }
+
+    .profile-header {
+        padding: 2rem 1rem;
+    }
+
+    .profile-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .profile-header p {
+        font-size: 1.2rem;
+    }
+
+    .profile-content {
+        padding: 1.5rem;
+    }
+
+    .profile-information-section,
+    .connected-devices-section,
+    .settings-section {
+        padding: 1.5rem;
+    }
+
+    .button-group {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .detail-row {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 0.8rem;
+    }
+
+    .detail-label {
+        margin-bottom: 0.25rem;
+    }
+
+    .form-group {
+        margin-bottom: 1rem;
+    }
+
+    .form-control {
+        padding: 0.75rem;
+    }
+
+    .device-item {
+        padding: 1rem;
+    }
+
+    .device-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .device-buttons {
+        margin-top: 0.8rem;
+    }
+
+    .health-metrics {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .metric-card {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-header h1 {
+        font-size: 2rem;
+    }
+
+    .profile-header p {
+        font-size: 1rem;
+    }
+
+    .profile-container {
+        padding: 1rem;
+    }
+
+    .profile-information-section h2,
+    .connected-devices-section h2,
+    .settings-section h2 {
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+
+    .edit-button,
+    .save-button,
+    .cancel-button,
+    .change-password-button {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .device-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .device-button {
+        width: 100%;
+    }
+
+    .change-password-form {
+        padding: 1rem;
+    }
+
+    .toggle-password {
+        padding: 0.3rem;
+    }
+}
+
+/* Add smooth transitions for better mobile experience */
+.profile-information-section,
+.connected-devices-section,
+.settings-section,
+.detail-row,
+.form-control,
+.button-group button {
+    transition: all 0.3s ease;
+}

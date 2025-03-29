@@ -1,0 +1,32 @@
+/* No specific styles needed for PrivateRoute, but you can add some if needed */
+
+/* Example: Basic styles for the PrivateRoute component */
+.private-route {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f4;
+}
+
+.private-route h1 {
+    font-size: 2rem;
+    color: #333;
+}
+
+.private-route p {
+    font-size: 1.2rem;
+    color: #666;
+}
+
+/* Example: Styles for the loading state */
+.private-route .loading {
+    font-size: 1.5rem;
+    color: #007bff;
+}
+
+/* Example: Styles for the error state */
+.private-route .error {
+    font-size: 1.5rem;
+    color: #ff0000;
+}

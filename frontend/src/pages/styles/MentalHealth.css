@@ -1,0 +1,747 @@
+/* Base styles and variables */
+:root {
+    --primary-color: #6b9080;
+    --secondary-color: #a4c3b2;
+    --background-color: #f6fff8;
+    --text-color: #2f3e46;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
+    --navbar-height: 64px;
+}
+
+/* Page Container */
+.page-container {
+    min-height: calc(100vh - 64px);
+    margin-top: 64px;
+    background: #f8f9fa;
+}
+
+/* Mental Health Container */
+.mentalhealth-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    background: #ffffff;
+    min-height: calc(100vh - 64px);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Mental Health Content */
+.mentalhealth-content {
+    flex-grow: 1;
+    padding: 2rem 5%;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Header styling with modern gradient and glass effect */
+.mentalhealth-header {
+    background: linear-gradient(to right, rgba(44, 62, 80, 0.95), rgba(52, 152, 219, 0.95));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: white;
+    box-shadow: var(--shadow);
+    padding: 2rem 1rem;
+}
+
+.mentalhealth-header h1 {
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+.mentalhealth-header p {
+    font-size: 1.2rem;
+    margin-top: 0.5rem;
+}
+
+/* Section Layout */
+.mentalhealth-section {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.mentalhealth-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--primary-color);
+}
+
+/* Section Headers */
+.mentalhealth-section h2 {
+    position: relative;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #f0f0f0;
+    font-size: 1.5rem;
+    color: var(--text-color);
+}
+
+.mentalhealth-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 60px;
+    height: 2px;
+    background: var(--primary-color);
+}
+
+/* Daily Check-in Section */
+.daily-check-in {
+    margin-bottom: 2rem;
+}
+
+/* Mood Tracker Section */
+.mental-logs {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+/* Stress Analysis/Recommendations Section */
+.stress-analysis {
+    margin-top: 2rem;
+}
+
+.stress-analysis-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.current-state {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.current-state h3 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.state-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.state-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.state-item label {
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: 0.9rem;
+}
+
+.state-item span {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+}
+
+.recommendations {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.recommendations h3 {
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.recommendations ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.recommendations li {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--primary-color);
+    transition: var(--transition);
+}
+
+.recommendations li:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Elements */
+.daily-check-in form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.daily-check-in label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-color);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.daily-check-in select,
+.daily-check-in textarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.daily-check-in select:focus,
+.daily-check-in textarea:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(107, 144, 128, 0.1);
+}
+
+/* Range Input Styling */
+.daily-check-in input[type="range"] {
+    width: 100%;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.daily-check-in input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+/* Submit Button */
+.daily-check-in button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.daily-check-in button:hover {
+    background-color: #5a7a6d;
+    transform: translateY(-2px);
+}
+
+/* Mental Logs Styling */
+.mental-logs ul {
+    display: grid;
+    gap: 1rem;
+    padding: 0;
+}
+
+.mental-logs li {
+    background: #f8f9fa;
+    border-left: 4px solid var(--primary-color);
+    padding: 1.5rem;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.mental-logs li:hover {
+    transform: translateX(5px);
+}
+
+.mental-logs p {
+    margin: 0.5rem 0;
+    line-height: 1.5;
+}
+
+.mental-logs strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Stress Analysis */
+.stress-analysis ul {
+    list-style: none;
+    padding: 0;
+}
+
+.stress-analysis li {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    align-items: center;
+}
+
+.stress-analysis li:before {
+    content: "•";
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-right: 0.5rem;
+}
+
+/* Delete Log Button */
+.delete-log-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.delete-log-btn:hover {
+    background-color: #c82333;
+}
+
+/* Custom Toast Styles */
+.Toastify__toast {
+    font-family: Arial, sans-serif;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.Toastify__toast--success {
+    background: #4CAF50;
+    color: white;
+    border-left: 6px solid #2E7D32;
+}
+
+.Toastify__toast--error {
+    background: #f44336;
+    color: white;
+    border-left: 6px solid #c62828;
+}
+
+.Toastify__toast--warning {
+    background: #ff9800;
+    color: white;
+    border-left: 6px solid #ef6c00;
+}
+
+.Toastify__toast--info {
+    background: #2196F3;
+    color: white;
+    border-left: 6px solid #1565c0;
+}
+
+.Toastify__progress-bar {
+    background: rgba(255, 255, 255, 0.7);
+    height: 4px;
+}
+
+.Toastify__toast-body {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* SweetAlert2 Toast Customization */
+.swal2-container.swal2-top-right>.swal2-popup {
+    margin-right: 1rem !important;
+}
+
+.mental-health-toast {
+    padding: 0.75rem 1.25rem !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Mood Tracker Grid Layout */
+.mental-logs-grid {
+    margin-top: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 0;
+    min-height: 200px; /* Ensures consistent height even with fewer entries */
+}
+
+.mental-log-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mental-log-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.log-date {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 10px 10px 0 0;
+    font-weight: 500;
+}
+
+.log-details {
+    padding: 1rem;
+}
+
+.log-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.log-item:last-child {
+    border-bottom: none;
+}
+
+.log-label {
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.log-value {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.log-notes {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.log-notes .log-label {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.log-notes .log-value {
+    display: block;
+    color: var(--text-color);
+    font-weight: normal;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Mood Chart Section Styling */
+.mood-chart-section {
+    margin-bottom: 2rem;
+}
+
+.mood-chart-container {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    height: 400px;
+    /* Increased height for better visibility */
+    width: 100%;
+    position: relative;
+}
+
+/* Adjust spacing for mood logs section */
+.mental-logs {
+    margin-top: 2rem;
+}
+
+/* Check-in Container Layout */
+.check-in-container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Today's Mood Section */
+.todays-mood {
+    height: fit-content;
+}
+
+.mood-display {
+    text-align: center;
+}
+
+.mood-emoji {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+}
+
+.mood-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mood-stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: var(--background-color);
+    border-radius: 8px;
+}
+
+.mood-stat-item label {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.mood-stat-item .stat-value {
+    font-weight: 600;
+    color: var(--primary-color);
+    text-transform: capitalize;
+}
+
+.no-mood {
+    color: #666;
+    font-style: italic;
+    line-height: 1.5;
+    padding: 1rem;
+    background: var(--background-color);
+    border-radius: 8px;
+}
+
+/* Mood Selection Buttons */
+.mood-selection {
+  margin-bottom: 2rem;
+}
+
+.mood-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.mood-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.2rem;
+  border: 3px solid #e0e0e0;
+  border-radius: 12px;
+  background: white;
+  color: var(--text-color);
+  font-size: 1.1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mood-button:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  background-color: #f8f9fa;
+}
+
+.mood-button.selected {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 12px rgba(107, 144, 128, 0.3);
+  transform: scale(1.05);
+}
+
+.mood-button.selected::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+  pointer-events: none;
+}
+
+.mood-button.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 16px;
+  background: white;
+  color: var(--primary-color);
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.mood-button:active {
+  transform: scale(0.98);
+}
+
+.mood-button span {
+  font-size: 1.8rem;
+  margin-right: 0.5rem;
+}
+
+/* Specific mood button colors */
+.mood-button[data-mood="happy"].selected {
+  background: #4CAF50;
+  border-color: #4CAF50;
+}
+
+.mood-button[data-mood="neutral"].selected {
+  background: #607D8B;
+  border-color: #607D8B;
+}
+
+.mood-button[data-mood="anxious"].selected {
+  background: #FF9800;
+  border-color: #FF9800;
+}
+
+.mood-button[data-mood="sad"].selected {
+  background: #7986CB;
+  border-color: #7986CB;
+}
+
+/* Responsive Media Queries */
+@media (max-width: 1200px) {
+    .mentalhealth-content {
+        padding: 2rem 3%;
+    }
+
+    .mental-logs-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .mentalhealth-header {
+        padding: 2rem 1rem;
+    }
+
+    .mentalhealth-header h1 {
+        font-size: 2.5rem;
+    }
+
+    .mentalhealth-header p {
+        font-size: 1.2rem;
+    }
+
+    .mentalhealth-content {
+        padding: 1.5rem;
+    }
+
+    .mental-logs-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .mentalhealth-section {
+        padding: 1.5rem;
+    }
+
+    /* Form responsiveness */
+    .form-group {
+        flex-direction: column;
+    }
+
+    .input-with-label {
+        width: 100%;
+    }
+
+    /* Chart responsiveness */
+    .mood-chart-container {
+        min-height: 250px;
+        padding: 1rem;
+    }
+
+    /* Check-in container responsiveness */
+    .check-in-container {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .mentalhealth-header h1 {
+        font-size: 2rem;
+    }
+
+    .mentalhealth-header p {
+        font-size: 1rem;
+    }
+
+    .mentalhealth-section {
+        padding: 1rem;
+    }
+
+    .mental-log-card {
+        padding: 1rem;
+    }
+
+    .log-header {
+        margin-bottom: 1rem;
+    }
+
+    .log-header i {
+        font-size: 1.2rem;
+        padding: 0.8rem;
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    .mood-display {
+        padding: 1rem;
+    }
+
+    .mood-emoji {
+        font-size: 3rem;
+    }
+}
+
+.page-content {
+    min-height: calc(100vh - 64px);
+    background: #f8f9fa;
+    padding: 84px 2rem 2rem;
+}
+
+.chart-description {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-style: italic;
+}
