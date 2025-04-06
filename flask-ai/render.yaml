@@ -1,23 +1,18 @@
 services:
   - type: web
-    name: fitness-app-ai
+    name: fitness-ai-service
     env: python
-    region: oregon  # Choose the region closest to your users
-    plan: free  # or specify paid plan if needed
+    region: oregon  # Choose your preferred region
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --threads 4
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 4 --timeout 120
+    healthCheckPath: /health
     envVars:
       - key: FLASK_ENV
         value: production
-      - key: PYTHON_VERSION
-        value: 3.8.12
       - key: ALLOWED_ORIGINS
-        sync: false  # Will be set manually in dashboard
-      - key: PORT
-        value: 10000
-    healthCheckPath: /health  # Ensure you have a health check endpoint
-    autoDeploy: true  # Enable automatic deployments
-    disk:
-      name: models
-      mountPath: /opt/render/project/src/models
-      sizeGB: 1 
+        sync: false  # This will be set manually in Render dashboard
+      - key: PYTHONUNBUFFERED
+        value: true
+    autoDeploy: true
+    numInstances: 1
+    plan: starter  # Choose appropriate plan based on your needs 
