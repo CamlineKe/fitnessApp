@@ -7,10 +7,10 @@ dotenv.config();
 const connectDB = async () => {
   try {
     const options = {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
+      // MongoDB driver 4.0+ automatically handles these settings
+      // Removed deprecated options: useNewUrlParser and useUnifiedTopology
     };
 
     const conn = await mongoose.connect(process.env.MONGO_URI, options);
