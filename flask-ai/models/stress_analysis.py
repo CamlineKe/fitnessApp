@@ -45,12 +45,13 @@ def analyze_stress(data):
         daily_logs = data.get('daily_logs', [])
         current_check_in = data.get('current_check_in')
 
-        Logger.debug(f"User data structure: {str({
+        user_data_debug = {
             'has_dob': 'dateOfBirth' in user_data,
             'has_gender': 'gender' in user_data,
             'dob_value': user_data.get('dateOfBirth'),
             'gender_value': user_data.get('gender')
-        })}")
+        }
+        Logger.debug(f"User data structure: {str(user_data_debug)}")
 
         # Get user profile data
         date_of_birth = user_data.get('dateOfBirth')
