@@ -32,13 +32,14 @@ def analyze_stress(data):
     Analyze stress and provide personalized recommendations based on user data.
     """
     try:
-        Logger.debug(f"Starting stress analysis with data structure: {str({
+        debug_data = {
             'has_user_data': 'user_data' in data,
             'has_daily_logs': 'daily_logs' in data,
             'has_current_check_in': 'current_check_in' in data,
             'logs_count': len(data.get('daily_logs', [])),
             'data_keys': list(data.keys())
-        })}")
+        }
+        Logger.debug(f"Starting stress analysis with data structure: {str(debug_data)}")
         
         user_data = data.get('user_data', {})
         daily_logs = data.get('daily_logs', [])
