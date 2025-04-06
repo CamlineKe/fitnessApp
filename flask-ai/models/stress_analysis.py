@@ -39,7 +39,7 @@ def analyze_stress(data):
         
         user_data = data.get('user_data', {})
         daily_logs = data.get('daily_logs', [])
-        current_check_in = data.get('current_check_in', {})
+        current_check_in = data.get('current_check_in')
 
         logger.info("Extracted components - User data: %s, Daily logs: %s, Current check-in: %s", 
                    user_data, daily_logs, current_check_in)
@@ -51,11 +51,26 @@ def analyze_stress(data):
         # Calculate age from date of birth
         age = calculate_age(date_of_birth)
 
-        # Get current metrics
-        mood = current_check_in.get('mood', 'neutral')
-        stress_level = current_check_in.get('stressLevel', 5)
-        sleep_quality = current_check_in.get('sleepQuality', 5)
-        notes = current_check_in.get('notes', '')
+        # Get current metrics - Use most recent log if available
+        if current_check_in:
+            # Use the provided current check-in data
+            mood = current_check_in.get('mood')
+            stress_level = current_check_in.get('stressLevel')
+            sleep_quality = current_check_in.get('sleepQuality')
+            notes = current_check_in.get('notes', '')
+        elif daily_logs:
+            # If no current check-in but we have logs, use the most recent log
+            most_recent = daily_logs[0]
+            mood = most_recent.get('mood')
+            stress_level = most_recent.get('stressLevel')
+            sleep_quality = most_recent.get('sleepQuality')
+            notes = most_recent.get('notes', '')
+        else:
+            # Only use defaults if we have no data at all
+            mood = 'neutral'
+            stress_level = 5
+            sleep_quality = 5
+            notes = ''
 
         logger.info("Processed user metrics - Age: %s, Gender: %s, Mood: %s, Stress: %s, Sleep: %s", 
                    age, gender, mood, stress_level, sleep_quality)

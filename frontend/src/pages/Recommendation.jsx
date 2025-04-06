@@ -27,26 +27,56 @@ const Recommendation = () => {
       console.log("Received mental health logs:", logs);
       setMentalLogs(logs);
 
-      // Then fetch all recommendations using the logs
-      console.log("Fetching recommendations with logs:", logs);
-      const [dietData, stressData, workoutData] = await Promise.all([
-        DietRecommendationService.getDietRecommendations(),
-        StressAnalysisService.getStressAnalysis(logs),
-        WorkoutRecommenderService.getWorkoutRecommendations(),
-      ]);
+      // Handle empty or null data
+      if (!logs || (Array.isArray(logs) && logs.length === 0)) {
+        console.log("No mental health records found");
+        setStressAnalysis({
+          recommendations: [
+            "Welcome to your stress management journey!",
+            "- Track your daily mood and stress levels",
+            "- Practice basic stress management techniques",
+            "- Establish a consistent sleep schedule",
+            "- Engage in regular physical activity"
+          ],
+          analysis: {
+            current_state: {
+              mood: 'neutral',
+              stress_level: 5,
+              sleep_quality: 10
+            },
+            patterns: {
+              stress_trend: 'neutral',
+              sleep_trend: 'neutral',
+              mood_trend: 'neutral'
+            }
+          }
+        });
+      } else {
+        // Ensure data is an array and sort by date (newest first)
+        const dataArray = Array.isArray(logs) ? logs : [logs];
+        const validLogs = dataArray.filter(log => log && log.mood && log.date && log._id);
+        const sortedLogs = validLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      console.log("Received stress analysis data:", stressData);
+        // Then fetch all recommendations using the sorted logs
+        console.log("Fetching recommendations with sorted logs:", sortedLogs);
+        const [dietData, stressData, workoutData] = await Promise.all([
+          DietRecommendationService.getDietRecommendations(),
+          StressAnalysisService.getStressAnalysis(sortedLogs),
+          WorkoutRecommenderService.getWorkoutRecommendations(),
+        ]);
 
-      // Set state and emit events for real-time updates
-      setDietRecommendations(dietData || { recommendations: [] });
-      EventEmitter.emit(EventEmitter.Events.DIET_RECOMMENDATIONS_UPDATED, dietData);
+        console.log("Received stress analysis data:", stressData);
 
-      setStressAnalysis(stressData || { recommendations: [], analysis: { current_state: {}, patterns: {} } });
-      EventEmitter.emit(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, stressData);
+        // Set state and emit events for real-time updates
+        setDietRecommendations(dietData || { recommendations: [] });
+        EventEmitter.emit(EventEmitter.Events.DIET_RECOMMENDATIONS_UPDATED, dietData);
 
-      setWorkoutRecommendations(workoutData || { recommendations: [] });
-      EventEmitter.emit(EventEmitter.Events.WORKOUT_RECOMMENDATIONS_UPDATED, workoutData);
+        setStressAnalysis(stressData);
+        EventEmitter.emit(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, stressData);
 
+        setWorkoutRecommendations(workoutData || { recommendations: [] });
+        EventEmitter.emit(EventEmitter.Events.WORKOUT_RECOMMENDATIONS_UPDATED, workoutData);
+      }
     } catch (err) {
       console.error('Failed to fetch recommendations:', err);
       setError('Error loading recommendations. Please try again later.');
