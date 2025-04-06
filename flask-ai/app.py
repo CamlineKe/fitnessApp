@@ -3,6 +3,7 @@ from flask_cors import CORS
 import os
 from utils.logger import Logger
 from werkzeug.middleware.proxy_fix import ProxyFix
+from datetime import datetime
 
 # ✅ Ensure correct imports from models
 from models.diet_recommender import get_diet_recommendations
@@ -87,6 +88,14 @@ def workout_recommendations():
     except Exception as e:
         Logger.error(f"Workout API Error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for Render."""
+    return jsonify({
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat()
+    }), 200
 
 if __name__ == '__main__':
     # Rotate logs on startup
