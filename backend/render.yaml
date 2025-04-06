@@ -7,19 +7,23 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: MONGO_URI
+        value: mongodb+srv://camlinemoses01:Camline%402070@cluster0.btydoee.mongodb.net/fitnessApp?retryWrites=true&w=majority
       - key: PORT
-        value: 8080
-      - key: MONGODB_URI
-        sync: false
+        value: "5000"
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_REDIRECT_URI
         sync: false
       - key: FITBIT_CLIENT_ID
         sync: false
       - key: FITBIT_CLIENT_SECRET
         sync: false
-      - key: CORS_ORIGIN
-        value: https://your-frontend-url.vercel.app 
+      - key: FITBIT_REDIRECT_URI
+        sync: false
+    healthCheckPath: /api/health
+    autoDeploy: true 

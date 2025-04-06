@@ -6,26 +6,48 @@ dotenv.config();
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI);
+    const options = {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    };
 
+    const conn = await mongoose.connect(process.env.MONGO_URI, options);
     Logger.info(`MongoDB Connected: ${conn.connection.host}`);
+    
+    // Handle initial connection errors
+    conn.connection.on('error', (err) => {
+      Logger.error('MongoDB connection error:', err);
+      process.exit(1);
+    });
+
+    // Handle disconnection
+    conn.connection.on('disconnected', () => {
+      Logger.warn('MongoDB disconnected! Attempting to reconnect...');
+      setTimeout(connectDB, 5000); // Try to reconnect after 5 seconds
+    });
+
+    return conn;
   } catch (error) {
     Logger.error('MongoDB Connection Error:', error.message);
-    process.exit(1);
+    // Wait 5 seconds before retrying
+    await new Promise(resolve => setTimeout(resolve, 5000));
+    return connectDB();
   }
 };
 
 // Gracefully close MongoDB on app termination
 process.on('SIGINT', async () => {
   Logger.info('Closing MongoDB connection...');
-  await mongoose.connection.close();
-  process.exit(0);
-});
-
-// Handle disconnection
-mongoose.connection.on('disconnected', () => {
-  Logger.warn('MongoDB disconnected! Retrying connection...');
-  connectDB();
+  try {
+    await mongoose.connection.close();
+    Logger.info('MongoDB connection closed through app termination');
+    process.exit(0);
+  } catch (err) {
+    Logger.error('Error while closing MongoDB connection:', err);
+    process.exit(1);
+  }
 });
 
 export default connectDB;

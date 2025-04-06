@@ -29,7 +29,11 @@ const server = createServer(app);
 // Initialize Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:3000', 'http://localhost:5000', '*'],
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:5000',
+      process.env.FRONTEND_URL // Add your production frontend URL here
+    ].filter(Boolean),
     methods: ["GET", "POST"],
     credentials: true,
     allowedHeaders: ["my-custom-header"],
@@ -41,11 +45,21 @@ const io = new Server(server, {
 app.use(express.json());
 
 // Middleware to enable Cross-Origin Resource Sharing (CORS)
-// Allow frontend to access backend
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5000',
+  process.env.FRONTEND_URL // Add your production frontend URL here
+].filter(Boolean);
+
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5000'], // Allow requests from both ports
-  credentials: true // Allow cookies/auth headers if needed
+  origin: allowedOrigins,
+  credentials: true
 }));
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', message: 'Server is running' });
+});
 
 // Initialize routes
 app.use('/api/users', userRoutes);
