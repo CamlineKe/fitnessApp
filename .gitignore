@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+.env
+
+# Logs
+*.log
+logs/
+flask-ai/logs/
+
+# Build
+dist/
+build/
+coverage/
+
+# IDE
+.vscode/
+.idea/ 
