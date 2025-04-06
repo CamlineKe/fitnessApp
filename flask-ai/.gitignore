@@ -35,10 +35,13 @@ ENV/
 logs/
 *.log
 fitnessai_*.log
+flask-ai/logs/
+flask-ai/logs/*.log
 
 # Environment variables
 .env
 .env.local
+.env.production
 
 # OS
 .DS_Store
