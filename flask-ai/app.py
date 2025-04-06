@@ -5,11 +5,6 @@ from datetime import datetime
 from utils.logger import Logger
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-# ✅ Ensure correct imports from models
-from models.diet_recommender import get_diet_recommendations
-from models.stress_analysis import analyze_stress
-from models.workout_recommender import get_workout_recommendations
-
 app = Flask(__name__)
 
 # Security headers middleware
@@ -61,60 +56,18 @@ def not_found(error):
 def internal_error(error):
     return jsonify({"error": "Internal server error"}), 500
 
-# ✅ Utility function to validate input data
-def validate_request(req):
-    if not req.json:
-        Logger.warning("Invalid request: No data provided")
-        return {'error': 'Invalid request: No data provided'}, 400
-    return None
-
+# Temporary route responses
 @app.route('/api/diet', methods=['POST'])
 def diet_recommendations():
-    try:
-        validation_error = validate_request(request)
-        if validation_error:
-            return jsonify(validation_error[0]), validation_error[1]
-
-        data = request.json
-        Logger.debug(f"Processing diet recommendation request with data: {data}")
-        recommendations = get_diet_recommendations(data)
-        Logger.info("Successfully generated diet recommendations")
-        return jsonify(recommendations), 200
-    except Exception as e:
-        Logger.error(f"Diet API Error: {str(e)}")
-        return jsonify({'error': 'Internal server error'}), 500
+    return jsonify({"message": "Diet recommendations temporarily unavailable"}), 503
 
 @app.route('/api/stress', methods=['POST'])
 def stress_analysis():
-    try:
-        validation_error = validate_request(request)
-        if validation_error:
-            return jsonify(validation_error[0]), validation_error[1]
-
-        data = request.json
-        Logger.debug(f"Processing stress analysis request with data: {data}")
-        analysis = analyze_stress(data)
-        Logger.info("Successfully generated stress analysis")
-        return jsonify(analysis), 200
-    except Exception as e:
-        Logger.error(f"Stress API Error: {str(e)}")
-        return jsonify({'error': 'Internal server error'}), 500
+    return jsonify({"message": "Stress analysis temporarily unavailable"}), 503
 
 @app.route('/api/workout', methods=['POST'])
 def workout_recommendations():
-    try:
-        validation_error = validate_request(request)
-        if validation_error:
-            return jsonify(validation_error[0]), validation_error[1]
-
-        data = request.json
-        Logger.debug(f"Processing workout recommendation request with data: {data}")
-        recommendations = get_workout_recommendations(data)
-        Logger.info("Successfully generated workout recommendations")
-        return jsonify(recommendations), 200
-    except Exception as e:
-        Logger.error(f"Workout API Error: {str(e)}")
-        return jsonify({'error': 'Internal server error'}), 500
+    return jsonify({"message": "Workout recommendations temporarily unavailable"}), 503
 
 if __name__ == '__main__':
     # Rotate logs on startup
