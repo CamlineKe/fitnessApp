@@ -1,5 +1,6 @@
 import axios from 'axios';
 import User from '../models/User.js';
+import Logger from '../utils/logger.js';
 
 class GoogleFitService {
   static async getAuthUrl() {
@@ -19,10 +20,10 @@ class GoogleFitService {
         `&prompt=consent` +
         `&include_granted_scopes=true`;
 
-      console.log('Generated Google Fit Auth URL:', authUrl);
+      Logger.info('Generated Google Fit Auth URL:', authUrl);
       return authUrl;
     } catch (error) {
-      console.error('Error generating Google Fit auth URL:', error);
+      Logger.error('Error generating Google Fit auth URL:', error);
       throw new Error('Failed to generate Google Fit authentication URL');
     }
   }
@@ -42,7 +43,7 @@ class GoogleFitService {
         refreshToken: response.data.refresh_token
       };
     } catch (error) {
-      console.error('Token exchange error:', error.response?.data || error.message);
+      Logger.error('Token exchange error:', error.response?.data || error.message);
       throw new Error('Failed to exchange code for tokens');
     }
   }
@@ -194,7 +195,7 @@ class GoogleFitService {
         lastSynced: new Date()
       };
     } catch (error) {
-      console.error('Error fetching Google Fit health data:', error);
+      Logger.error('Error fetching Google Fit health data:', error);
       if (error.response?.status === 401) {
         throw new Error('Authentication expired');
       }

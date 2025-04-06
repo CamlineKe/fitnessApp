@@ -1,4 +1,5 @@
 import Gamification from '../models/Gamification.js';
+import Logger from '../utils/logger.js';
 
 // Helper function to initialize gamification data
 const initializeGamificationData = async (userId) => {
@@ -56,7 +57,7 @@ export const getGamificationData = async (req, res) => {
 
     res.json(gamificationData);
   } catch (error) {
-    console.error('Error getting gamification data:', error);
+    Logger.error('Error getting gamification data:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -77,7 +78,7 @@ export const initializeGamification = async (req, res) => {
 
     res.json(gamificationData);
   } catch (error) {
-    console.error('Error initializing gamification:', error);
+    Logger.error('Error initializing gamification:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -90,7 +91,7 @@ export const updatePoints = async (req, res) => {
     }
 
     const { activity, data } = req.body;
-    console.log('🔹 Updating points:', { activity, data });
+    Logger.debug('Updating points:', { activity, data });
 
     // Validate request data
     if (!activity || !data) {
@@ -111,7 +112,7 @@ export const updatePoints = async (req, res) => {
     let gamificationData = await Gamification.findOne({ userId: req.user._id });
     
     if (!gamificationData) {
-      console.log('🔹 No gamification data found, initializing...');
+      Logger.debug('No gamification data found, initializing...');
       gamificationData = await initializeGamificationData(req.user._id);
     }
 
@@ -195,7 +196,7 @@ export const updatePoints = async (req, res) => {
 
     res.json(responseData);
   } catch (error) {
-    console.error('Error updating points:', error);
+    Logger.error('Error updating points:', error);
     res.status(500).json({ 
       message: 'Server error',
       details: error.message,
@@ -212,7 +213,7 @@ export const updateStreak = async (req, res) => {
     }
 
     const { category } = req.body;
-    console.log('🔹 Updating streak for category:', category);
+    Logger.debug('Updating streak for category:', category);
 
     if (!['workout', 'mental', 'nutrition'].includes(category)) {
       return res.status(400).json({ 
@@ -243,15 +244,15 @@ export const updateStreak = async (req, res) => {
 
       if (diffDays === 0) {
         // Already logged today, streak stays the same
-        console.log('🔹 Activity already logged today, maintaining streak');
+        Logger.debug('Activity already logged today, maintaining streak');
       } else if (diffDays === 1) {
         // Activity done on consecutive day, increase streak
-        console.log('🔹 Consecutive day activity, increasing streak');
+        Logger.debug('Consecutive day activity, increasing streak');
         gamificationData.streaks[streakKey]++;
         gamificationData.streaks[`last${category.charAt(0).toUpperCase() + category.slice(1)}Date`] = today;
       } else {
         // Break in streak, reset to 1
-        console.log('🔹 Break in streak, resetting to 1');
+        Logger.debug('Break in streak, resetting to 1');
         gamificationData.streaks[streakKey] = 1;
         gamificationData.streaks[`last${category.charAt(0).toUpperCase() + category.slice(1)}Date`] = today;
       }
@@ -270,10 +271,12 @@ export const updateStreak = async (req, res) => {
       gamificationData.streaks.currentStreak
     );
 
-    console.log('🔹 Updated streak data:', {
-      categoryStreak: gamificationData.streaks[streakKey],
+    Logger.debug('Updated streak data:', {
+      userId: req.user._id,
+      category,
       currentStreak: gamificationData.streaks.currentStreak,
-      bestStreak: gamificationData.streaks.bestStreak
+      lastActivity: gamificationData.streaks[streakKey],
+      streakUpdated: gamificationData.streaks[streakKey] !== gamificationData.streaks[streakKey]
     });
 
     await gamificationData.save();
@@ -283,7 +286,7 @@ export const updateStreak = async (req, res) => {
       message: `${category} streak updated successfully`
     });
   } catch (error) {
-    console.error('Error updating streak:', error);
+    Logger.error('Error updating streak:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
@@ -315,7 +318,7 @@ export const logMood = async (req, res) => {
     await gamificationData.save();
     res.json({ success: true, moodLog: gamificationData.moodLog });
   } catch (error) {
-    console.error('Error logging mood:', error);
+    Logger.error('Error logging mood:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -385,7 +388,7 @@ export const checkAchievements = async (req, res) => {
 
     res.json({ newAchievements });
   } catch (error) {
-    console.error('Error checking achievements:', error);
+    Logger.error('Error checking achievements:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -409,7 +412,7 @@ export const getLeaderboard = async (req, res) => {
 
     res.json(leaderboard);
   } catch (error) {
-    console.error('Error getting leaderboard:', error);
+    Logger.error('Error getting leaderboard:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

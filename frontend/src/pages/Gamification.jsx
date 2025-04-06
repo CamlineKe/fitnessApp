@@ -10,6 +10,7 @@ import {
 import { GiMeditation } from 'react-icons/gi';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Logger from '../utils/logger';
 
 const getMoodEmoji = (mood) => {
   switch (mood?.toLowerCase()) {
@@ -71,7 +72,7 @@ const Gamification = () => {
           await initializeNewUserData();
         }
       } catch (error) {
-        console.error('Failed to fetch gamification data:', error);
+        Logger.error('Failed to fetch gamification data:', error);
         setError('Failed to load data. Please try again.');
         toast.error('Error loading gamification data');
       } finally {
@@ -120,7 +121,7 @@ const Gamification = () => {
       setGamificationData(defaultData);
       toast.info('Welcome! Start your wellness journey by completing activities.');
     } catch (error) {
-      console.error('Failed to initialize new user data:', error);
+      Logger.error('Failed to initialize new user data:', error);
       toast.error('Error setting up your profile');
     }
   };

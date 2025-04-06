@@ -1,4 +1,5 @@
 import Nutrition from "../models/Nutrition.js";
+import Logger from '../utils/logger.js';
 
 // Create a new nutrition log
 export const createNutritionLog = async (req, res) => {
@@ -22,7 +23,7 @@ export const createNutritionLog = async (req, res) => {
     await nutritionLog.save();
     return res.status(201).json(nutritionLog);
   } catch (error) {
-    console.error("Error creating nutrition log:", error);
+    Logger.error("Error creating nutrition log:", error);
     return res.status(500).json({ message: "Server error", error: error.message });
   }
 };

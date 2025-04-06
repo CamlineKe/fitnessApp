@@ -1,4 +1,5 @@
 import axios from "axios";
+import Logger from '../utils/logger';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/workouts`;
 
@@ -15,10 +16,11 @@ const getAuthHeaders = () => {
 const requestHandler = async (method, url, data = null) => {
   try {
     const headers = getAuthHeaders();
-    console.log(`🔹 Making ${method.toUpperCase()} request to ${url}`, { 
+    const requestData = data ? JSON.stringify(data) : undefined;
+    Logger.debug(`Making ${method.toUpperCase()} request to ${url}`, {
       method,
       url,
-      data,
+      data: requestData,
       headers 
     });
 
@@ -32,18 +34,18 @@ const requestHandler = async (method, url, data = null) => {
       data: data ? JSON.stringify(data) : undefined
     };
 
-    console.log('Request config:', config);
+    Logger.debug('Request config:', config);
     const response = await axios(config);
-    console.log(`✅ ${method.toUpperCase()} request successful:`, response.data);
+    Logger.info(`${method.toUpperCase()} request successful:`, response.data);
     return response.data;
   } catch (error) {
-    console.error(`❌ Error in ${method.toUpperCase()} ${url}:`, error.response?.data || error.message);
-    console.error('Full error object:', error);
+    Logger.error(`❌ Error in ${method.toUpperCase()} ${url}:`, error.response?.data || error.message);
+    Logger.error('Full error object:', error);
     throw error;
   }
 };
 
-// 🔹 Fetch workout data for the current day
+// �� Fetch workout data for the current day
 const getWorkoutData = async () => {
   return requestHandler("get", `${API_URL}/today`);
 };
@@ -54,7 +56,7 @@ const getWorkoutLogs = async () => {
     const logs = await requestHandler("get", API_URL);
     return Array.isArray(logs) ? logs : [];
   } catch (error) {
-    console.error("❌ Failed to fetch workout logs:", error);
+    Logger.error("❌ Failed to fetch workout logs:", error);
     throw error;
   }
 };
@@ -64,7 +66,7 @@ const getWorkoutLog = (id) => requestHandler("get", `${API_URL}/${id}`);
 
 // 🔹 Add a new workout log
 const addWorkoutLog = async (workoutLog) => {
-  console.log('🔹 Adding new workout log:', workoutLog);
+  Logger.debug('🔹 Adding new workout log:', workoutLog);
   try {
     // Ensure all required fields are present and properly formatted
     const formattedLog = {
@@ -87,12 +89,12 @@ const addWorkoutLog = async (workoutLog) => {
       throw new Error('Calories burned must be greater than 0');
     }
 
-    console.log('🔹 Sending formatted workout log to server:', formattedLog);
+    Logger.debug('🔹 Sending formatted workout log to server:', formattedLog);
     const result = await requestHandler("post", API_URL, formattedLog);
-    console.log('✅ Successfully added workout log:', result);
+    Logger.info('✅ Successfully added workout log:', result);
     return result;
   } catch (error) {
-    console.error('❌ Failed to add workout log:', error);
+    Logger.error('❌ Failed to add workout log:', error);
     throw error;
   }
 };
@@ -105,14 +107,14 @@ const deleteWorkoutLog = (id) => requestHandler("delete", `${API_URL}/${id}`);
 
 // 🔹 Update today's workout data
 const updateWorkoutData = async (workoutData) => {
-  console.log('🔹 Updating today\'s workout data:', workoutData);
+  Logger.debug('🔹 Updating today\'s workout data:', workoutData);
   try {
     // First get today's workout to get its ID
     const todayWorkout = await getWorkoutData();
     
     // If there's no workout for today, we can't update it
     if (!todayWorkout || !todayWorkout._id) {
-      console.log('❌ No workout found for today to update');
+      Logger.warn('❌ No workout found for today to update');
       return null;
     }
 
@@ -124,7 +126,7 @@ const updateWorkoutData = async (workoutData) => {
 
     return await updateWorkoutLog(todayWorkout._id, formattedData);
   } catch (error) {
-    console.error('❌ Failed to update today\'s workout data:', error);
+    Logger.error('❌ Failed to update today\'s workout data:', error);
     throw error;
   }
 };

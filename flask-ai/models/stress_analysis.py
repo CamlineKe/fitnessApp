@@ -4,11 +4,7 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 import os
 from datetime import datetime
-import logging
-
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from utils.logger import Logger
 
 # Get current directory and model path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -17,6 +13,7 @@ MODEL_PATH = os.path.join(BASE_DIR, 'stress_model.pkl')
 def calculate_age(date_of_birth):
     """Calculate age from date of birth"""
     if not date_of_birth:
+        Logger.warning("No date of birth provided")
         return None
         
     try:
@@ -27,7 +24,7 @@ def calculate_age(date_of_birth):
             age -= 1
         return age
     except Exception as e:
-        logger.error(f"Error calculating age: {e}")
+        Logger.error(f"Error calculating age: {e}")
         return None
 
 def analyze_stress(data):
@@ -35,14 +32,24 @@ def analyze_stress(data):
     Analyze stress and provide personalized recommendations based on user data.
     """
     try:
-        logger.info("Starting stress analysis with data: %s", data)
+        Logger.debug(f"Starting stress analysis with data structure: {str({
+            'has_user_data': 'user_data' in data,
+            'has_daily_logs': 'daily_logs' in data,
+            'has_current_check_in': 'current_check_in' in data,
+            'logs_count': len(data.get('daily_logs', [])),
+            'data_keys': list(data.keys())
+        })}")
         
         user_data = data.get('user_data', {})
         daily_logs = data.get('daily_logs', [])
         current_check_in = data.get('current_check_in')
 
-        logger.info("Extracted components - User data: %s, Daily logs: %s, Current check-in: %s", 
-                   user_data, daily_logs, current_check_in)
+        Logger.debug(f"User data structure: {str({
+            'has_dob': 'dateOfBirth' in user_data,
+            'has_gender': 'gender' in user_data,
+            'dob_value': user_data.get('dateOfBirth'),
+            'gender_value': user_data.get('gender')
+        })}")
 
         # Get user profile data
         date_of_birth = user_data.get('dateOfBirth')
@@ -50,6 +57,8 @@ def analyze_stress(data):
         
         # Calculate age from date of birth
         age = calculate_age(date_of_birth)
+        if age is None:
+            Logger.warning(f"Could not calculate age from date of birth: {date_of_birth}")
 
         # Get current metrics - Use most recent log if available
         if current_check_in:
@@ -58,6 +67,7 @@ def analyze_stress(data):
             stress_level = current_check_in.get('stressLevel')
             sleep_quality = current_check_in.get('sleepQuality')
             notes = current_check_in.get('notes', '')
+            Logger.debug(f"Using current check-in data: mood={mood}, stress={stress_level}, sleep={sleep_quality}")
         elif daily_logs:
             # If no current check-in but we have logs, use the most recent log
             most_recent = daily_logs[0]
@@ -65,23 +75,42 @@ def analyze_stress(data):
             stress_level = most_recent.get('stressLevel')
             sleep_quality = most_recent.get('sleepQuality')
             notes = most_recent.get('notes', '')
+            Logger.debug(f"Using most recent log data: mood={mood}, stress={stress_level}, sleep={sleep_quality}")
         else:
             # Only use defaults if we have no data at all
             mood = 'neutral'
             stress_level = 5
             sleep_quality = 5
             notes = ''
+            Logger.warning("No logs available, using default values")
 
-        logger.info("Processed user metrics - Age: %s, Gender: %s, Mood: %s, Stress: %s, Sleep: %s", 
-                   age, gender, mood, stress_level, sleep_quality)
+        # Validate metrics
+        if not mood or not isinstance(mood, str):
+            mood = 'neutral'
+            Logger.warning("Invalid mood value, using default: neutral")
+        
+        try:
+            stress_level = float(stress_level) if stress_level is not None else 5
+            stress_level = max(0, min(10, stress_level))  # Clamp between 0 and 10
+        except (ValueError, TypeError):
+            stress_level = 5
+            Logger.warning("Invalid stress level value, using default: 5")
+            
+        try:
+            sleep_quality = float(sleep_quality) if sleep_quality is not None else 5
+            sleep_quality = max(0, min(10, sleep_quality))  # Clamp between 0 and 10
+        except (ValueError, TypeError):
+            sleep_quality = 5
+            Logger.warning("Invalid sleep quality value, using default: 5")
+
+        Logger.debug(f"Processed user metrics - Age: {age}, Gender: {gender}, Mood: {mood}, Stress: {stress_level}, Sleep: {sleep_quality}")
 
         # Analyze patterns
         stress_pattern = analyze_stress_pattern(daily_logs)
         sleep_pattern = analyze_sleep_pattern(daily_logs)
         mood_pattern = analyze_mood_pattern(daily_logs)
 
-        logger.info("Analyzed patterns - Stress: %s, Sleep: %s, Mood: %s", 
-                   stress_pattern, sleep_pattern, mood_pattern)
+        Logger.debug(f"Analyzed patterns - Stress: {stress_pattern}, Sleep: {sleep_pattern}, Mood: {mood_pattern}")
 
         # Generate recommendations based on current state and patterns
         recommendations = []
@@ -179,6 +208,7 @@ def analyze_stress(data):
                 
             recommendations.extend(base_recommendations)
 
+        Logger.info("Successfully completed stress analysis")
         return {
             'analysis': {
                 'current_state': {
@@ -199,7 +229,7 @@ def analyze_stress(data):
         }
 
     except Exception as e:
-        logger.error("Error in stress analysis: %s", str(e))
+        Logger.error(f"Error in stress analysis: {str(e)}")
         return {
             'analysis': {
                 'current_state': {
@@ -241,7 +271,7 @@ def analyze_stress_pattern(logs):
                 return {'trend': 'decreasing'}
         return {'trend': 'stable'}
     except Exception as e:
-        logger.error("Error analyzing stress pattern: %s", str(e))
+        Logger.error(f"Error analyzing stress pattern: {str(e)}")
         return {'trend': 'neutral'}
 
 def analyze_sleep_pattern(logs):
@@ -259,7 +289,7 @@ def analyze_sleep_pattern(logs):
                 return {'trend': 'declining'}
         return {'trend': 'stable'}
     except Exception as e:
-        logger.error("Error analyzing sleep pattern: %s", str(e))
+        Logger.error(f"Error analyzing sleep pattern: {str(e)}")
         return {'trend': 'neutral'}
 
 def analyze_mood_pattern(logs):
@@ -284,5 +314,5 @@ def analyze_mood_pattern(logs):
                 return {'trend': 'declining'}
         return {'trend': 'stable'}
     except Exception as e:
-        logger.error("Error analyzing mood pattern: %s", str(e))
+        Logger.error(f"Error analyzing mood pattern: {str(e)}")
         return {'trend': 'neutral'}

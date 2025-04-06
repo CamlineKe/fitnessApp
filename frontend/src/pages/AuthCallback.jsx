@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import axios from 'axios';
+import Logger from '../utils/logger';
 
 const AuthCallback = () => {
     useEffect(() => {
@@ -10,7 +11,7 @@ const AuthCallback = () => {
                 const state = urlParams.get('state');
 
                 if (!code) {
-                    console.error('No authorization code found');
+                    Logger.error('No authorization code found');
                     window.opener.location.href = '/profile?status=error&message=No authorization code found';
                     window.close();
                     return;
@@ -34,7 +35,7 @@ const AuthCallback = () => {
                 window.opener.location.href = `/profile?status=success&service=${isFitbit ? 'Fitbit' : 'Google Fit'}`;
                 window.close();
             } catch (error) {
-                console.error('Error handling auth callback:', error);
+                Logger.error('Error handling auth callback:', error);
                 const errorMessage = encodeURIComponent(error.response?.data?.message || `Failed to connect to service`);
                 window.opener.location.href = `/profile?status=error&message=${errorMessage}`;
                 window.close();

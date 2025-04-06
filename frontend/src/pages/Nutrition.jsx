@@ -13,11 +13,12 @@ import GamificationService from '../services/GamificationService';
 import { EventEmitter } from '../utils/EventEmitter';
 import Swal from 'sweetalert2';
 import mealsData from '../data/mealsData';
+import Logger from '../utils/logger';
 
 const Nutrition = () => {
   // ✅ Get the authenticated user from UserContext
   const { user } = useContext(UserContext);
-  console.log("User from Context:", user); // Debugging user context
+  Logger.debug("User from Context:", user);
 
   // ✅ State for storing nutrition data (calories, macronutrients, meal logs)
   const [nutritionData, setNutritionData] = useState({
@@ -90,7 +91,7 @@ const Nutrition = () => {
         const recommendations = await DietRecommendationService.getDietRecommendations();
         setDietRecommendations(recommendations);
       } catch (err) {
-        console.error('Error fetching nutrition data:', err);
+        Logger.error('Error fetching nutrition data:', err);
         setError('Failed to load nutrition data');
       }
     };
@@ -99,7 +100,7 @@ const Nutrition = () => {
 
     // Subscribe to diet recommendation updates
     const handleDietUpdate = (newRecommendations) => {
-      console.log('Received new diet recommendations:', newRecommendations);
+      Logger.info('Received new diet recommendations:', newRecommendations);
       setDietRecommendations(newRecommendations);
     };
 
@@ -212,7 +213,7 @@ const Nutrition = () => {
         form.reset();
         setMealInput(""); // Reset meal input after submission
     } catch (error) {
-        console.error('Failed to submit meal:', error);
+        Logger.error('Failed to submit meal:', error);
     } finally {
         setIsSubmitting(false);
     }
@@ -260,7 +261,7 @@ const Nutrition = () => {
       notifySuccess('Meal added successfully! 🍽️');
       
     } catch (error) {
-      console.error("Failed to create meal log:", error);
+      Logger.error("Failed to create meal log:", error);
       notifyError('Failed to add meal. Please try again.');
     }
   };
@@ -308,7 +309,7 @@ const Nutrition = () => {
         notifySuccess('Meal updated successfully! 🔄');
       }
     } catch (error) {
-      console.error("Failed to update meal log:", error);
+      Logger.error("Failed to update meal log:", error);
       notifyError('Failed to update meal. Please try again.');
     }
   };
@@ -348,7 +349,7 @@ const Nutrition = () => {
         notifySuccess('Meal deleted successfully! 🗑️');
       }
     } catch (error) {
-      console.error("Failed to delete meal log:", error);
+      Logger.error("Failed to delete meal log:", error);
       notifyError('Failed to delete meal. Please try again.');
     }
   };

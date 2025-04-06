@@ -1,5 +1,6 @@
 import axios from 'axios';
 import User from '../models/User.js';
+import Logger from '../utils/logger.js';
 
 class FitbitService {
   static async getAuthUrl() {
@@ -29,7 +30,7 @@ class FitbitService {
 
       return authUrl;
     } catch (error) {
-      console.error('Error generating Fitbit auth URL:', error);
+      Logger.error('Error generating Fitbit auth URL:', error);
       throw new Error('Failed to generate Fitbit authentication URL');
     }
   }
@@ -65,7 +66,7 @@ class FitbitService {
         userId: response.data.user_id
       };
     } catch (error) {
-      console.error('Fitbit token exchange error:', error.response?.data || error.message);
+      Logger.error('Fitbit token exchange error:', error.response?.data || error.message);
       throw new Error('Failed to exchange code for Fitbit tokens');
     }
   }
@@ -83,7 +84,7 @@ class FitbitService {
       });
       return { success: true };
     } catch (error) {
-      console.error('Error connecting Fitbit:', error);
+      Logger.error('Error connecting Fitbit:', error);
       throw new Error('Failed to connect Fitbit');
     }
   }
@@ -196,7 +197,7 @@ class FitbitService {
         lastSynced: new Date()
       };
     } catch (error) {
-      console.error('Error fetching Fitbit health data:', error);
+      Logger.error('Error fetching Fitbit health data:', error);
       if (error.response?.status === 401) {
         throw new Error('Authentication expired');
       }

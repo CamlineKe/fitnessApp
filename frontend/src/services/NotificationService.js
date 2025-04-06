@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client';
+import Logger from '../utils/logger';
 
 class NotificationService {
   constructor() {
@@ -21,7 +22,7 @@ class NotificationService {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
     const SOCKET_URL = API_URL.replace('/api', '');
     
-    console.log('Connecting to socket server at:', SOCKET_URL);
+    Logger.info('Connecting to socket server at:', SOCKET_URL);
     
     this.socket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
@@ -33,7 +34,7 @@ class NotificationService {
 
     // Set up connection event handlers
     this.socket.on('connect', () => {
-      console.log('Socket connected:', this.socket.id);
+      Logger.info('Socket connected:', this.socket.id);
       this.connected = true;
       
       // Authenticate the socket connection
@@ -44,41 +45,41 @@ class NotificationService {
     });
 
     this.socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error.message);
+      Logger.error('Socket connection error:', error.message);
     });
 
     this.socket.on('disconnect', () => {
-      console.log('Socket disconnected');
+      Logger.info('Socket disconnected');
       this.connected = false;
     });
 
     this.socket.on('error', (error) => {
-      console.error('Socket error:', error);
+      Logger.error('Socket error:', error);
     });
 
     // Set up notification event handlers
     this.socket.on('points_updated', (data) => {
-      console.log('Points updated:', data);
+      Logger.debug('Points updated:', data);
       this.callbacks.pointsUpdated.forEach(callback => callback(data));
     });
 
     this.socket.on('level_up', (data) => {
-      console.log('Level up:', data);
+      Logger.info('Level up:', data);
       this.callbacks.levelUp.forEach(callback => callback(data));
     });
 
     this.socket.on('achievement_unlocked', (data) => {
-      console.log('Achievement unlocked:', data);
+      Logger.info('Achievement unlocked:', data);
       this.callbacks.achievementUnlocked.forEach(callback => callback(data));
     });
 
     this.socket.on('streak_updated', (data) => {
-      console.log('Streak updated:', data);
+      Logger.debug('Streak updated:', data);
       this.callbacks.streakUpdated.forEach(callback => callback(data));
     });
 
     this.socket.on('challenge_completed', (data) => {
-      console.log('Challenge completed:', data);
+      Logger.info('Challenge completed:', data);
       this.callbacks.challengeCompleted.forEach(callback => callback(data));
     });
   }
@@ -86,7 +87,7 @@ class NotificationService {
   // Join the user's personal room for targeted notifications
   joinUserRoom(userId) {
     if (!this.connected || !this.socket) return;
-    console.log('Joining user room for:', userId);
+    Logger.debug('Joining user room for:', userId);
     this.socket.emit('join_user_room', userId);
   }
 

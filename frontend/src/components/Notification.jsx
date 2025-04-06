@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import notificationService from '../services/NotificationService';
 import '../components/Notification.css';
+import Logger from '../utils/logger';
 
 const Notification = () => {
   const [notifications, setNotifications] = useState([]);
@@ -83,7 +84,7 @@ const Notification = () => {
       timestamp: new Date()
     };
     
-    console.log('Adding notification:', newNotification);
+    Logger.debug('Adding notification:', newNotification);
     
     setNotifications(prev => [newNotification, ...prev]);
 

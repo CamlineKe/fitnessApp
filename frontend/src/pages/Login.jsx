@@ -4,6 +4,7 @@ import Swal from 'sweetalert2';
 import UserService from "../services/UserService";
 import { UserContext } from "../components/UserContext";
 import "./styles/Login.css";
+import Logger from '../utils/logger';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -72,7 +73,7 @@ const Login = () => {
         }, 2000);
       }
     } catch (error) {
-      console.error("Login failed:", error);
+      Logger.error("Login failed:", error);
       let errorMessage = 'Login failed. Please try again later.';
 
       if (error.response?.data?.message) {

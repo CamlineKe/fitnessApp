@@ -6,6 +6,7 @@ import Workout from '../models/Workout.js';  // Import Workout model
 import Nutrition from '../models/Nutrition.js';  // Import Nutrition model
 import MentalHealth from '../models/MentalHealth.js';  // Import MentalHealth model
 import Gamification from '../models/Gamification.js';  // Import Gamification model
+import Logger from '../utils/logger.js';
 
 dotenv.config();
 
@@ -47,7 +48,7 @@ export const registerUser = async (req, res) => {
     });
 
     await user.save();
-    console.log(" User registered successfully:", user);
+    Logger.info("User registered successfully:", user);
 
     // Initialize default data for the user
     await initializeDefaultData(user._id);
@@ -62,7 +63,7 @@ export const registerUser = async (req, res) => {
     });
 
   } catch (error) {
-    console.error(" Registration error:", error);
+    Logger.error("Registration error:", error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
@@ -207,9 +208,9 @@ const initializeDefaultData = async (userId) => {
       moodLog: []
     });
 
-    console.log(" Default data initialized for user:", userId);
+    Logger.info("Default data initialized for user:", userId);
   } catch (error) {
-    console.error(" Error initializing default data:", error);
+    Logger.error("Error initializing default data:", error);
     throw error; // Re-throw to handle in the calling function
   }
 };
@@ -247,7 +248,7 @@ export const loginUser = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('Login error:', error);
+    Logger.error('Login error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -306,7 +307,7 @@ export const updateUserProfile = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Profile update error:", error);
+    Logger.error("Profile update error:", error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
@@ -344,7 +345,7 @@ export const changeUserPassword = async (req, res) => {
       token
     });
   } catch (error) {
-    console.error('Password change error:', error);
+    Logger.error('Password change error:', error);
     res.status(500).json({ message: 'Failed to change password' });
   }
 };

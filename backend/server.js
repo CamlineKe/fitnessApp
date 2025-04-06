@@ -2,8 +2,10 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
-import http from 'http';
+import { createServer } from 'http';
 import { Server } from 'socket.io';
+import jwt from 'jsonwebtoken';
+import Logger from './utils/logger.js';
 
 // Import routes
 import userRoutes from './routes/userRoutes.js';
@@ -22,7 +24,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Create HTTP server
-const server = http.createServer(app);
+const server = createServer(app);
 
 // Initialize Socket.IO
 const io = new Server(server, {
@@ -56,7 +58,7 @@ app.use('/api/sync', syncRoutes);
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
-  console.log('✅ New client connected:', socket.id);
+  Logger.info('New client connected:', socket.id);
   
   // Authenticate socket connection
   socket.on('authenticate', async (token) => {
@@ -72,24 +74,13 @@ io.on('connection', (socket) => {
         try {
           const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
           const userId = payload.userId;
-          console.log('Authenticated User:', userId, `(${payload.email})`);
+          Logger.info('Authenticated User:', userId, `(${payload.email})`);
           
           // Join user to their personal room
           socket.join(`user_${userId}`);
           
-          // Send a test notification after 5 seconds
-          setTimeout(() => {
-            console.log('Sending test notification to user:', userId);
-            socket.emit('points_updated', { 
-              points: 10, 
-              total: 100, 
-              level: 2,
-              leveledUp: false,
-              activityPoints: 50
-            });
-          }, 5000);
         } catch (e) {
-          console.error('Error parsing token:', e);
+          Logger.error('Error parsing token:', e);
         }
       }
     } catch (error) {
@@ -100,11 +91,11 @@ io.on('connection', (socket) => {
   // Join user to their personal room
   socket.on('join_user_room', (userId) => {
     socket.join(`user_${userId}`);
-    console.log(`User ${userId} joined their personal room`);
+    Logger.info(`User ${userId} joined their personal room`);
   });
 
   socket.on('disconnect', () => {
-    console.log('Client disconnected:', socket.id);
+    Logger.info('Client disconnected:', socket.id);
   });
 });
 
@@ -118,12 +109,18 @@ const startServer = async () => {
     await connectDB();
     // Start the server
     server.listen(PORT, () => {
-      console.log(`✅ Server running on port ${PORT}`);
+      Logger.info(`Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.error('Server error:', error);
+    Logger.error('Server error:', error);
   }
 };
 
 // Start the server
 startServer();
+
+// Error handling
+process.on('uncaughtException', (error) => {
+  Logger.error('Server error:', error);
+  // ... existing code ...
+});

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import Logger from '../utils/logger.js';
 
 const userSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
@@ -57,7 +58,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   try {
     return await bcrypt.compare(candidatePassword, this.password);
   } catch (error) {
-    console.error("Password comparison error:", error);
+    Logger.error("Password comparison error:", error);
     return false;
   }
 };

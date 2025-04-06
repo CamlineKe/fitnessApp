@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import MentalHealth from "../models/MentalHealth.js";
+import Logger from '../utils/logger.js';
 
 /**
  * ✅ Create a mental health log (Only for logged-in users)
@@ -33,10 +34,10 @@ export const createMentalHealthLog = async (req, res) => {
     });
 
     await mentalHealthLog.save();
-    console.log("🆕 Created Log:", mentalHealthLog);
+    Logger.info("Created Log:", mentalHealthLog);
     res.status(201).json(mentalHealthLog);
   } catch (error) {
-    console.error("❌ Error creating mental health log:", error);
+    Logger.error("Error creating mental health log:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -50,7 +51,7 @@ export const getMentalHealthLogs = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized: User not found" });
     }
 
-    console.log("🔍 Fetching logs for user:", req.user._id);
+    Logger.debug("Fetching logs for user:", req.user._id);
     const mentalHealthLogs = await MentalHealth.find({ userId: req.user._id }).sort({ date: -1 });
 
     if (!mentalHealthLogs.length) {
@@ -59,7 +60,7 @@ export const getMentalHealthLogs = async (req, res) => {
 
     res.json(mentalHealthLogs);
   } catch (error) {
-    console.error("❌ Error fetching mental health logs:", error);
+    Logger.error("Error fetching mental health logs:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -70,7 +71,7 @@ export const getMentalHealthLogs = async (req, res) => {
 export const getMentalHealthLog = async (req, res) => {
   try {
     const logId = req.params.id;
-    console.log("🔍 Fetching log for ID:", logId);
+    Logger.debug("Fetching log for ID:", logId);
 
     if (!mongoose.Types.ObjectId.isValid(logId)) {
       return res.status(400).json({ message: "Invalid log ID format" });
@@ -88,7 +89,7 @@ export const getMentalHealthLog = async (req, res) => {
 
     res.json(mentalHealthLog);
   } catch (error) {
-    console.error("❌ Error fetching mental health log:", error);
+    Logger.error("Error fetching mental health log:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -136,7 +137,7 @@ export const updateMentalHealthLog = async (req, res) => {
     await mentalHealthLog.save();
     res.json(mentalHealthLog);
   } catch (error) {
-    console.error("❌ Error updating mental health log:", error);
+    Logger.error("Error updating mental health log:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -165,7 +166,7 @@ export const deleteMentalHealthLog = async (req, res) => {
     await mentalHealthLog.deleteOne();
     res.json({ message: "Mental health log deleted successfully" });
   } catch (error) {
-    console.error("❌ Error deleting mental health log:", error);
+    Logger.error("Error deleting mental health log:", error);
     res.status(500).json({ message: "Server error" });
   }
 };

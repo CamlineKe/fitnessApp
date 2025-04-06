@@ -1,5 +1,6 @@
 import React, { createContext, useState, useCallback } from "react";
 import axios from "axios";
+import Logger from '../utils/logger';
 
 export const UserContext = createContext(null);
 const API_URL = `${import.meta.env.VITE_API_URL}/users/profile`; // 
@@ -10,7 +11,7 @@ export const UserProvider = ({ children }) => {
       const storedUser = localStorage.getItem("user");
       return storedUser ? JSON.parse(storedUser) : null;
     } catch (error) {
-      console.error(" Error parsing user from localStorage:", error);
+      Logger.error("Error parsing user from localStorage:", error);
       return null;
     }
   });
@@ -38,7 +39,7 @@ export const UserProvider = ({ children }) => {
       setUser(response.data);
       localStorage.setItem("user", JSON.stringify(response.data)); // 
     } catch (error) {
-      console.error(" Authentication error:", error.response?.data || error.message);
+      Logger.error("Authentication error:", error.response?.data || error.message);
 
       if (error.response?.status === 401) {
         console.warn(" Token expired or invalid. Logging out...");
@@ -52,7 +53,7 @@ export const UserProvider = ({ children }) => {
   // 
   const login = async (userData, token) => {
     if (!token || !userData) {
-      console.error(" Login error: Missing token or user data.");
+      Logger.error("Login error: Missing token or user data.");
       return;
     }
 
@@ -65,7 +66,7 @@ export const UserProvider = ({ children }) => {
 
   // 
   const logout = useCallback(() => {
-    console.log("Logging out...");
+    Logger.info("Logging out...");
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
@@ -75,7 +76,7 @@ export const UserProvider = ({ children }) => {
   const updateUser = async (userData, newToken) => {
     try {
       if (!userData) {
-        console.error(" Update failed: No user data provided");
+        Logger.error("Update failed: No user data provided");
         return;
       }
 
@@ -93,7 +94,7 @@ export const UserProvider = ({ children }) => {
       // Verify the update was successful by fetching fresh user data
       await fetchUser();
     } catch (error) {
-      console.error(" Error updating user context:", error);
+      Logger.error("Error updating user context:", error);
       // If there's an error, try to recover by fetching fresh user data
       await fetchUser();
     }

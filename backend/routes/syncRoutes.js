@@ -3,6 +3,7 @@ import { syncData, getDeviceStatus, getHealthData, getCalories, getDeviceAuthUrl
 import authMiddleware from '../middlewares/authMiddleware.js';
 import User from '../models/User.js';
 import GoogleFitService from '../services/googleFitService.js';
+import Logger from '../utils/logger.js';
 
 const router = express.Router();
 
@@ -28,7 +29,7 @@ router.get('/device-status', authMiddleware, async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Error fetching device status:', error);
+    Logger.error('Error fetching device status:', error);
     res.status(500).json({ message: 'Failed to fetch device status' });
   }
 });
@@ -53,7 +54,7 @@ router.get('/google-fit/auth-url', authMiddleware, async (req, res) => {
     const authUrl = await GoogleFitService.getAuthUrl();
     res.json({ authUrl });
   } catch (error) {
-    console.error('Error generating Google Fit auth URL:', error);
+    Logger.error('Error generating Google Fit auth URL:', error);
     res.status(500).json({ message: error.message });
   }
 });

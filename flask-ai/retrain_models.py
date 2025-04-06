@@ -6,6 +6,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import train_test_split
+from utils.logger import Logger
 
 # Set paths for saving models
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -17,8 +18,10 @@ WORKOUT_MODEL_PATH = os.path.join(MODELS_DIR, "workout_model.pkl")
 def load_sample_data():
     np.random.seed(42)
     data_size = 10000  # Increased dataset size for better training
+    Logger.info(f"Generating sample data with size: {data_size}")
     
     # Enhanced diet data generation
+    Logger.debug("Generating diet data...")
     diet_data = pd.DataFrame({
         "calories": np.random.normal(2200, 400, data_size).clip(1500, 3500),
         "protein": np.random.normal(80, 25, data_size).clip(30, 150),
@@ -41,8 +44,10 @@ def load_sample_data():
             return "Balanced"
     
     diet_data["diet_recommendation"] = diet_data.apply(get_diet_recommendation, axis=1)
+    Logger.debug("Diet data generation complete")
 
     # Enhanced stress data generation with more realistic patterns
+    Logger.debug("Generating stress data...")
     stress_data = pd.DataFrame({
         "mood": np.random.choice(
             ["happy", "sad", "anxious", "neutral"],
@@ -81,8 +86,10 @@ def load_sample_data():
             return "High"
     
     stress_data["stress_category"] = stress_data.apply(get_stress_category, axis=1)
+    Logger.debug("Stress data generation complete")
 
     # Enhanced workout data generation
+    Logger.debug("Generating workout data...")
     workout_data = pd.DataFrame({
         "activity_type": np.random.choice([
             "Running", "Walking", "Cycling", "Swimming", 
@@ -120,6 +127,7 @@ def load_sample_data():
         return row
     
     workout_data = workout_data.apply(generate_activity_metrics, axis=1)
+    Logger.debug("Workout data generation complete")
 
     return diet_data, stress_data, workout_data
 
@@ -144,12 +152,12 @@ def train_model(X, y, model, model_path, feature_names=None):
     os.makedirs(os.path.dirname(model_path), exist_ok=True)
     joblib.dump(model_data, model_path)
     
-    # Print accuracy metrics
+    # Log accuracy metrics
     train_score = pipeline.score(X_train, y_train)
     test_score = pipeline.score(X_test, y_test)
-    print(f"✅ Model saved: {model_path}")
-    print(f"   Training accuracy: {train_score:.2f}")
-    print(f"   Testing accuracy: {test_score:.2f}")
+    Logger.info(f"Model saved: {model_path}")
+    Logger.info(f"Training accuracy: {train_score:.2f}")
+    Logger.info(f"Testing accuracy: {test_score:.2f}")
 
 def determine_workout_category(duration, heart_rate, calories_burned):
     """Determine workout category based on metrics"""
@@ -169,11 +177,12 @@ def determine_workout_category(duration, heart_rate, calories_burned):
         return "Increase Intensity"
 
 # Generate and prepare training data
-print("Generating training data...")
+Logger.info("Starting model training process...")
+Logger.info("Generating training data...")
 diet_data, stress_data, workout_data = load_sample_data()
 
 # Train Diet Model
-print("\nTraining diet model...")
+Logger.info("Training diet model...")
 X_diet = diet_data[["calories", "protein", "carbohydrates", "fats"]]
 y_diet = diet_data["diet_recommendation"]
 train_model(
@@ -184,7 +193,7 @@ train_model(
 )
 
 # Train Stress Model
-print("\nTraining stress model...")
+Logger.info("Training stress model...")
 X_stress = pd.concat([
     pd.get_dummies(stress_data["mood"], prefix="mood"),
     stress_data[["stress_level", "sleep_quality"]]
@@ -209,7 +218,7 @@ train_model(
 )
 
 # Train Workout Model
-print("\nTraining workout model...")
+Logger.info("Training workout model...")
 X_workout = pd.concat([
     pd.get_dummies(workout_data["activity_type"], prefix="activity"),
     workout_data[["duration", "calories_burned", "heart_rate"]]
@@ -233,4 +242,4 @@ train_model(
     WORKOUT_MODEL_PATH
 )
 
-print("\n✅ All models trained and saved successfully!")
+Logger.info("All models trained and saved successfully!")

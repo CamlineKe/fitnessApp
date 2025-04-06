@@ -1,0 +1,78 @@
+2025-04-06 13:25:44,940 [INFO]: Starting Flask server on port 5001
+2025-04-06 13:26:42,086 [INFO]: Starting Flask server on port 5001
+2025-04-06 13:27:17,275 [INFO]: Starting Flask server on port 5001
+2025-04-06 13:27:57,632 [INFO]: Starting Flask server on port 5001
+2025-04-06 13:29:10,719 [INFO]: Starting Flask server on port 5001
+2025-04-06 13:31:02,130 [INFO]: Starting Flask server on port 5001
+2025-04-06 13:31:43,782 [INFO]: Starting Flask server on 127.0.0.1:5001 in development mode
+2025-04-06 13:33:49,493 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:33:49,504 [INFO]: Successfully generated diet recommendations
+2025-04-06 13:33:49,505 [INFO]: Successfully generated diet recommendations
+2025-04-06 13:33:49,508 [INFO]: Successfully generated workout recommendations
+2025-04-06 13:33:49,508 [INFO]: Successfully generated workout recommendations
+2025-04-06 13:33:49,520 [INFO]: Successfully generated diet recommendations
+2025-04-06 13:33:49,521 [INFO]: Successfully generated diet recommendations
+2025-04-06 13:33:49,766 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:33:49,909 [INFO]: Successfully generated workout recommendations
+2025-04-06 13:33:49,938 [INFO]: Successfully generated workout recommendations
+2025-04-06 13:34:06,591 [INFO]: Successfully generated diet recommendations
+2025-04-06 13:34:06,595 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:34:06,596 [INFO]: Successfully generated diet recommendations
+2025-04-06 13:34:06,606 [INFO]: Successfully generated workout recommendations
+2025-04-06 13:34:06,607 [INFO]: Successfully generated workout recommendations
+2025-04-06 13:34:06,644 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:34:06,652 [INFO]: Successfully generated diet recommendations
+2025-04-06 13:34:06,654 [INFO]: Successfully generated diet recommendations
+2025-04-06 13:34:06,661 [INFO]: Successfully generated workout recommendations
+2025-04-06 13:34:06,661 [INFO]: Successfully generated workout recommendations
+2025-04-06 13:37:33,118 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:37:33,119 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:37:33,330 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:37:33,415 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:39:36,422 [INFO]: Starting Flask server on 127.0.0.1:5001 in development mode
+2025-04-06 13:40:54,493 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:40:54,544 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:40:54,990 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:40:55,442 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:41:10,662 [INFO]: Starting Flask server on 127.0.0.1:5001 in development mode
+2025-04-06 13:41:48,037 [INFO]: Starting Flask server on 127.0.0.1:5001 in development mode
+2025-04-06 13:43:37,330 [INFO]: Starting Flask server on 127.0.0.1:5001 in development mode
+2025-04-06 13:44:09,412 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:44:09,430 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:44:09,585 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:44:09,638 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:45:22,411 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:45:22,412 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:45:22,528 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:45:22,598 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:45:38,909 [ERROR]: Stress API Error: Logger.error() takes 2 positional arguments but 3 were given
+2025-04-06 13:47:20,054 [INFO]: Starting Flask server on 127.0.0.1:5001 in development mode
+2025-04-06 13:47:45,446 [INFO]: Successfully completed stress analysis
+2025-04-06 13:47:45,451 [INFO]: Successfully generated stress analysis
+2025-04-06 13:47:45,497 [INFO]: Successfully completed stress analysis
+2025-04-06 13:47:45,544 [INFO]: Successfully generated stress analysis
+2025-04-06 13:47:45,648 [INFO]: Successfully completed stress analysis
+2025-04-06 13:47:45,676 [INFO]: Successfully generated stress analysis
+2025-04-06 13:47:45,770 [INFO]: Successfully completed stress analysis
+2025-04-06 13:47:45,774 [INFO]: Successfully generated stress analysis
+2025-04-06 13:47:46,796 [INFO]: Successfully completed stress analysis
+2025-04-06 13:47:46,808 [INFO]: Successfully generated diet recommendations
+2025-04-06 13:47:46,810 [INFO]: Successfully generated stress analysis
+2025-04-06 13:47:46,811 [INFO]: Successfully generated diet recommendations
+2025-04-06 13:47:46,820 [INFO]: Successfully generated workout recommendations
+2025-04-06 13:47:46,820 [INFO]: Successfully generated workout recommendations
+2025-04-06 13:47:46,861 [INFO]: Successfully generated diet recommendations
+2025-04-06 13:47:46,861 [INFO]: Successfully generated diet recommendations
+2025-04-06 13:47:46,960 [INFO]: Successfully completed stress analysis
+2025-04-06 13:47:46,961 [INFO]: Successfully generated stress analysis
+2025-04-06 13:47:46,976 [INFO]: Successfully generated workout recommendations
+2025-04-06 13:47:46,977 [INFO]: Successfully generated workout recommendations
+2025-04-06 13:48:32,048 [INFO]: Starting Flask server on 127.0.0.1:5001 in development mode
+2025-04-06 13:48:42,156 [INFO]: Successfully completed stress analysis
+2025-04-06 13:48:42,156 [INFO]: Successfully completed stress analysis
+2025-04-06 13:48:42,157 [INFO]: Successfully generated stress analysis
+2025-04-06 13:48:42,158 [INFO]: Successfully generated stress analysis
+2025-04-06 13:48:42,360 [INFO]: Successfully completed stress analysis
+2025-04-06 13:48:42,441 [INFO]: Successfully generated stress analysis
+2025-04-06 13:48:42,604 [INFO]: Successfully completed stress analysis
+2025-04-06 13:48:42,615 [INFO]: Successfully generated stress analysis

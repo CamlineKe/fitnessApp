@@ -10,6 +10,7 @@ import DatePicker from "react-datepicker";
 import { FaPlus } from "react-icons/fa";
 import { EventEmitter } from '../utils/EventEmitter';
 import { Line, Pie } from 'react-chartjs-2';
+import Logger from '../utils/logger';
 
 const activityTypes = [
   "Running",
@@ -26,7 +27,7 @@ const activityTypes = [
 
 const Workout = () => {
   const { user, logout } = useContext(UserContext);
-  console.log("User from Context:", user);
+  Logger.debug("User from Context:", user);
 
   // Add error state
   const [error, setError] = useState(null);
@@ -116,7 +117,7 @@ const Workout = () => {
 
         setWorkoutRecommendations(recommendations);
       } catch (err) {
-        console.error('Error fetching workout data:', err);
+        Logger.error('Error fetching workout data:', err);
         setError('Failed to load workout data');
         if (err.message.includes("No authentication token found") || err.response?.status === 401) {
           handleError("Session expired. Please log in again");
@@ -131,7 +132,7 @@ const Workout = () => {
 
     // Subscribe to workout recommendation updates
     const handleWorkoutUpdate = (newRecommendations) => {
-      console.log('Received new workout recommendations:', newRecommendations);
+      Logger.info('Received new workout recommendations:', newRecommendations);
       setWorkoutRecommendations(newRecommendations);
     };
 
@@ -227,7 +228,7 @@ const Workout = () => {
 
         // Update streak
         const streakResponse = await GamificationService.updateStreak("workout");
-        console.log('🔹 Updated streak data:', streakResponse);
+        Logger.debug('Updated streak data:', streakResponse);
         
         // Emit events for dashboard update
         EventEmitter.emit('workout-updated', workoutEventData);
@@ -239,7 +240,7 @@ const Workout = () => {
           : '';
         handleSuccess(`Workout logged successfully! ${streakMsg}`);
       } catch (error) {
-        console.error("Failed to update gamification:", error);
+        Logger.error("Failed to update gamification:", error);
         handleError(error.message || "Failed to update gamification. Please try refreshing the page.");
       }
 
@@ -253,7 +254,7 @@ const Workout = () => {
         feedback: ""
       });
     } catch (error) {
-      console.error("Failed to add workout log:", error);
+      Logger.error("Failed to add workout log:", error);
       setError("Failed to add workout log. Please try again.");
       handleError("Failed to add workout log. Please try again");
     } finally {

@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 import "./styles/MentalHealth.css";
 import { Line } from "react-chartjs-2";
 import "chart.js/auto";
+import Logger from '../utils/logger';
 
 const moodMapping = {
   happy: 3,
@@ -74,12 +75,12 @@ const MentalHealth = () => {
 
   const fetchStressAnalysis = async (logs) => {
     try {
-      console.log("Fetching stress analysis with logs:", logs);
+      Logger.debug("Fetching stress analysis with logs:", logs);
       const analysisData = await StressAnalysisService.getStressAnalysis(logs);
-      console.log("Received stress analysis:", analysisData);
+      Logger.info("Received stress analysis:", analysisData);
       setStressAnalysis(analysisData);
     } catch (error) {
-      console.error("Failed to fetch stress analysis:", error);
+      Logger.error("Failed to fetch stress analysis:", error);
       // Don't show error toast, just use default values
       setStressAnalysis({
         recommendations: [
@@ -120,9 +121,9 @@ const MentalHealth = () => {
         return;
       }
 
-      console.log("Fetching data for user:", userId);
+      Logger.debug("Fetching data for user:", userId);
       const data = await getMentalHealthData(userId);
-      console.log("Received data:", data);
+      Logger.debug("Received data:", data);
 
       // Handle empty or null data
       if (!data || (Array.isArray(data) && data.length === 0)) {
@@ -137,18 +138,18 @@ const MentalHealth = () => {
 
       // Ensure data is an array
       const dataArray = Array.isArray(data) ? data : [data];
-      console.log("Data array:", dataArray);
+      Logger.debug("Data array:", dataArray);
 
       // Filter valid logs
       const validLogs = dataArray.filter(log => {
         const isValid = log && log.mood && log.date && log._id;
         if (!isValid) {
-          console.log("Invalid log found:", log);
+          Logger.debug("Invalid log found:", log);
         }
         return isValid;
       });
 
-      console.log("Valid logs:", validLogs);
+      Logger.debug("Valid logs:", validLogs);
 
       if (validLogs.length === 0) {
         setError("No valid mental health records found. Start by adding your first check-in!");
@@ -163,7 +164,7 @@ const MentalHealth = () => {
         setError(null);
       }
     } catch (error) {
-      console.error("Failed to fetch mental health data:", error);
+      Logger.error("Failed to fetch mental health data:", error);
       setError(error.message || "Failed to load mental health data. Please try again.");
       setMentalHealthData([]);
       setMentalLogs([]);
@@ -195,7 +196,7 @@ const MentalHealth = () => {
           }
         });
       } catch (err) {
-        console.error('Error fetching mental health data:', err);
+        Logger.error('Error fetching mental health data:', err);
         setError('Failed to load mental health data');
       } finally {
         setIsLoading(false);
@@ -206,7 +207,7 @@ const MentalHealth = () => {
 
     // Subscribe to mental health recommendation updates
     const handleMentalHealthUpdate = (newAnalysis) => {
-      console.log('Received new mental health analysis:', newAnalysis);
+      Logger.info('Received new mental health analysis:', newAnalysis);
       setStressAnalysis(newAnalysis);
     };
 
@@ -251,9 +252,9 @@ const MentalHealth = () => {
 
     try {
       setIsLoading(true);
-      console.log("Submitting check-in:", { ...dailyCheckInData, userId: user._id });
+      Logger.debug("Submitting check-in:", { ...dailyCheckInData, userId: user._id });
       const newLog = await logDailyCheckIn({ ...dailyCheckInData, userId: user._id });
-      console.log("New log created:", newLog);
+      Logger.info("New log created:", newLog);
 
       if (newLog) {
         try {
@@ -281,12 +282,12 @@ const MentalHealth = () => {
           await fetchMentalHealthData(user._id);
           handleSuccess("Daily check-in submitted successfully!");
         } catch (error) {
-          console.error("Failed to update gamification:", error);
+          Logger.error("Failed to update gamification:", error);
           handleError("Check-in saved but failed to update points. Please try again.");
         }
       }
     } catch (error) {
-      console.error("Failed to submit daily check-in:", error);
+      Logger.error("Failed to submit daily check-in:", error);
       handleError(error.message || "Failed to submit check-in. Please try again.");
     } finally {
       setIsLoading(false);
@@ -295,10 +296,10 @@ const MentalHealth = () => {
 
   // First, let's add console logs to debug the data
   const calculateDailyMoods = (data) => {
-    console.log("Calculating daily moods with data:", data);
+    Logger.debug("Calculating daily moods with data:", data);
     
     if (!Array.isArray(data) || data.length === 0) {
-      console.log("No data available for mood calculation");
+      Logger.debug("No data available for mood calculation");
       return [];
     }
 
@@ -326,11 +327,11 @@ const MentalHealth = () => {
         date,
         mood: dayLog ? moodMapping[dayLog.mood.toLowerCase()] : null
       };
-      console.log(`Mood for ${date.toDateString()}:`, result.mood);
+      Logger.debug(`Mood for ${date.toDateString()}:`, result.mood);
       return result;
     });
 
-    console.log("Calculated daily moods:", dailyMoods);
+    Logger.debug("Calculated daily moods:", dailyMoods);
     return dailyMoods;
   };
 
@@ -474,7 +475,7 @@ const MentalHealth = () => {
                       className={`mood-button ${dailyCheckInData.mood === 'happy' ? 'selected' : ''}`}
                       data-mood="happy"
                       onClick={() => {
-                        console.log('Setting mood to happy');
+                        Logger.debug('Setting mood to happy');
                         setDailyCheckInData(prev => ({
                           ...prev,
                           mood: 'happy'
@@ -488,7 +489,7 @@ const MentalHealth = () => {
                       className={`mood-button ${dailyCheckInData.mood === 'neutral' ? 'selected' : ''}`}
                       data-mood="neutral"
                       onClick={() => {
-                        console.log('Setting mood to neutral');
+                        Logger.debug('Setting mood to neutral');
                         setDailyCheckInData(prev => ({
                           ...prev,
                           mood: 'neutral'
@@ -502,7 +503,7 @@ const MentalHealth = () => {
                       className={`mood-button ${dailyCheckInData.mood === 'anxious' ? 'selected' : ''}`}
                       data-mood="anxious"
                       onClick={() => {
-                        console.log('Setting mood to anxious');
+                        Logger.debug('Setting mood to anxious');
                         setDailyCheckInData(prev => ({
                           ...prev,
                           mood: 'anxious'
@@ -516,7 +517,7 @@ const MentalHealth = () => {
                       className={`mood-button ${dailyCheckInData.mood === 'sad' ? 'selected' : ''}`}
                       data-mood="sad"
                       onClick={() => {
-                        console.log('Setting mood to sad');
+                        Logger.debug('Setting mood to sad');
                         setDailyCheckInData(prev => ({
                           ...prev,
                           mood: 'sad'

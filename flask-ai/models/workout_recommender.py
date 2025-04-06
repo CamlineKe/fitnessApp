@@ -4,10 +4,7 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 import os
 from datetime import datetime, timedelta
-import logging
-
-# Create a logger
-logger = logging.getLogger(__name__)
+from utils.logger import Logger
 
 # Get current directory and model path
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -16,16 +13,16 @@ MODEL_PATH = os.path.join(BASE_DIR, 'workout_model.pkl')
 def calculate_age(date_of_birth):
     """Calculate age from date of birth"""
     if not date_of_birth:
-        logger.warning("No date of birth provided")
+        Logger.warning("No date of birth provided")
         return None
     
     today = datetime.now()
-    logger.info(f"Processing date of birth: {date_of_birth}")
+    Logger.debug(f"Processing date of birth: {date_of_birth}")
     
     try:
         # Clean the date string by removing timezone info if present
         clean_date = date_of_birth.split('T')[0] if 'T' in date_of_birth else date_of_birth
-        logger.info(f"Cleaned date: {clean_date}")
+        Logger.debug(f"Cleaned date: {clean_date}")
         
         # Parse the date
         born = datetime.strptime(clean_date, '%Y-%m-%d')
@@ -34,10 +31,10 @@ def calculate_age(date_of_birth):
         if today.month < born.month or (today.month == born.month and today.day < born.day):
             age -= 1
         
-        logger.info(f"Successfully calculated age: {age} from date: {clean_date}")
+        Logger.debug(f"Successfully calculated age: {age} from date: {clean_date}")
         return age
     except Exception as e:
-        logger.error(f"Error calculating age: {str(e)}")
+        Logger.error(f"Error calculating age: {str(e)}")
         return None
 
 def calculate_max_heart_rate(age):
@@ -92,12 +89,12 @@ def get_workout_recommendations(data):
 
         # Get user profile data
         date_of_birth = user_data.get('dateOfBirth')
-        logger.info(f"Received user data: {user_data}")
-        logger.info(f"Date of birth from request: {date_of_birth}")
+        Logger.debug(f"Received user data: {user_data}")
+        Logger.debug(f"Date of birth from request: {date_of_birth}")
         
         gender = user_data.get('gender', 'other')
         age = calculate_age(date_of_birth)
-        logger.info(f"Calculated age: {age}, Gender: {gender}")
+        Logger.debug(f"Calculated age: {age}, Gender: {gender}")
 
         # Calculate heart rate zones
         max_hr = calculate_max_heart_rate(age) if age else 180  # Default if age not available
@@ -135,7 +132,7 @@ def get_workout_recommendations(data):
 
         # Profile completeness check with detailed logging
         is_profile_complete = bool(age and gender != 'other')
-        logger.info(f"Profile completeness check - Age: {age}, Gender: {gender}, Complete: {is_profile_complete}")
+        Logger.debug(f"Profile completeness check - Age: {age}, Gender: {gender}, Complete: {is_profile_complete}")
 
         if not is_profile_complete:
             if not age:
@@ -258,7 +255,7 @@ def get_workout_recommendations(data):
                 if time_since_last < timedelta(hours=24):
                     recommendations.append("Ensure adequate rest between workouts")
             except (ValueError, TypeError) as e:
-                logger.warning(f"Could not parse workout date: {e}")
+                Logger.warning(f"Could not parse workout date: {e}")
                 # Continue without the time-based recommendation
 
         # Progressive overload suggestion
@@ -267,6 +264,7 @@ def get_workout_recommendations(data):
             if all(d >= base_duration for d in recent_durations):
                 recommendations.append("Consider gradually increasing workout intensity")
 
+        Logger.info("Successfully generated workout recommendations")
         return {
             'recommendations': recommendations,
             'analysis': analysis,
@@ -274,8 +272,8 @@ def get_workout_recommendations(data):
         }
 
     except Exception as e:
-        logger.error(f"Workout recommendation error: {e}")
-        # Only return generic recommendations if profile is incomplete
+        Logger.error(f"Workout recommendation error: {e}")
+        # Return generic recommendations if profile is incomplete
         if not is_profile_complete:
             return {
                 'recommendations': [

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Swal from 'sweetalert2';
 import UserService from "../services/UserService";
 import "./styles/Register.css";
+import Logger from '../utils/logger';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -130,7 +131,7 @@ const Register = () => {
         }, 2000);
       }
     } catch (error) {
-      console.error("Registration failed:", error);
+      Logger.error("Registration failed:", error);
       let errorMessage = 'Registration failed. Please try again.';
 
       if (error.response?.data?.message) {

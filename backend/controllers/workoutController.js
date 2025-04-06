@@ -1,26 +1,22 @@
 import Workout from "../models/Workout.js";
+import Logger from '../utils/logger.js';
 
 // ✅ Create a new workout log
 export const createWorkoutLog = async (req, res) => {
   try {
-    console.log('🔹 Received workout log creation request:', req.body);
-    console.log('🔹 User from request:', req.user);
+    Logger.debug('Received workout log creation request:', req.body);
+    Logger.debug('User from request:', req.user);
 
     const { date, activityType, duration, caloriesBurned, heartRate, feedback } = req.body;
 
     if (!req.user || !req.user._id) {
-      console.error('❌ No user ID found in request');
-      return res.status(401).json({ message: "Unauthorized: No user ID found" });
+      Logger.error('No user ID found in request');
+      return res.status(400).json({ message: 'User ID is required' });
     }
 
-    console.log('🔹 Creating new workout with data:', {
+    Logger.debug('Creating new workout with data:', {
       userId: req.user._id,
-      date,
-      activityType,
-      duration,
-      caloriesBurned,
-      heartRate,
-      feedback
+      workoutData: req.body
     });
 
     const workoutLog = new Workout({
@@ -34,10 +30,10 @@ export const createWorkoutLog = async (req, res) => {
     });
 
     await workoutLog.save();
-    console.log('✅ Successfully created workout log:', workoutLog);
+    Logger.info('Successfully created workout log:', workoutLog);
     res.status(201).json(workoutLog);
   } catch (error) {
-    console.error("❌ Error creating workout log:", error);
+    Logger.error("Error creating workout log:", error);
     if (error.name === 'ValidationError') {
       return res.status(400).json({ 
         message: "Invalid workout data", 
@@ -47,7 +43,7 @@ export const createWorkoutLog = async (req, res) => {
         }, {})
       });
     }
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.status(500).json({ message: 'Failed to create workout log' });
   }
 };
 
@@ -62,8 +58,8 @@ export const getWorkoutLogs = async (req, res) => {
 
     res.json(workoutLogs); // ✅ Even if empty, return []
   } catch (error) {
-    console.error("❌ Error fetching workout logs:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    Logger.error("Error fetching workout logs:", error);
+    res.status(500).json({ message: 'Failed to fetch workout logs' });
   }
 };
 
@@ -97,8 +93,8 @@ export const getTodayWorkout = async (req, res) => {
 
     res.json(workout);
   } catch (error) {
-    console.error("❌ Error fetching today's workout:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    Logger.error("Error fetching today's workout:", error);
+    res.status(500).json({ message: "Failed to fetch today's workout" });
   }
 };
 
@@ -117,8 +113,8 @@ export const getWorkoutLog = async (req, res) => {
 
     res.json(workoutLog);
   } catch (error) {
-    console.error("❌ Error fetching workout log:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    Logger.error("Error fetching workout log:", error);
+    res.status(500).json({ message: 'Failed to fetch workout log' });
   }
 };
 
@@ -146,8 +142,8 @@ export const updateWorkoutLog = async (req, res) => {
     await workoutLog.save();
     res.json(workoutLog);
   } catch (error) {
-    console.error("❌ Error updating workout log:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    Logger.error("Error updating workout log:", error);
+    res.status(500).json({ message: 'Failed to update workout log' });
   }
 };
 
@@ -165,10 +161,10 @@ export const deleteWorkoutLog = async (req, res) => {
     }
 
     await workoutLog.deleteOne();
-    res.json({ message: "Workout log deleted successfully" });
+    res.json({ message: "Workout log deleted" });
   } catch (error) {
-    console.error("❌ Error deleting workout log:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    Logger.error("Error deleting workout log:", error);
+    res.status(500).json({ message: 'Failed to delete workout log' });
   }
 };
 
@@ -183,7 +179,7 @@ export const getAllWorkouts = async (req, res) => {
 
     res.json(workouts);
   } catch (error) {
-    console.error("❌ Error fetching workouts:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    Logger.error("Error fetching workouts:", error);
+    res.status(500).json({ message: 'Failed to fetch workouts' });
   }
 };

@@ -4,6 +4,7 @@ import * as appleHealthService from '../services/appleHealthService.js';
 import GoogleFitService from '../services/googleFitService.js';
 import FitbitService from '../services/fitbitService.js';
 import User from '../models/User.js';
+import Logger from '../utils/logger.js';
 
 // Placeholder for actual synchronization logic
 const syncFitbitData = async (userId) => {
@@ -63,7 +64,7 @@ export const getCalories = async (req, res) => {
           lastSynced: data.lastSynced
         };
       } catch (error) {
-        console.error('Error fetching Google Fit calories:', error);
+        Logger.error('Error fetching Google Fit calories:', error);
       }
     }
     // If Google Fit fails or isn't connected, try Fitbit
@@ -76,13 +77,13 @@ export const getCalories = async (req, res) => {
           lastSynced: data.lastSynced
         };
       } catch (error) {
-        console.error('Error fetching Fitbit calories:', error);
+        Logger.error('Error fetching Fitbit calories:', error);
       }
     }
 
     res.json(caloriesData);
   } catch (error) {
-    console.error('Error fetching calories:', error);
+    Logger.error('Error fetching calories:', error);
     res.status(500).json({
       error: 'Failed to fetch calories data',
       details: error.message

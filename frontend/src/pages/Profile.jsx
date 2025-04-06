@@ -8,6 +8,7 @@ import AppleHealthService from '../services/AppleHealthService';
 import "./styles/Profile.css";
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import Logger from '../utils/logger';
 
 const Profile = () => {
   const { user, updateUser, fetchUser } = useContext(UserContext);
@@ -121,7 +122,7 @@ const Profile = () => {
       setEditMode(false);
       handleSuccess("Profile updated successfully!");
     } catch (error) {
-      console.error("Failed to update profile:", error);
+      Logger.error("Failed to update profile:", error);
       handleError("Failed to update profile");
     }
   };
@@ -165,7 +166,7 @@ const Profile = () => {
           fetchHealthData();
         }
       } catch (error) {
-        console.error('Error fetching device status:', error);
+        Logger.error('Error fetching device status:', error);
         toast.error('Failed to fetch device connection status');
       }
     };
@@ -224,7 +225,7 @@ const Profile = () => {
           });
         }
       } catch (error) {
-        console.error('Failed to fetch calories:', error);
+        Logger.error('Failed to fetch calories:', error);
         handleError('Failed to fetch calories data');
       }
     };
@@ -249,7 +250,7 @@ const Profile = () => {
         });
       }
     } catch (error) {
-      console.error('Failed to fetch health data:', error);
+      Logger.error('Failed to fetch health data:', error);
       handleError('Failed to fetch health data');
     }
   };
@@ -265,7 +266,7 @@ const Profile = () => {
       const handleAuthMessage = async (event) => {
         if (event.origin !== window.location.origin) return;
 
-        console.log('Received auth message:', event.data);
+        Logger.debug('Received auth message:', event.data);
 
         if (event.data.type === 'GOOGLE_FIT_AUTH') {
           window.removeEventListener('message', handleAuthMessage);
@@ -295,7 +296,7 @@ const Profile = () => {
       await ServiceClass.connect();
 
     } catch (error) {
-      console.error(`${service} connection error:`, error);
+      Logger.error(`${service} connection error:`, error);
       toast.error(`Failed to connect to ${service}: ${error.message}`);
       setDeviceStates(prev => ({
         ...prev,
@@ -330,7 +331,7 @@ const Profile = () => {
       }));
       handleSuccess(`Successfully disconnected from ${service}`);
     } catch (error) {
-      console.error(`Failed to disconnect ${service}:`, error);
+      Logger.error(`Failed to disconnect ${service}:`, error);
       handleError(`Failed to disconnect ${service}`);
       setDeviceStates(prev => ({
         ...prev,
@@ -365,8 +366,8 @@ const Profile = () => {
       handleSuccess("Password changed successfully");
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Failed to change password";
+      Logger.error("Failed to change password:", error);
       handleError(errorMessage);
-      console.error("Failed to change password:", error);
     }
   };
 

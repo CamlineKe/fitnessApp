@@ -1,5 +1,6 @@
 import axios from 'axios';
 import User from '../models/User.js';
+import Logger from '../utils/logger.js';
 
 class AppleHealthService {
   static async getAppleHealthData(userId, accessToken) {
@@ -11,7 +12,7 @@ class AppleHealthService {
       });
       return response.data;
     } catch (error) {
-      console.error('Failed to fetch Apple Health data:', error);
+      Logger.error('Failed to fetch Apple Health data:', error);
       throw new Error('Failed to fetch Apple Health data');
     }
   }

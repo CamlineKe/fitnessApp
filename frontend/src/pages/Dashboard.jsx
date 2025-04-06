@@ -10,6 +10,7 @@ import GamificationService from '../services/GamificationService';
 import { toast } from 'react-toastify';
 import { EventEmitter } from '../utils/EventEmitter';
 import { FaFire } from 'react-icons/fa';
+import Logger from '../utils/logger';
 
 const Dashboard = () => {
   const { user, logout } = useContext(UserContext);
@@ -29,7 +30,7 @@ const Dashboard = () => {
 
     try {
       setIsLoading(true);
-      console.log('🔹 Dashboard: Fetching fresh data...');
+      Logger.debug('Dashboard: Fetching fresh data...');
       
       const [nutrition, workouts, mentalHealth, gamification] = await Promise.all([
         getNutritionData(),
@@ -100,7 +101,7 @@ const Dashboard = () => {
 
       // Sort activities by timestamp (most recent first)
       const sortedActivities = allActivities.sort((a, b) => b.timestamp - a.timestamp);
-      console.log('🔹 Dashboard: Updated activity feed:', sortedActivities);
+      Logger.debug('Dashboard: Updated activity feed:', sortedActivities);
 
       setActivityFeed(sortedActivities);
       setNutritionData(nutrition);
@@ -108,7 +109,7 @@ const Dashboard = () => {
       setMentalHealthData(mentalHealth);
       setGamificationData(gamification);
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+      Logger.error("Error fetching dashboard data:", error);
       toast.error("Failed to load some dashboard data");
     } finally {
       setIsLoading(false);
@@ -120,12 +121,12 @@ const Dashboard = () => {
     
     // Listen for workout and gamification updates
     const handleWorkoutUpdate = () => {
-      console.log('🔹 Dashboard: Workout update detected, refreshing data...');
+      Logger.debug('Dashboard: Workout update detected, refreshing data...');
       fetchDashboardData();
     };
 
     const handleGamificationUpdate = (streakData) => {
-      console.log('🔹 Dashboard: Gamification update detected with data:', streakData);
+      Logger.debug('Dashboard: Gamification update detected with data:', streakData);
       // Update gamification data with new streak info
       setGamificationData(prevData => ({
         ...prevData,

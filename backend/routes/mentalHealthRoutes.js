@@ -7,16 +7,17 @@ import {
   deleteMentalHealthLog
 } from '../controllers/mentalHealthController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
+import Logger from '../utils/logger.js';
 
 const router = express.Router();
 
 // Debugging Middleware: Log the authenticated user for every request
 router.use(authMiddleware, (req, res, next) => {
   if (!req.user) {
-    console.warn("Unauthorized access attempt - No user data in request.");
+    Logger.warn("Unauthorized access attempt - No user data in request.");
     return res.status(401).json({ message: "Unauthorized. No user data found." });
   }
-  console.log(`Authenticated User: ${req.user._id} (${req.user.email})`);
+  Logger.debug(`Authenticated User: ${req.user._id} (${req.user.email})`);
   next();
 });
 

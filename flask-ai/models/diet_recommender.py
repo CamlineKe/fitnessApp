@@ -1,15 +1,12 @@
 import numpy as np
 from datetime import datetime
 import os
-import logging
-
-# Create a logger
-logger = logging.getLogger(__name__)
+from utils.logger import Logger
 
 def calculate_age(date_of_birth):
     """Calculate age from date of birth"""
     if not date_of_birth:
-        logger.warning("No date of birth provided")
+        Logger.warning("No date of birth provided")
         return None
     today = datetime.now()
     try:
@@ -20,15 +17,15 @@ def calculate_age(date_of_birth):
                 age = today.year - born.year
                 if today.month < born.month or (today.month == born.month and today.day < born.day):
                     age -= 1
-                logger.info(f"Successfully calculated age: {age} from date: {date_of_birth}")
+                Logger.debug(f"Successfully calculated age: {age} from date: {date_of_birth}")
                 return age
             except ValueError:
                 continue
         
-        logger.error(f"Failed to parse date of birth: {date_of_birth}")
+        Logger.error(f"Failed to parse date of birth: {date_of_birth}")
         return None
     except (TypeError, Exception) as e:
-        logger.error(f"Error calculating age: {str(e)}")
+        Logger.error(f"Error calculating age: {str(e)}")
         return None
 
 def get_diet_recommendations(data):
@@ -42,16 +39,18 @@ def get_diet_recommendations(data):
 
         # Get user profile data
         date_of_birth = user_data.get('dateOfBirth')
-        logger.info(f"Retrieved date of birth: {date_of_birth}")  # Log the date of birth
+        Logger.debug(f"Retrieved date of birth: {date_of_birth}")
         gender = user_data.get('gender', 'other')
         age = calculate_age(date_of_birth)
-        logger.info(f"Calculated age: {age}")  # Log the calculated age
+        Logger.debug(f"Calculated age: {age}")
 
         # Get current intake
         current_calories = daily_intake.get('calories', 0)
         current_protein = daily_intake.get('macronutrients', {}).get('protein', 0)
         current_carbs = daily_intake.get('macronutrients', {}).get('carbohydrates', 0)
         current_fats = daily_intake.get('macronutrients', {}).get('fats', 0)
+
+        Logger.debug(f"Current intake - Calories: {current_calories}, Protein: {current_protein}g, Carbs: {current_carbs}g, Fats: {current_fats}g")
 
         # Analyze meal timing patterns
         meal_times = []
@@ -168,6 +167,7 @@ def get_diet_recommendations(data):
                     "- Consider reducing sodium intake"
                 ])
 
+        Logger.info("Successfully generated diet recommendations")
         return {
             'recommendations': recommendations,
             'analysis': {
@@ -195,7 +195,7 @@ def get_diet_recommendations(data):
         }
 
     except Exception as e:
-        logger.error(f"Diet recommendation error: {e}")
+        Logger.error(f"Diet recommendation error: {e}")
         return {
             'recommendations': [
                 "Please complete your profile for personalized recommendations.",

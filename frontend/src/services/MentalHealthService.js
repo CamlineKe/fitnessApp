@@ -1,4 +1,5 @@
 import axios from "axios";
+import Logger from '../utils/logger';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/mentalhealth`;
 
@@ -14,9 +15,9 @@ export const getMentalHealthData = async (userId) => {
   }
 
   try {
-    console.log("API URL being called:", API_URL);
-    console.log("User ID:", userId);
-    console.log("Token:", token ? "Present" : "Missing");
+    Logger.debug("API URL being called:", API_URL);
+    Logger.debug("User ID:", userId);
+    Logger.debug("Token:", token ? "Present" : "Missing");
     
     const response = await axios.get(API_URL, {
       headers: { 
@@ -25,21 +26,21 @@ export const getMentalHealthData = async (userId) => {
       },
     });
 
-    console.log("Response from server:", response.data);
+    Logger.info("Response from server:", response.data);
 
     if (!response.data) {
-      console.error("No data in response");
+      Logger.error("No data in response");
       return []; // Return empty array instead of throwing error
     }
 
     if (!Array.isArray(response.data)) {
-      console.log("Converting non-array response to array");
+      Logger.debug("Converting non-array response to array");
       return [response.data]; // Convert single item to array
     }
 
     return response.data;
   } catch (error) {
-    console.error("Full error details:", {
+    Logger.error("Full error details:", {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,
@@ -55,7 +56,7 @@ export const getMentalHealthData = async (userId) => {
       throw new Error("Your session has expired. Please log in again");
     }
     if (error.response?.status === 404) {
-      console.error("API endpoint not found. Please check the URL configuration.");
+      Logger.error("API endpoint not found. Please check the URL configuration.");
       return []; // Return empty array for no records instead of throwing error
     }
     throw new Error(error.response?.data?.message || "Failed to fetch mental health data");
@@ -94,8 +95,8 @@ export const logDailyCheckIn = async (checkInData) => {
   }
 
   try {
-    console.log("API URL for POST:", API_URL);
-    console.log("Submitting check-in data:", checkInData);
+    Logger.debug("API URL for POST:", API_URL);
+    Logger.debug("Submitting check-in data:", checkInData);
     
     const { userId, ...dataToSend } = checkInData;
     
@@ -106,10 +107,10 @@ export const logDailyCheckIn = async (checkInData) => {
       },
     });
     
-    console.log("Check-in response:", response.data);
+    Logger.info("Check-in response:", response.data);
     return response.data;
   } catch (error) {
-    console.error("Error submitting check-in:", {
+    Logger.error("Error submitting check-in:", {
       message: error.message,
       status: error.response?.status,
       data: error.response?.data,

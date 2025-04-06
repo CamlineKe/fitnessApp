@@ -3,6 +3,7 @@ import User from '../models/User.js';
 import Nutrition from '../models/Nutrition.js';
 import Workout from '../models/Workout.js';
 import MentalHealth from '../models/MentalHealth.js';
+import Logger from '../utils/logger.js';
 
 const FLASK_API_URL = 'http://localhost:5001/api';
 
@@ -41,7 +42,7 @@ export const getDietRecommendations = async (req, res) => {
     // Send back both recommendations and analysis
     res.json(response.data);
   } catch (error) {
-    console.error('Diet AI Error:', error);
+    Logger.error('Diet AI Error:', error);
     res.status(500).send('Server error');
   }
 };
@@ -75,7 +76,7 @@ export const getWorkoutRecommendations = async (req, res) => {
     const response = await axios.post(`${FLASK_API_URL}/workout`, requestData);
     res.json(response.data);
   } catch (error) {
-    console.error('Workout AI Error:', error);
+    Logger.error('Workout AI Error:', error);
     res.status(500).send('Server error');
   }
 };
@@ -109,7 +110,7 @@ export const getStressAnalysis = async (req, res) => {
     const response = await axios.post(`${FLASK_API_URL}/stress`, requestData);
     res.json(response.data);
   } catch (error) {
-    console.error('Stress Analysis Error:', error);
+    Logger.error('Stress Analysis Error:', error);
     res.status(500).send('Server error');
   }
 };

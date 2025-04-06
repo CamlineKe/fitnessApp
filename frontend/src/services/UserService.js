@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Logger from '../utils/logger';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/users`;
 
@@ -10,7 +11,7 @@ const registerUser = async (userData) => {
         });
         return response.data;
     } catch (error) {
-        console.error("Registration error:", error.response?.data || error.message);
+        Logger.error("Registration error:", error.response?.data || error.message);
         throw error;
     }
 };
@@ -33,7 +34,7 @@ const loginUser = async (userData) => {
 
         return response.data;
     } catch (error) {
-        console.error("Login failed:", error.response?.data || error.message);
+        Logger.error("Login failed:", error.response?.data || error.message);
         throw error;
     }
 };
@@ -53,7 +54,7 @@ const getUserProfile = async () => {
         });
         return response.data;
     } catch (error) {
-        console.error('Profile fetch error:', error.response?.data || error.message);
+        Logger.error('Profile fetch error:', error.response?.data || error.message);
         throw error;
     }
 };
@@ -74,7 +75,7 @@ const updateUserProfile = async (userData) => {
             token: response.data.token
         };
     } catch (error) {
-        console.error("Profile update error:", error.response?.data || error.message);
+        Logger.error("Profile update error:", error.response?.data || error.message);
         throw error;
     }
 };
@@ -94,7 +95,7 @@ const changePassword = async ({ currentPassword, newPassword }) => {
 
         return response.data;
     } catch (error) {
-        console.error("Change password error:", error.response?.data || error.message);
+        Logger.error("Change password error:", error.response?.data || error.message);
         throw error;
     }
 };
