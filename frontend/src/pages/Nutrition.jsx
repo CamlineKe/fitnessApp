@@ -15,7 +15,6 @@ import Swal from 'sweetalert2';
 import mealsData from '../data/mealsData';
 import Logger from '../utils/logger';
 import NutritionService from '../services/NutritionService';
-import DietRecommenderService from '../services/DietRecommenderService';
 
 const Nutrition = () => {
   // ✅ Get the authenticated user from UserContext
