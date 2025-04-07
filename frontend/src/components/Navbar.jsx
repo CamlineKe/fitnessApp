@@ -40,7 +40,7 @@ const Navbar = () => {
           </button>
         )}
 
-        <div className={`navbar-links ${isMobile ? 'mobile' : ''} ${isMenuOpen ? 'open' : ''}`}>
+        <div className={`navbar-links ${isMobile ? 'mobile' : ''} ${isMenuOpen ? 'open' : ''}`} style={{ marginRight: isMobile ? '0' : '10px' }}>
           {user && (
             <>
               <Link to="/dashboard" className="navbar-link" onClick={() => setIsMenuOpen(false)}>
