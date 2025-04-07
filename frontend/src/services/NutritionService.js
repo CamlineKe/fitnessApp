@@ -7,8 +7,7 @@ const API_URL = `${import.meta.env.VITE_API_URL}/nutrition`;
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
   if (!token) {
-    console.warn("No authentication token found!");
-    return {}; // Ensures headers object is always returned to prevent crashes
+    throw new Error("❌ No authentication token found!");
   }
   return { Authorization: `Bearer ${token}` };
 };
