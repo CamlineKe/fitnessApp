@@ -5,7 +5,9 @@ import Workout from '../models/Workout.js';
 import MentalHealth from '../models/MentalHealth.js';
 import Logger from '../utils/logger.js';
 
-const FLASK_API_URL = 'http://localhost:5001/api';
+const FLASK_API_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://fitness-ai-service.onrender.com/api'
+  : 'http://localhost:5001/api';
 
 export const getDietRecommendations = async (req, res) => {
   try {
