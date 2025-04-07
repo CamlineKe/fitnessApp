@@ -90,10 +90,9 @@ const Workout = () => {
     const fetchInitialData = async () => {
       try {
         setLoading(true);
-        const [workoutData, workoutLogs, recommendations] = await Promise.all([
+        const [workoutData, workoutLogs] = await Promise.all([
           WorkoutService.getWorkoutData(user._id),
-          WorkoutService.getWorkoutLogs(user._id),
-          WorkoutRecommenderService.getWorkoutRecommendations()
+          WorkoutService.getWorkoutLogs(user._id)
         ]);
 
         // Set workout logs first
@@ -115,7 +114,14 @@ const Workout = () => {
           feedback: "Log your first workout for today!",
         });
 
-        setWorkoutRecommendations(recommendations);
+        // Try to get recommendations, but don't fail if they're not available
+        try {
+          const recommendations = await WorkoutRecommenderService.getWorkoutRecommendations();
+          setWorkoutRecommendations(recommendations);
+        } catch (recError) {
+          Logger.warn('Could not fetch workout recommendations:', recError);
+          setWorkoutRecommendations(null);
+        }
       } catch (err) {
         Logger.error('Error fetching workout data:', err);
         setError('Failed to load workout data');
@@ -511,9 +517,10 @@ const Workout = () => {
                     ))}
                   </ul>
                 ) : (
-                  <ul>
-                    <li>Loading recommendations...</li>
-                  </ul>
+                  <div className="no-recommendations">
+                    <p>No workout recommendations available at the moment.</p>
+                    <p className="recommendation-note">Keep logging your workouts to receive personalized recommendations!</p>
+                  </div>
                 )}
               </div>
 
