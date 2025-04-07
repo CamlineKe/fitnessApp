@@ -1,12 +1,16 @@
 import axios from 'axios';
 import Logger from '../utils/logger';
 
-const API_URL = `${import.meta.env.VITE_API_URL}/users`;
+// Use the API_URL directly from the environment variable
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Register User Function
 const registerUser = async (userData) => {
     try {
-        const response = await axios.post(`${API_URL}/register`, userData, {
+        // Log the URL for debugging
+        Logger.info("Registering user at URL:", `${API_URL}/users/register`);
+        
+        const response = await axios.post(`${API_URL}/users/register`, userData, {
             headers: { 'Content-Type': 'application/json' }
         });
         return response.data;
@@ -24,7 +28,7 @@ const loginUser = async (userData) => {
             password: userData.password
         };
 
-        const response = await axios.post(`${API_URL}/login`, formattedUserData, {
+        const response = await axios.post(`${API_URL}/users/login`, formattedUserData, {
             headers: { 'Content-Type': 'application/json' }
         });
 
@@ -49,7 +53,7 @@ const getAuthHeaders = () => {
 // Get User Profile Function
 const getUserProfile = async () => {
     try {
-        const response = await axios.get(`${API_URL}/profile`, {
+        const response = await axios.get(`${API_URL}/users/profile`, {
             headers: getAuthHeaders()
         });
         return response.data;
@@ -62,7 +66,7 @@ const getUserProfile = async () => {
 // Update User Profile Function
 const updateUserProfile = async (userData) => {
     try {
-        const response = await axios.put(`${API_URL}/profile`, userData, {
+        const response = await axios.put(`${API_URL}/users/profile`, userData, {
             headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
         });
 
@@ -84,7 +88,7 @@ const updateUserProfile = async (userData) => {
 const changePassword = async ({ currentPassword, newPassword }) => {
     try {
         const response = await axios.put(
-            `${API_URL}/change-password`,
+            `${API_URL}/users/change-password`,
             { currentPassword, newPassword },
             { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } }
         );
