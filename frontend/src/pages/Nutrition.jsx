@@ -14,6 +14,8 @@ import { EventEmitter } from '../utils/EventEmitter';
 import Swal from 'sweetalert2';
 import mealsData from '../data/mealsData';
 import Logger from '../utils/logger';
+import NutritionService from '../services/NutritionService';
+import DietRecommenderService from '../services/DietRecommenderService';
 
 const Nutrition = () => {
   // ✅ Get the authenticated user from UserContext
@@ -82,31 +84,38 @@ const Nutrition = () => {
   useEffect(() => {
     if (!user || !user._id) return;
 
-    const fetchInitialData = async () => {
+    const fetchData = async () => {
       try {
-        const data = await getNutritionData(user._id);
-        setNutritionData(data);
-        setMealLogs(data.mealLogs || []);
+        const [nutritionData, logsData] = await Promise.all([
+          NutritionService.getNutritionData(user._id),
+          NutritionService.getMealLogs(user._id)
+        ]);
+        setNutritionData(nutritionData);
+        setMealLogs(logsData);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching nutrition data:', err);
+        setError('Failed to load nutrition data');
+      }
 
-        const recommendations = await DietRecommendationService.getDietRecommendations();
+      try {
+        const recommendations = await DietRecommenderService.getDietRecommendations();
         setDietRecommendations(recommendations);
       } catch (err) {
-        Logger.error('Error fetching nutrition data:', err);
-        setError('Failed to load nutrition data');
+        console.warn('Failed to load diet recommendations:', err);
+        setDietRecommendations(null);
       }
     };
 
-    fetchInitialData();
+    fetchData();
 
     // Subscribe to diet recommendation updates
     const handleDietUpdate = (newRecommendations) => {
-      Logger.info('Received new diet recommendations:', newRecommendations);
       setDietRecommendations(newRecommendations);
     };
 
     EventEmitter.on(EventEmitter.Events.DIET_RECOMMENDATIONS_UPDATED, handleDietUpdate);
 
-    // Cleanup subscription
     return () => {
       EventEmitter.off(EventEmitter.Events.DIET_RECOMMENDATIONS_UPDATED, handleDietUpdate);
     };
