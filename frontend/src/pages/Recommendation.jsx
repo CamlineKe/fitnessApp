@@ -13,12 +13,20 @@ const Recommendation = () => {
   const [stressAnalysis, setStressAnalysis] = useState(null);
   const [workoutRecommendations, setWorkoutRecommendations] = useState(null);
   const [mentalLogs, setMentalLogs] = useState([]);
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState({
+    diet: null,
+    stress: null,
+    workout: null
+  });
   const [loading, setLoading] = useState(true);
 
   const fetchRecommendations = async () => {
     setLoading(true);
-    setError(null);
+    setErrors({
+      diet: null,
+      stress: null,
+      workout: null
+    });
 
     try {
       // First fetch mental health logs
@@ -57,29 +65,60 @@ const Recommendation = () => {
         const validLogs = dataArray.filter(log => log && log.mood && log.date && log._id);
         const sortedLogs = validLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        // Then fetch all recommendations using the sorted logs
-        console.log("Fetching recommendations with sorted logs:", sortedLogs);
-        const [dietData, stressData, workoutData] = await Promise.all([
-          DietRecommendationService.getDietRecommendations(),
-          StressAnalysisService.getStressAnalysis(sortedLogs),
-          WorkoutRecommenderService.getWorkoutRecommendations(),
-        ]);
+        // Fetch recommendations for each service separately to handle errors individually
+        try {
+          const dietData = await DietRecommendationService.getDietRecommendations();
+          setDietRecommendations(dietData || { recommendations: [] });
+          EventEmitter.emit(EventEmitter.Events.DIET_RECOMMENDATIONS_UPDATED, dietData);
+        } catch (err) {
+          console.error('Failed to fetch diet recommendations:', err);
+          setErrors(prev => ({ ...prev, diet: 'Diet recommendation service is currently unavailable. Please try again later.' }));
+          setDietRecommendations({ recommendations: [] });
+        }
 
-        console.log("Received stress analysis data:", stressData);
+        try {
+          const stressData = await StressAnalysisService.getStressAnalysis(sortedLogs);
+          setStressAnalysis(stressData);
+          EventEmitter.emit(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, stressData);
+        } catch (err) {
+          console.error('Failed to fetch stress analysis:', err);
+          setErrors(prev => ({ ...prev, stress: 'Stress analysis service is currently unavailable. Please try again later.' }));
+          setStressAnalysis({
+            recommendations: [
+              "Welcome to your stress management journey!",
+              "- Track your daily mood and stress levels",
+              "- Practice basic stress management techniques",
+              "- Establish a consistent sleep schedule",
+              "- Engage in regular physical activity"
+            ],
+            analysis: {
+              current_state: {
+                mood: 'neutral',
+                stress_level: 5,
+                sleep_quality: 10
+              },
+              patterns: {
+                stress_trend: 'neutral',
+                sleep_trend: 'neutral',
+                mood_trend: 'neutral'
+              }
+            }
+          });
+        }
 
-        // Set state and emit events for real-time updates
-        setDietRecommendations(dietData || { recommendations: [] });
-        EventEmitter.emit(EventEmitter.Events.DIET_RECOMMENDATIONS_UPDATED, dietData);
-
-        setStressAnalysis(stressData);
-        EventEmitter.emit(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, stressData);
-
-        setWorkoutRecommendations(workoutData || { recommendations: [] });
-        EventEmitter.emit(EventEmitter.Events.WORKOUT_RECOMMENDATIONS_UPDATED, workoutData);
+        try {
+          const workoutData = await WorkoutRecommenderService.getWorkoutRecommendations();
+          setWorkoutRecommendations(workoutData || { recommendations: [] });
+          EventEmitter.emit(EventEmitter.Events.WORKOUT_RECOMMENDATIONS_UPDATED, workoutData);
+        } catch (err) {
+          console.error('Failed to fetch workout recommendations:', err);
+          setErrors(prev => ({ ...prev, workout: 'Workout recommendation service is currently unavailable. Please try again later.' }));
+          setWorkoutRecommendations({ recommendations: [] });
+        }
       }
     } catch (err) {
-      console.error('Failed to fetch recommendations:', err);
-      setError('Error loading recommendations. Please try again later.');
+      console.error('Failed to fetch mental health logs:', err);
+      setErrors(prev => ({ ...prev, stress: 'Unable to load mental health data. Please try again later.' }));
     } finally {
       setLoading(false);
     }
@@ -127,9 +166,7 @@ const Recommendation = () => {
             </div>
           )}
 
-          {error && <div className="error-message">{error}</div>}
-
-          {!loading && !error && (
+          {!loading && (
             <div className="recommendations-grid">
               {/* Diet Recommendations Section */}
               <div className="recommendation-section diet-section">
@@ -137,7 +174,13 @@ const Recommendation = () => {
                   <i className="fas fa-utensils"></i>
                   <h2>Diet Recommendations</h2>
                 </div>
-                {dietRecommendations ? (
+                {errors.diet && (
+                  <div className="error-message">
+                    <i className="fas fa-exclamation-circle"></i>
+                    <p>{errors.diet}</p>
+                  </div>
+                )}
+                {dietRecommendations && (
                   <div>
                     {/* Current Intake Analysis */}
                     {dietRecommendations.analysis?.current_intake && (
@@ -179,8 +222,6 @@ const Recommendation = () => {
                       )}
                     </div>
                   </div>
-                ) : (
-                  <p>Loading diet recommendations...</p>
                 )}
               </div>
 
@@ -190,26 +231,34 @@ const Recommendation = () => {
                   <i className="fas fa-brain"></i>
                   <h2>Stress Analysis</h2>
                 </div>
-                <div>
-                  <div className="stress-status">
-                    <h3>Current Status</h3>
-                    <p>Mood: {stressAnalysis?.analysis?.current_state?.mood || 'Neutral'}</p>
-                    <p>Stress Level: {stressAnalysis?.analysis?.current_state?.stress_level || '5'}</p>
-                    <p>Sleep Quality: {stressAnalysis?.analysis?.current_state?.sleep_quality || '10'}</p>
+                {errors.stress && (
+                  <div className="error-message">
+                    <i className="fas fa-exclamation-circle"></i>
+                    <p>{errors.stress}</p>
                   </div>
-                  <div className="stress-recommendations">
-                    <h3>Recommendations</h3>
-                    {stressAnalysis?.recommendations?.length > 0 ? (
-                      <ul>
-                        {stressAnalysis.recommendations.map((rec, index) => (
-                          <li key={index} className="recommendation-item">{rec}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p>Loading recommendations...</p>
-                    )}
+                )}
+                {stressAnalysis && (
+                  <div>
+                    <div className="stress-status">
+                      <h3>Current Status</h3>
+                      <p>Mood: {stressAnalysis?.analysis?.current_state?.mood || 'Neutral'}</p>
+                      <p>Stress Level: {stressAnalysis?.analysis?.current_state?.stress_level || '5'}</p>
+                      <p>Sleep Quality: {stressAnalysis?.analysis?.current_state?.sleep_quality || '10'}</p>
+                    </div>
+                    <div className="stress-recommendations">
+                      <h3>Recommendations</h3>
+                      {stressAnalysis?.recommendations?.length > 0 ? (
+                        <ul>
+                          {stressAnalysis.recommendations.map((rec, index) => (
+                            <li key={index} className="recommendation-item">{rec}</li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p>Loading recommendations...</p>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Workout Recommendations Section */}
@@ -218,7 +267,13 @@ const Recommendation = () => {
                   <i className="fas fa-dumbbell"></i>
                   <h2>Workout Recommendations</h2>
                 </div>
-                {workoutRecommendations ? (
+                {errors.workout && (
+                  <div className="error-message">
+                    <i className="fas fa-exclamation-circle"></i>
+                    <p>{errors.workout}</p>
+                  </div>
+                )}
+                {workoutRecommendations && (
                   <div>
                     {/* Fitness Level */}
                     {workoutRecommendations.analysis?.fitness_level && (
@@ -304,8 +359,6 @@ const Recommendation = () => {
                       </div>
                     </div>
                   </div>
-                ) : (
-                  <p>Loading workout recommendations...</p>
                 )}
               </div>
             </div>
