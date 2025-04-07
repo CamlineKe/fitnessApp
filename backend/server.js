@@ -32,11 +32,12 @@ const io = new Server(server, {
     origin: [
       'http://localhost:3000',
       'http://localhost:5000',
-      process.env.FRONTEND_URL // Add your production frontend URL here
+      process.env.FRONTEND_URL,
+      'https://fitness-3doakdbyh-camlinekes-projects.vercel.app'
     ].filter(Boolean),
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
-    allowedHeaders: ["my-custom-header"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     transports: ['websocket', 'polling']
   }
 });
@@ -48,12 +49,24 @@ app.use(express.json());
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5000',
-  process.env.FRONTEND_URL // Add your production frontend URL here
+  process.env.FRONTEND_URL,
+  'https://fitness-3doakdbyh-camlinekes-projects.vercel.app' // Explicitly add your Vercel URL
 ].filter(Boolean);
 
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
 
 // Health check endpoint
@@ -132,6 +145,17 @@ const startServer = async () => {
 
 // Start the server
 startServer();
+
+// Add error handling middleware
+app.use((err, req, res, next) => {
+  Logger.error('Error:', err);
+  res.status(err.status || 500).json({
+    error: {
+      message: err.message || 'Internal Server Error',
+      status: err.status || 500
+    }
+  });
+});
 
 // Error handling
 process.on('uncaughtException', (error) => {
