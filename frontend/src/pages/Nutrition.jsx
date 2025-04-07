@@ -99,7 +99,7 @@ const Nutrition = () => {
       }
 
       try {
-        const recommendations = await DietRecommenderService.getDietRecommendations();
+        const recommendations = await DietRecommendationService.getDietRecommendations();
         setDietRecommendations(recommendations);
       } catch (err) {
         console.warn('Failed to load diet recommendations:', err);
