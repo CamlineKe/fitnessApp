@@ -4,6 +4,7 @@ import {
   createNutritionLog,
   updateNutritionLog,
   deleteNutritionLog,
+  getMealLogs
 } from "../services/NutritionService";
 import Chart from "react-apexcharts";
 import "./styles/Nutrition.css";
@@ -14,7 +15,6 @@ import { EventEmitter } from '../utils/EventEmitter';
 import Swal from 'sweetalert2';
 import mealsData from '../data/mealsData';
 import Logger from '../utils/logger';
-import NutritionService from '../services/NutritionService';
 
 const Nutrition = () => {
   // ✅ Get the authenticated user from UserContext
@@ -86,8 +86,8 @@ const Nutrition = () => {
     const fetchData = async () => {
       try {
         const [nutritionData, logsData] = await Promise.all([
-          NutritionService.getNutritionData(user._id),
-          NutritionService.getMealLogs(user._id)
+          getNutritionData(),
+          getMealLogs(user._id)
         ]);
         setNutritionData(nutritionData);
         setMealLogs(logsData);

@@ -55,6 +55,20 @@ export const getNutritionData = async () => {
   }
 };
 
+// Function to get meal logs for a user
+export const getMealLogs = async (userId) => {
+  try {
+    const response = await axios.get(`${API_URL}/logs/${userId}`, { headers: getAuthHeaders() });
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Error fetching meal logs (Status: ${error.response?.status}):`,
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
 // Function to create a new nutrition log
 export const createNutritionLog = async (nutritionLog) => {
   try {
