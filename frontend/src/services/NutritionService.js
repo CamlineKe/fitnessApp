@@ -7,7 +7,8 @@ const API_URL = `${import.meta.env.VITE_API_URL}/nutrition`;
 const getAuthHeaders = () => {
   const token = localStorage.getItem("token");
   if (!token) {
-    throw new Error("❌ No authentication token found!");
+    console.warn("No authentication token found!");
+    return {}; // Ensures headers object is always returned to prevent crashes
   }
   return { Authorization: `Bearer ${token}` };
 };
@@ -48,20 +49,6 @@ export const getNutritionData = async () => {
   } catch (error) {
     console.error(
       `Error fetching nutrition data (Status: ${error.response?.status}):`,
-      error.response?.data || error.message
-    );
-    throw error;
-  }
-};
-
-// Function to get meal logs for a user
-export const getMealLogs = async (userId) => {
-  try {
-    const response = await axios.get(`${API_URL}/logs/${userId}`, { headers: getAuthHeaders() });
-    return response.data;
-  } catch (error) {
-    console.error(
-      `Error fetching meal logs (Status: ${error.response?.status}):`,
       error.response?.data || error.message
     );
     throw error;
