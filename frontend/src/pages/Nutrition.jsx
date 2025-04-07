@@ -84,15 +84,24 @@ const Nutrition = () => {
 
     const fetchInitialData = async () => {
       try {
+        // Fetch nutrition data
         const data = await getNutritionData(user._id);
         setNutritionData(data);
         setMealLogs(data.mealLogs || []);
-
-        const recommendations = await DietRecommendationService.getDietRecommendations();
-        setDietRecommendations(recommendations);
+        setError(null); // Clear any previous errors
       } catch (err) {
         Logger.error('Error fetching nutrition data:', err);
         setError('Failed to load nutrition data');
+      }
+
+      // Separate try-catch for recommendations
+      try {
+        const recommendations = await DietRecommendationService.getDietRecommendations();
+        setDietRecommendations(recommendations);
+      } catch (err) {
+        Logger.error('Error fetching diet recommendations:', err);
+        // Don't set the main error state, just log it
+        // You could set a separate state for recommendation errors if needed
       }
     };
 
