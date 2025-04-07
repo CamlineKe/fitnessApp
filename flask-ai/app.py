@@ -17,8 +17,8 @@ allowed_origins = [
     'http://localhost:5000',  # Local backend
     'http://localhost:5173',  # Vite dev server
     # Production URLs
-    'https://fitness-3doakdbyh-camlinekes-projects.vercel.app',  # Vercel frontend
-    'https://fitness-app-backend-dtvo.onrender.com',  # Render backend
+    'https://fitness-app-dusky-six.vercel.app',  # Vercel frontend
+    'https://fitness-app-backend-ap0r.onrender.com',  # Render backend
     os.getenv('CORS_ORIGIN', 'http://localhost:5173')  # From environment variable
 ]
 
