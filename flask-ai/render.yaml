@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: fitness-ai-service
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.9.0
+      - key: PORT
+        value: 10000
+    healthCheckPath: /api/health
+    autoDeploy: true 
