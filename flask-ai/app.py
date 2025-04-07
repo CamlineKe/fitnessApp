@@ -9,7 +9,29 @@ from models.stress_analysis import analyze_stress
 from models.workout_recommender import get_workout_recommendations
 
 app = Flask(__name__)
-CORS(app)  # Enable Cross-Origin Resource Sharing
+
+# Configure CORS with both development and production origins
+allowed_origins = [
+    # Development URLs
+    'http://localhost:3000',  # Local frontend
+    'http://localhost:5000',  # Local backend
+    'http://localhost:5173',  # Vite dev server
+    # Production URLs
+    'https://fitness-3doakdbyh-camlinekes-projects.vercel.app',  # Vercel frontend
+    'https://fitness-app-backend-dtvo.onrender.com',  # Render backend
+    os.getenv('CORS_ORIGIN', 'http://localhost:5173')  # From environment variable
+]
+
+# Remove any None values and duplicates
+allowed_origins = list(set(filter(None, allowed_origins)))
+
+CORS(app, resources={
+    r"/api/*": {
+        "origins": allowed_origins,
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
