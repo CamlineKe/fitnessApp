@@ -50,7 +50,7 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5000',
   process.env.FRONTEND_URL,
-  'https://fitness-app-dusky-six.vercel.app/' // Explicitly add your Vercel URL
+  'https://fitness-app-dusky-six.vercel.app' // Removed trailing slash
 ].filter(Boolean);
 
 app.use(cors({
