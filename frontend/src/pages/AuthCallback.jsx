@@ -12,7 +12,10 @@ const AuthCallback = () => {
 
                 if (!code) {
                     Logger.error('No authorization code found');
-                    window.opener.location.href = '/profile?status=error&message=No authorization code found';
+                    window.opener?.postMessage({
+                        type: 'FITBIT_AUTH_ERROR',
+                        error: 'No authorization code found'
+                    }, window.location.origin);
                     window.close();
                     return;
                 }
@@ -31,13 +34,19 @@ const AuthCallback = () => {
                     }
                 );
 
-                // Redirect with success message
-                window.opener.location.href = `/profile?status=success&service=${isFitbit ? 'Fitbit' : 'Google Fit'}`;
+                // Send success message to opener window
+                window.opener?.postMessage({
+                    type: 'FITBIT_AUTH_SUCCESS',
+                    service: isFitbit ? 'Fitbit' : 'Google Fit'
+                }, window.location.origin);
                 window.close();
             } catch (error) {
                 Logger.error('Error handling auth callback:', error);
-                const errorMessage = encodeURIComponent(error.response?.data?.message || `Failed to connect to service`);
-                window.opener.location.href = `/profile?status=error&message=${errorMessage}`;
+                const errorMessage = error.response?.data?.message || `Failed to connect to service`;
+                window.opener?.postMessage({
+                    type: 'FITBIT_AUTH_ERROR',
+                    error: errorMessage
+                }, window.location.origin);
                 window.close();
             }
         };

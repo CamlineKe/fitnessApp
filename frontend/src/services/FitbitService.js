@@ -5,31 +5,55 @@ const API_URL = `${import.meta.env.VITE_API_URL}/sync`;
 class FitbitService {
   static async connect() {
     try {
+      console.log('Starting Fitbit connection...');
+
       const response = await axios.get(`${API_URL}/fitbit/auth-url`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
         }
       });
 
-      // Create a popup window for auth
-      const width = 600;
-      const height = 800;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
+      console.log('Received auth URL:', response.data.authUrl);
 
-      const authUrl = response.data.authUrl;
-      const popup = window.open(
-        authUrl,
-        'Fitbit Auth',
-        `width=${width},height=${height},left=${left},top=${top}`
-      );
+      return new Promise((resolve, reject) => {
+        const width = 600;
+        const height = 800;
+        const left = window.screenX + (window.outerWidth - width) / 2;
+        const top = window.screenY + (window.outerHeight - height) / 2;
 
-      if (!popup) {
-        throw new Error('Popup was blocked. Please enable popups for this site.');
-      }
+        const authWindow = window.open(
+          response.data.authUrl,
+          'Fitbit Auth',
+          `width=${width},height=${height},left=${left},top=${top}`
+        );
 
+        if (!authWindow) {
+          reject(new Error('Popup window was blocked'));
+          return;
+        }
+
+        const handleMessage = (event) => {
+          if (event.origin !== window.location.origin) return;
+
+          if (event.data.type === 'FITBIT_AUTH_SUCCESS') {
+            window.removeEventListener('message', handleMessage);
+            resolve({ success: true, service: event.data.service });
+          } else if (event.data.type === 'FITBIT_AUTH_ERROR') {
+            window.removeEventListener('message', handleMessage);
+            reject(new Error(event.data.error));
+          }
+        };
+
+        window.addEventListener('message', handleMessage);
+
+        // Timeout after 5 minutes
+        setTimeout(() => {
+          window.removeEventListener('message', handleMessage);
+          reject(new Error('Authentication timed out'));
+        }, 300000);
+      });
     } catch (error) {
-      console.error('Error connecting to Fitbit:', error);
+      console.error('Connection error:', error);
       throw error;
     }
   }
