@@ -11,7 +11,6 @@ const Footer = () => {
         <div className="footer-section">
           <h4>About Us</h4>
           <p>Fitness Tracker - Your personal wellness companion</p>
-          <p>Helping you achieve your fitness goals with smart tracking and motivation.</p>
         </div>
         
         <div className="footer-section">
@@ -25,24 +24,15 @@ const Footer = () => {
           <h4>Contact</h4>
           <p>Email: support@fitnessapp.com</p>
           <p>Phone: (+254) 123-4567</p>
-          <p>Address: 40200, Chuka</p>
         </div>
 
         <div className="footer-section">
           <h4>Connect With Us</h4>
           <div className="social-icons">
-            <a href="#" aria-label="Facebook">
-              <FaFacebook />
-            </a>
-            <a href="#" aria-label="Twitter">
-              <FaTwitter />
-            </a>
-            <a href="#" aria-label="Instagram">
-              <FaInstagram />
-            </a>
-            <a href="#" aria-label="LinkedIn">
-              <FaLinkedin />
-            </a>
+            <a href="#" aria-label="Facebook"><FaFacebook /></a>
+            <a href="#" aria-label="Twitter"><FaTwitter /></a>
+            <a href="#" aria-label="Instagram"><FaInstagram /></a>
+            <a href="#" aria-label="LinkedIn"><FaLinkedin /></a>
           </div>
         </div>
       </div>
