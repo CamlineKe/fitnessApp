@@ -21,6 +21,7 @@ html {
     box-sizing: border-box;
     width: 100%;
     position: relative;
+    overflow-x: hidden;
 }
 
 /* Navbar Styles */
@@ -40,6 +41,7 @@ html {
     -moz-backdrop-filter: blur(10px);
     -o-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
+    box-sizing: border-box;
 }
 
 .navbar-title h1 {
@@ -83,6 +85,7 @@ html {
     width: 100%;
     padding: 6rem 5% 4rem;
     background: linear-gradient(135deg, rgba(72, 52, 212, 0.05) 0%, rgba(104, 109, 224, 0.05) 100%);
+    box-sizing: border-box;
 }
 
 .home-header h2 {
@@ -247,8 +250,26 @@ html {
         overflow-x: hidden;
     }
     
+    .navbar {
+        padding: 0.5rem 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .navbar-title h1 {
+        font-size: 1.5rem;
+    }
+    
+    .navbar-buttons {
+        gap: 0.5rem;
+    }
+    
+    .nav-link {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
     .home-header {
-        margin-top: 160px;
+        margin-top: 120px;
         padding: 2rem 1rem;
     }
     
@@ -285,9 +306,26 @@ html {
         padding: 0;
     }
     
+    .navbar {
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .navbar-title h1 {
+        font-size: 1.3rem;
+    }
+    
+    .navbar-buttons {
+        gap: 0.4rem;
+    }
+    
+    .nav-link {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.85rem;
+    }
+    
     .home-header {
-        margin-top: 140px;
-        padding: 1.5rem 1rem;
+        margin-top: 100px;
+        padding: 1.5rem 0.75rem;
     }
     
     .home-header h2 {
@@ -333,6 +371,7 @@ html {
     color: white;
     padding: 4rem 5% 2rem;
     margin-top: 4rem;
+    box-sizing: border-box;
 }
 
 .footer-content {
