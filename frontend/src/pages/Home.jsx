@@ -58,27 +58,24 @@ const Home = () => {
         <div className="footer-content">
           <div className="footer-section">
             <h4>Quick Links</h4>
-            <Link to="/about">About Us</Link>
+            <Link to="/about">About</Link>
             <Link to="/contact">Contact</Link>
-            <Link to="/privacy">Privacy Policy</Link>
-            <Link to="/terms">Terms of Service</Link>
+            <Link to="/privacy">Privacy</Link>
           </div>
           
           <div className="footer-section">
             <h4>Features</h4>
-            <Link to="/login">Workout Tracking</Link>
-            <Link to="/login">Nutrition Planning</Link>
-            <Link to="/login">Mental Wellness</Link>
-            <Link to="/login">Progress Analytics</Link>
+            <Link to="/login">Workouts</Link>
+            <Link to="/login">Nutrition</Link>
+            <Link to="/login">Wellness</Link>
           </div>
           
           <div className="footer-section">
-            <h4>Connect With Us</h4>
+            <h4>Connect</h4>
             <div className="social-links">
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a>
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
               <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
             </div>
           </div>
         </div>
