@@ -186,11 +186,11 @@ const Dashboard = () => {
     <div className="page-container">
       <div className="dashboard-container">
         <div className="dashboard-header">
-          <h1>Welcome, {user?.name || user?.username || "User"} to Fitness Hub</h1>
-          <p>Track your fitness journey and achieve your goals</p>
           <button onClick={handleLogout} className="logout-button">
             <i className="fa fa-sign-out"></i> Logout
           </button>
+          <h1>Welcome, {user?.name || user?.username || "User"} to Fitness Hub</h1>
+          <p>Track your fitness journey and achieve your goals</p>
         </div>
         <div className="dashboard-content">
           <section className="quick-stats">
