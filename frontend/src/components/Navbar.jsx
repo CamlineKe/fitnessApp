@@ -33,7 +33,6 @@ const Navbar = () => {
           <button 
             className={`mobile-menu-button ${isMenuOpen ? 'active' : ''}`}
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Toggle menu"
           >
             <span></span>
             <span></span>
@@ -41,7 +40,7 @@ const Navbar = () => {
           </button>
         )}
 
-        <div className={`navbar-links ${isMobile ? 'mobile' : ''} ${isMenuOpen ? 'open' : ''}`}>
+        <div className={`navbar-links ${isMobile ? 'mobile' : ''} ${isMenuOpen ? 'open' : ''}`} style={{ marginRight: isMobile ? '0' : '10px' }}>
           {user && (
             <>
               <Link to="/dashboard" className="navbar-link" onClick={() => setIsMenuOpen(false)}>
