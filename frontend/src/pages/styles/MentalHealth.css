@@ -26,6 +26,7 @@
     min-height: calc(100vh - 64px);
     display: flex;
     flex-direction: column;
+    margin-top: 0;
 }
 
 /* Mental Health Content */
@@ -648,8 +649,18 @@
 }
 
 @media (max-width: 768px) {
+    .page-content {
+        padding-top: 64px;
+    }
+
+    .mentalhealth-container {
+        margin-top: 0;
+        min-height: calc(100vh - 64px);
+    }
+
     .mentalhealth-header {
         padding: 2rem 1rem;
+        margin-top: 0;
     }
 
     .mentalhealth-header h1 {
@@ -733,9 +744,9 @@
 }
 
 .page-content {
-    min-height: calc(100vh - 64px);
+    padding-top: 64px;
+    min-height: 100vh;
     background: #f8f9fa;
-    padding: 84px 2rem 2rem;
 }
 
 .chart-description {
