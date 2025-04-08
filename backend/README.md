@@ -7,107 +7,85 @@ This backend service provides the API infrastructure for a comprehensive health 
 ### Key Features
 - 🔐 Secure user authentication and authorization
 - 🔄 Integration with multiple fitness platforms (Google Fit, Fitbit)
-- 📊 Real-time data synchronization
+- 📊 Real-time data synchronization with Socket.IO
 - 🤖 AI-powered health recommendations
 - 📱 Cross-platform data management
 - 🔌 WebSocket support for real-time updates
+- 🏃‍♂️ Workout tracking and management
+- 🥗 Nutrition monitoring
+- 🧘‍♀️ Mental health assessment
+- 🎮 Gamification features
 
 ## Technical Stack
 - **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** MongoDB with Mongoose
-- **Real-time:** Socket.IO
+- **Framework:** Express.js 4.21
+- **Database:** MongoDB with Mongoose 8.10
+- **Real-time:** Socket.IO 4.8
 - **Authentication:** JWT + OAuth2
-- **AI Service:** Flask Python backend
-- **Logging:** Custom Logger implementation
+- **HTTP Client:** Axios 1.7
+- **Security:** bcryptjs 3.0
+- **Environment:** dotenv 16.4
+- **CORS:** cors 2.8
+- **Development:** nodemon 3.1
 
 ## API Architecture
 
-### Core Services
+### Core Routes
 
-#### Authentication Service
+#### User Management
 ```javascript
-// JWT authentication implementation
-import jwt from 'jsonwebtoken';
-
-// Token generation with expiry
-const generateToken = (userId) => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: '24h'
-  });
-};
-```
-
-#### Platform Integration Services
-
-```javascript
-// Google Fit Service
-class GoogleFitService {
-  // OAuth2 authentication URL generation
-  static async getAuthUrl() {
-    const scopes = [
-      'https://www.googleapis.com/auth/fitness.activity.read',
-      'https://www.googleapis.com/auth/fitness.heart_rate.read',
-      'https://www.googleapis.com/auth/fitness.body.read'
-    ];
-    // ... auth URL generation logic
-  }
-
-  // Health data fetching
-  static async getHealthData(userId) {
-    // ... health data retrieval logic
-  }
-}
-
-// Fitbit Service
-class FitbitService {
-  // Similar implementation for Fitbit integration
-}
-```
-
-### API Routes
-
-#### User Routes
-```javascript
-// User management endpoints
+// User routes
 router.post('/register', userController.register);
 router.post('/login', userController.login);
 router.get('/profile', authMiddleware, userController.getProfile);
 router.put('/profile', authMiddleware, userController.updateProfile);
 ```
 
-#### Sync Routes
+#### Workout Management
 ```javascript
-// Data synchronization endpoints
-router.post('/sync', authMiddleware, syncController.syncData);
-router.get('/health-data', authMiddleware, syncController.getHealthData);
-router.get('/device-status', authMiddleware, syncController.getDeviceStatus);
+// Workout routes
+router.post('/', authMiddleware, workoutController.createWorkout);
+router.get('/', authMiddleware, workoutController.getWorkouts);
+router.get('/:id', authMiddleware, workoutController.getWorkout);
+router.put('/:id', authMiddleware, workoutController.updateWorkout);
+router.delete('/:id', authMiddleware, workoutController.deleteWorkout);
 ```
 
-## Database Schema
-
-### User Schema
+#### Nutrition Tracking
 ```javascript
-// User model definition
-const userSchema = new Schema({
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  devices: {
-    googleFit: {
-      connected: Boolean,
-      accessToken: String,
-      refreshToken: String,
-      lastSynced: Date
-    },
-    fitbit: {
-      connected: Boolean,
-      accessToken: String,
-      refreshToken: String,
-      lastSynced: Date
-    }
-  }
-});
+// Nutrition routes
+router.post('/', authMiddleware, nutritionController.addNutrition);
+router.get('/', authMiddleware, nutritionController.getNutrition);
+router.get('/stats', authMiddleware, nutritionController.getStats);
+```
+
+#### Mental Health
+```javascript
+// Mental health routes
+router.post('/assessment', authMiddleware, mentalHealthController.addAssessment);
+router.get('/history', authMiddleware, mentalHealthController.getHistory);
+```
+
+#### Gamification
+```javascript
+// Gamification routes
+router.get('/achievements', authMiddleware, gamificationController.getAchievements);
+router.post('/progress', authMiddleware, gamificationController.updateProgress);
+```
+
+#### Data Synchronization
+```javascript
+// Sync routes
+router.post('/google-fit', authMiddleware, syncController.syncGoogleFit);
+router.post('/fitbit', authMiddleware, syncController.syncFitbit);
+router.get('/status', authMiddleware, syncController.getSyncStatus);
+```
+
+#### AI Recommendations
+```javascript
+// AI routes
+router.post('/analyze', authMiddleware, aiController.analyzeData);
+router.get('/recommendations', authMiddleware, aiController.getRecommendations);
 ```
 
 ## Real-time Implementation
@@ -117,15 +95,22 @@ const userSchema = new Schema({
 // WebSocket setup for real-time updates
 const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:3000', 'http://localhost:5000'],
-    methods: ["GET", "POST"],
-    credentials: true
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:5000',
+      process.env.FRONTEND_URL,
+      'https://fitness-3doakdbyh-camlinekes-projects.vercel.app'
+    ].filter(Boolean),
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    transports: ['websocket', 'polling']
   }
 });
 
 // Socket authentication
-io.use(async (socket, next) => {
-  // ... socket authentication middleware
+socket.on('authenticate', async (token) => {
+  // Token validation and user room joining
 });
 ```
 
@@ -152,90 +137,71 @@ npm start
 PORT=5000
 MONGODB_URI=your_mongodb_uri
 JWT_SECRET=your_jwt_secret
+FRONTEND_URL=your_frontend_url
+
+# OAuth Configuration
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 FITBIT_CLIENT_ID=your_fitbit_client_id
 FITBIT_CLIENT_SECRET=your_fitbit_client_secret
+
+# OAuth Scopes
+GOOGLE_FIT_SCOPES=https://www.googleapis.com/auth/fitness.activity.read https://www.googleapis.com/auth/fitness.heart_rate.read https://www.googleapis.com/auth/fitness.body.read
+FITBIT_SCOPES=activity heartrate profile
 ```
 
-## API Documentation
-
-### Authentication Endpoints
-```javascript
-/**
- * @route POST /api/auth/register
- * @desc Register a new user
- * @access Public
- */
-
-/**
- * @route POST /api/auth/login
- * @desc Authenticate user & get token
- * @access Public
- */
+## Project Structure
+```
+backend/
+├── config/         # Configuration files
+├── controllers/    # Route controllers
+├── middlewares/    # Custom middlewares
+├── models/        # Database models
+├── routes/        # API routes
+├── services/      # Business logic
+├── utils/         # Utility functions
+├── .env          # Environment variables
+├── .env.example  # Example environment variables
+├── .env.production # Production environment variables
+├── server.js     # Application entry point
+└── package.json  # Project dependencies
 ```
 
-### Health Data Endpoints
-```javascript
-/**
- * @route GET /api/sync/health-data
- * @desc Get user's health data
- * @access Private
- */
-
-/**
- * @route POST /api/sync/
- * @desc Sync data from connected platforms
- * @access Private
- */
-```
+## Security Implementations
+- JWT Authentication with token expiry
+- OAuth2 for third-party services
+- CORS policy with allowed origins
+- Request validation and sanitization
+- Secure headers configuration
+- Environment variable protection
+- Error handling middleware
 
 ## Error Handling
 ```javascript
 // Global error handler
-const errorHandler = (err, req, res, next) => {
-  Logger.error(err.stack);
+app.use((err, req, res, next) => {
+  Logger.error('Error:', err);
   res.status(err.status || 500).json({
-    message: err.message,
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+    error: {
+      message: err.message || 'Internal Server Error',
+      status: err.status || 500
+    }
   });
-};
-```
+});
 
-## Security Implementations
-- JWT Authentication
-- OAuth2 for third-party services
-- Request rate limiting
-- Input validation and sanitization
-- Secure headers configuration
-- CORS policy
-
-## Testing
-```bash
-# Run unit tests
-npm run test
-
-# Run integration tests
-npm run test:integration
-
-# Generate coverage report
-npm run test:coverage
+// Uncaught exception handler
+process.on('uncaughtException', (error) => {
+  Logger.error('Server error:', error);
+});
 ```
 
 ## Deployment
-```bash
-# Build for production
-npm run build
-
-# Start production server
-npm start
-```
-
-## Monitoring and Logging
-- Custom Logger implementation
-- Error tracking
-- Performance monitoring
-- API usage statistics
+The application is configured for deployment on Render with the following features:
+- Environment-specific configuration
+- Health check endpoint
+- CORS configuration for production
+- WebSocket support in production
+- Error logging and monitoring
 
 ## Contributing Guidelines
 1. Fork the repository
@@ -253,6 +219,10 @@ npm start
   - Platform integrations
   - Real-time updates
   - User authentication
+  - Workout tracking
+  - Nutrition monitoring
+  - Mental health assessment
+  - Gamification features
 
 ## Contact
 [Your Contact Information]
