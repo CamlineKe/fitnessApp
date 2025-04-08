@@ -10,6 +10,11 @@ body {
     min-height: calc(100vh - 64px);
     margin-top: 64px;
     background: #f8f9fa;
+    box-sizing: border-box;
+    width: 100%;
+    overflow-x: hidden;
+    position: relative;
+    padding-top: 0;
 }
 
 /* Nutrition Container */
@@ -21,6 +26,8 @@ body {
     min-height: calc(100vh - 64px);
     display: flex;
     flex-direction: column;
+    box-sizing: border-box;
+    position: relative;
 }
 
 /* Nutrition Header */
@@ -31,6 +38,10 @@ body {
     color: white;
     padding: 4rem 5%;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+    width: 100%;
+    position: relative;
+    z-index: 1;
 }
 
 .nutrition-header h1 {
@@ -56,16 +67,24 @@ body {
 }
 
 @media (max-width: 768px) {
+    .page-container {
+        margin-top: 64px;
+        padding-top: 0;
+    }
+    
     .nutrition-header {
         padding: 2rem 1rem;
+        margin-top: 0;
     }
 
     .nutrition-header h1 {
         font-size: 2.5rem;
+        margin-top: 0;
     }
 
     .nutrition-header p {
         font-size: 1.2rem;
+        margin-top: 0.5rem;
     }
 
     .nutrition-content {
@@ -105,12 +124,29 @@ body {
 }
 
 @media (max-width: 480px) {
+    .page-container {
+        margin-top: 64px;
+        padding-top: 0;
+    }
+    
+    .nutrition-container {
+        border-radius: 0;
+    }
+    
+    .nutrition-header {
+        padding: 1.5rem 1rem;
+        border-radius: 0;
+        margin-top: 0;
+    }
+
     .nutrition-header h1 {
         font-size: 2rem;
+        margin-top: 0;
     }
 
     .nutrition-header p {
         font-size: 1rem;
+        margin-top: 0.5rem;
     }
 
     .stat-card {
