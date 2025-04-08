@@ -268,25 +268,20 @@ const Profile = () => {
 
         Logger.debug('Received auth message:', event.data);
 
-        if (event.data.type === 'GOOGLE_FIT_AUTH') {
+        if (event.data.type === 'FITBIT_AUTH_SUCCESS' || event.data.type === 'GOOGLE_FIT_AUTH_SUCCESS') {
           window.removeEventListener('message', handleAuthMessage);
 
-          if (event.data.error) {
-            throw new Error(event.data.error);
-          }
+          // Update device state immediately
+          setDeviceStates(prev => ({
+            ...prev,
+            [service]: { ...prev[service], connected: true, loading: false }
+          }));
 
-          if (event.data.code) {
-            const ServiceClass = service === 'googleFit' ? GoogleFitService : FitbitService;
-            await ServiceClass.handleAuthCallback(event.data.code);
-
-            setDeviceStates(prev => ({
-              ...prev,
-              [service]: { ...prev[service], connected: true }
-            }));
-
-            await fetchHealthData();
-            toast.success(`Successfully connected to ${service}`);
-          }
+          await fetchHealthData();
+          toast.success(`Successfully connected to ${event.data.service}`);
+        } else if (event.data.type === 'FITBIT_AUTH_ERROR' || event.data.type === 'GOOGLE_FIT_AUTH_ERROR') {
+          window.removeEventListener('message', handleAuthMessage);
+          throw new Error(event.data.error);
         }
       };
 
@@ -300,12 +295,7 @@ const Profile = () => {
       toast.error(`Failed to connect to ${service}: ${error.message}`);
       setDeviceStates(prev => ({
         ...prev,
-        [service]: { ...prev[service], connected: false }
-      }));
-    } finally {
-      setDeviceStates(prev => ({
-        ...prev,
-        [service]: { ...prev[service], loading: false }
+        [service]: { ...prev[service], connected: false, loading: false }
       }));
     }
   };
