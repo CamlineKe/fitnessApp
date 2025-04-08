@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
   dateOfBirth: { type: Date },
   gender: { type: String, enum: ['male', 'female', 'other'] },
   healthGoals: { type: String },
+  isAdmin: { type: Boolean, default: false },
   devices: {
     googleFit: {
       connected: { type: Boolean, default: false },
