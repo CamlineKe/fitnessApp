@@ -37,11 +37,11 @@ const getStressAnalysis = async (mentalLogs = []) => {
     if (!response.data) {
       return {
         recommendations: [],
-        analysis: {
+      analysis: {
           current_state: {},
           patterns: {}
-        }
-      };
+      }
+    };
     }
 
     return response.data;
