@@ -205,9 +205,9 @@ const Recommendation = () => {
                   <div>
                     <div className="stress-status">
                       <h3>Current Status</h3>
-                      <p>Mood: {stressAnalysis?.analysis?.current_state?.mood || 'Neutral'}</p>
-                      <p>Stress Level: {stressAnalysis?.analysis?.current_state?.stress_level || '5'}</p>
-                      <p>Sleep Quality: {stressAnalysis?.analysis?.current_state?.sleep_quality || '10'}</p>
+                      <p>Mood: {stressAnalysis?.analysis?.current_state?.mood || 'N/A'}</p>
+                      <p>Stress Level: {stressAnalysis?.analysis?.current_state?.stress_level ? `${stressAnalysis.analysis.current_state.stress_level}/10` : 'N/A'}</p>
+                      <p>Sleep Quality: {stressAnalysis?.analysis?.current_state?.sleep_quality ? `${stressAnalysis.analysis.current_state.sleep_quality}/10` : 'N/A'}</p>
                     </div>
                     <div className="stress-recommendations">
                       <h3>Recommendations</h3>
@@ -313,14 +313,21 @@ const Recommendation = () => {
                     {/* Recommendations */}
                     <div className="workout-recommendations">
                       <h3>Personalized Recommendations</h3>
-                      <div className="recommendations-grid">
-                        {workoutRecommendations.recommendations?.map((rec, index) => (
-                          <div key={index} className="recommendation-card">
-                            <i className="fas fa-check-circle"></i>
-                            <p>{rec}</p>
-                          </div>
-                        ))}
-                      </div>
+                      {workoutRecommendations.recommendations?.length > 0 ? (
+                        <div className="recommendations-grid">
+                          {workoutRecommendations.recommendations.map((rec, index) => (
+                            <div key={index} className="recommendation-card">
+                              <i className="fas fa-check-circle"></i>
+                              <p>{rec}</p>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="no-recommendations">
+                          <p>No workout recommendations available at the moment.</p>
+                          <p>Continue logging your workouts to receive personalized recommendations.</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

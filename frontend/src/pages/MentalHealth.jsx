@@ -73,11 +73,15 @@ const MentalHealth = () => {
       setStressAnalysis(analysisData);
     } catch (error) {
       Logger.error("Failed to fetch stress analysis:", error);
-      // Don't show error toast, just use default values
+      // Set default empty state without showing error to user
       setStressAnalysis({
         recommendations: [],
         analysis: {
-          current_state: {},
+          current_state: {
+            mood: 'N/A',
+            stress_level: 'N/A',
+            sleep_quality: 'N/A'
+          },
           patterns: {}
         }
       });
@@ -566,75 +570,40 @@ const MentalHealth = () => {
           {/* Stress Analysis Section */}
           <div className="mentalhealth-section stress-analysis">
             <h2>Recommendations</h2>
-            {mentalHealthData.length > 0 ? (
-              <div>
-                <p>
-                  Your latest stress level is{" "}
-                  <strong>{mentalHealthData[0]?.stressLevel || "Not recorded"}</strong>.
-                </p>
-                {stressAnalysis ? (
-                  <div className="stress-analysis-content">
-                    <div className="current-state">
-                      <h3>Current State</h3>
-                      <div className="state-grid">
-                        <div className="state-item">
-                          <label>Mood:</label>
-                          <span>{stressAnalysis?.analysis?.current_state?.mood || 'N/A'}</span>
-                        </div>
-                        <div className="state-item">
-                          <label>Stress Level:</label>
-                          <span>{stressAnalysis?.analysis?.current_state?.stress_level || 'N/A'}/10</span>
-                        </div>
-                        <div className="state-item">
-                          <label>Sleep Quality:</label>
-                          <span>{stressAnalysis?.analysis?.current_state?.sleep_quality || 'N/A'}/10</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="recommendations">
-                      <h3>Personalized Recommendations</h3>
-                      <ul>
-                        {Array.isArray(stressAnalysis?.recommendations) ? (
-                          stressAnalysis.recommendations.map((rec, index) => (
-                            <li key={index}>{rec}</li>
-                          ))
-                        ) : (
-                          <li>No recommendations available at the moment.</li>
-                        )}
-                      </ul>
-                    </div>
+            <div className="stress-analysis-content">
+              <div className="current-state">
+                <h3>Current State</h3>
+                <div className="state-grid">
+                  <div className="state-item">
+                    <label>Mood:</label>
+                    <span>{stressAnalysis?.analysis?.current_state?.mood || 'N/A'}</span>
                   </div>
+                  <div className="state-item">
+                    <label>Stress Level:</label>
+                    <span>{stressAnalysis?.analysis?.current_state?.stress_level ? `${stressAnalysis.analysis.current_state.stress_level}/10` : 'N/A'}</span>
+                  </div>
+                  <div className="state-item">
+                    <label>Sleep Quality:</label>
+                    <span>{stressAnalysis?.analysis?.current_state?.sleep_quality ? `${stressAnalysis.analysis.current_state.sleep_quality}/10` : 'N/A'}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="recommendations">
+                <h3>Personalized Recommendations</h3>
+                {stressAnalysis?.recommendations && stressAnalysis.recommendations.length > 0 ? (
+                  <ul>
+                    {stressAnalysis.recommendations.map((rec, index) => (
+                      <li key={index}>{rec}</li>
+                    ))}
+                  </ul>
                 ) : (
-                  <div className="stress-analysis-content">
-                    <div className="current-state">
-                      <h3>Current State</h3>
-                      <div className="state-grid">
-                        <div className="state-item">
-                          <label>Mood:</label>
-                          <span>N/A</span>
-                        </div>
-                        <div className="state-item">
-                          <label>Stress Level:</label>
-                          <span>N/A</span>
-                        </div>
-                        <div className="state-item">
-                          <label>Sleep Quality:</label>
-                          <span>N/A</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="recommendations">
-                      <h3>Personalized Recommendations</h3>
-                      <ul>
-                        <li>No recommendations available at the moment.</li>
-                      </ul>
-                    </div>
+                  <div className="no-recommendations">
+                    <p>No recommendations available at the moment.</p>
+                    <p>Continue logging your daily check-ins to receive personalized recommendations.</p>
                   </div>
                 )}
               </div>
-            ) : (
-              <p>Loading stress data...</p>
-            )}
+            </div>
           </div>
 
           {/* Mood Chart Section */}
