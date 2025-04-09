@@ -39,25 +39,7 @@ const Recommendation = () => {
       if (!logs || (Array.isArray(logs) && logs.length === 0)) {
         console.log("No mental health records found");
         setStressAnalysis({
-          recommendations: [
-            "Welcome to your stress management journey!",
-            "- Track your daily mood and stress levels",
-            "- Practice basic stress management techniques",
-            "- Establish a consistent sleep schedule",
-            "- Engage in regular physical activity"
-          ],
-          analysis: {
-            current_state: {
-              mood: 'neutral',
-              stress_level: 5,
-              sleep_quality: 10
-            },
-            patterns: {
-              stress_trend: 'neutral',
-              sleep_trend: 'neutral',
-              mood_trend: 'neutral'
-            }
-          }
+          recommendations: []
         });
       } else {
         // Ensure data is an array and sort by date (newest first)
@@ -83,7 +65,9 @@ const Recommendation = () => {
         } catch (err) {
           console.error('Failed to fetch stress analysis:', err);
           setErrors(prev => ({ ...prev, stress: 'Stress analysis service is currently unavailable. Please try again later.' }));
-          setStressAnalysis({ recommendations: [] });
+          setStressAnalysis({
+            recommendations: []
+          });
         }
 
         try {
@@ -234,7 +218,7 @@ const Recommendation = () => {
                           ))}
                         </ul>
                       ) : (
-                        <p>Loading recommendations...</p>
+                        <p>No stress analysis recommendations available at the moment.</p>
                       )}
                     </div>
                   </div>
