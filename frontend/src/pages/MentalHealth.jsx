@@ -611,26 +611,22 @@ const MentalHealth = () => {
                       <div className="state-grid">
                         <div className="state-item">
                           <label>Mood:</label>
-                          <span>neutral</span>
+                          <span>N/A</span>
                         </div>
                         <div className="state-item">
                           <label>Stress Level:</label>
-                          <span>5/10</span>
+                          <span>N/A</span>
                         </div>
                         <div className="state-item">
                           <label>Sleep Quality:</label>
-                          <span>10/10</span>
+                          <span>N/A</span>
                         </div>
                       </div>
                     </div>
                     <div className="recommendations">
                       <h3>Personalized Recommendations</h3>
                       <ul>
-                        <li>Welcome to your stress management journey!</li>
-                        <li>- Track your daily mood and stress levels</li>
-                        <li>- Practice basic stress management techniques</li>
-                        <li>- Establish a consistent sleep schedule</li>
-                        <li>- Engage in regular physical activity</li>
+                        <li>No recommendations available at the moment.</li>
                       </ul>
                     </div>
                   </div>
