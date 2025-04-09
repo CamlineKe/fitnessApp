@@ -83,27 +83,7 @@ const Recommendation = () => {
         } catch (err) {
           console.error('Failed to fetch stress analysis:', err);
           setErrors(prev => ({ ...prev, stress: 'Stress analysis service is currently unavailable. Please try again later.' }));
-          setStressAnalysis({
-            recommendations: [
-              "Welcome to your stress management journey!",
-              "- Track your daily mood and stress levels",
-              "- Practice basic stress management techniques",
-              "- Establish a consistent sleep schedule",
-              "- Engage in regular physical activity"
-            ],
-            analysis: {
-              current_state: {
-                mood: 'neutral',
-                stress_level: 5,
-                sleep_quality: 10
-              },
-              patterns: {
-                stress_trend: 'neutral',
-                sleep_trend: 'neutral',
-                mood_trend: 'neutral'
-              }
-            }
-          });
+          setStressAnalysis({ recommendations: [] });
         }
 
         try {
