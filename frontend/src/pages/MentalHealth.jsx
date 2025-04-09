@@ -26,16 +26,8 @@ const MentalHealth = () => {
   const [stressAnalysis, setStressAnalysis] = useState({
     recommendations: [],
     analysis: {
-      current_state: {
-        mood: 'neutral',
-        stress_level: 5,
-        sleep_quality: 10
-      },
-      patterns: {
-        stress_trend: 'neutral',
-        sleep_trend: 'neutral',
-        mood_trend: 'neutral'
-      }
+      current_state: {},
+      patterns: {}
     }
   });
 
@@ -83,24 +75,10 @@ const MentalHealth = () => {
       Logger.error("Failed to fetch stress analysis:", error);
       // Don't show error toast, just use default values
       setStressAnalysis({
-        recommendations: [
-          "Welcome to your stress management journey!",
-          "- Track your daily mood and stress levels",
-          "- Practice basic stress management techniques",
-          "- Establish a consistent sleep schedule",
-          "- Engage in regular physical activity"
-        ],
+        recommendations: [],
         analysis: {
-          current_state: {
-            mood: 'neutral',
-            stress_level: 5,
-            sleep_quality: 10
-          },
-          patterns: {
-            stress_trend: 'neutral',
-            sleep_trend: 'neutral',
-            mood_trend: 'neutral'
-          }
+          current_state: {},
+          patterns: {}
         }
       });
     }
@@ -191,8 +169,8 @@ const MentalHealth = () => {
         setStressAnalysis(analysis || {
           recommendations: [],
           analysis: {
-            current_state: { mood: 'neutral', stress_level: 5, sleep_quality: 10 },
-            patterns: { stress_trend: 'neutral', sleep_trend: 'neutral', mood_trend: 'neutral' }
+            current_state: {},
+            patterns: {}
           }
         });
       } catch (err) {
