@@ -15,7 +15,7 @@ This platform consists of three main components:
 - Node.js (v18 or higher)
 - Python (v3.9 or higher)
 - MongoDB (v6.0 or higher)
-- Git
+- Git (optional, only if you want to use version control)
 
 ### Required Accounts and API Keys
 - Google Cloud Platform account (for Google Fit integration)
@@ -24,90 +24,83 @@ This platform consists of three main components:
 
 ## Installation and Setup
 
-### 1. Clone the Repository
+### Option 1: From Zip File
+1. **Extract the zip file**
+   - Extract the downloaded zip file to your desired location
+   - Open the extracted folder in your terminal/command prompt
+
+2. **Backend Setup**
+   ```bash
+   # Navigate to backend directory
+   cd backend
+
+   # Install dependencies
+   npm install
+
+   # Copy environment example file
+   cp .env.example .env
+
+   # Edit .env file with your configuration
+   # (See Environment Variables section below)
+
+   # Start the backend server
+   npm run dev
+   ```
+
+3. **Frontend Setup**
+   ```bash
+   # Open a new terminal window
+   # Navigate to frontend directory
+   cd frontend
+
+   # Install dependencies
+   npm install
+
+   # Copy environment example file
+   cp .env.example .env
+
+   # Edit .env file with your configuration
+   # (See Environment Variables section below)
+
+   # Start the frontend development server
+   npm run dev
+   ```
+
+4. **AI Service Setup**
+   ```bash
+   # Open a new terminal window
+   # Navigate to flask-ai directory
+   cd flask-ai
+
+   # Create virtual environment
+   python -m venv venv
+
+   # Activate virtual environment
+   # On Windows:
+   venv\Scripts\activate
+   # On macOS/Linux:
+   source venv/bin/activate
+
+   # Install dependencies
+   pip install -r requirements.txt
+
+   # Copy environment example file
+   cp .env.example .env
+
+   # Edit .env file with your configuration
+   # (See Environment Variables section below)
+
+   # Start the AI service
+   python app.py
+   ```
+
+### Option 2: From Git Repository
 ```bash
-git clone [your-repository-url]
+# Clone the repository
+git clone https://github.com/CamlineKe/fitnessApp
 cd fitnessApp
-```
 
-### 2. Backend Setup
-```bash
-cd backend
-npm install
-cp .env.example .env
-# Edit .env with your configuration
-npm run dev
-```
-
-### 3. Frontend Setup
-```bash
-cd frontend
-npm install
-cp .env.example .env
-# Edit .env with your configuration
-npm start
-```
-
-### 4. AI Service Setup
-```bash
-# Navigate to the flask-ai directory
-cd flask-ai
-
-# Create and activate virtual environment
-# For Windows:
-python -m venv venv
-
-# Configure Python interpreter location
-# Edit venv\pyvenv.cfg and set the correct Python path:
-home = C:\Path\To\Your\Python
-include-system-site-packages = false
-version = 3.9
-
-# Activate the virtual environment
-venv\Scripts\activate
-
-# For macOS/Linux:
-python -m venv venv
-
-# Configure Python interpreter location
-# Edit venv/pyvenv.cfg and set the correct Python path:
-home = /path/to/your/python
-include-system-site-packages = false
-version = 3.9
-
-# Activate the virtual environment
-source venv/bin/activate
-
-# Verify the virtual environment is active
-# The prompt should show (venv) at the beginning
-# If not, make sure you're in the correct directory and try activating again
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your configuration
-# Make sure to set the correct paths and locations:
-FLASK_APP=app.py
-FLASK_ENV=development
-PORT=5001
-# Add any other required environment variables
-
-# Run the application
-python app.py
-
-# Common virtual environment commands:
-# To deactivate the virtual environment:
-# Windows/Linux/macOS: deactivate
-
-# To check if virtual environment is active:
-# Windows/Linux/macOS: which python  # Should point to venv directory
-
-# If you need to recreate the virtual environment:
-# deactivate
-# rm -rf venv  # On Windows: rmdir /s /q venv
-# Then follow the setup steps again
+# Follow steps 2-4 from Option 1
 ```
 
 ## Environment Variables
@@ -331,3 +324,131 @@ Types:
 - Database Query Time: < 100ms
 - WebSocket Latency: < 50ms
 - Frontend Load Time: < 2s 
+
+## Virtual Environment Setup
+
+### Windows Setup
+1. **Install Python**
+   - Download Python 3.9 or higher from [python.org](https://www.python.org/downloads/)
+   - During installation, check "Add Python to PATH"
+   - Verify installation: `python --version`
+
+2. **Create Virtual Environment**
+   ```bash
+   # Navigate to flask-ai directory
+   cd flask-ai
+
+   # Create virtual environment
+   python -m venv venv
+
+   # Activate virtual environment
+   venv\Scripts\activate
+
+   # Verify activation (should see (venv) at start of prompt)
+   ```
+
+3. **Install Dependencies**
+   ```bash
+   # Make sure virtual environment is activated
+   pip install -r requirements.txt
+   ```
+
+### macOS Setup
+1. **Install Python**
+   - Install using Homebrew: `brew install python@3.9`
+   - Or download from [python.org](https://www.python.org/downloads/)
+   - Verify installation: `python3 --version`
+
+2. **Create Virtual Environment**
+   ```bash
+   # Navigate to flask-ai directory
+   cd flask-ai
+
+   # Create virtual environment
+   python3 -m venv venv
+
+   # Activate virtual environment
+   source venv/bin/activate
+
+   # Verify activation (should see (venv) at start of prompt)
+   ```
+
+3. **Install Dependencies**
+   ```bash
+   # Make sure virtual environment is activated
+   pip install -r requirements.txt
+   ```
+
+### Linux Setup
+1. **Install Python**
+   ```bash
+   # Ubuntu/Debian
+   sudo apt update
+   sudo apt install python3.9 python3.9-venv
+
+   # CentOS/RHEL
+   sudo yum install python3.9 python3.9-venv
+
+   # Verify installation
+   python3 --version
+   ```
+
+2. **Create Virtual Environment**
+   ```bash
+   # Navigate to flask-ai directory
+   cd flask-ai
+
+   # Create virtual environment
+   python3 -m venv venv
+
+   # Activate virtual environment
+   source venv/bin/activate
+
+   # Verify activation (should see (venv) at start of prompt)
+   ```
+
+3. **Install Dependencies**
+   ```bash
+   # Make sure virtual environment is activated
+   pip install -r requirements.txt
+   ```
+
+### Common Virtual Environment Commands
+```bash
+# To deactivate virtual environment
+deactivate
+
+# To check if virtual environment is active
+# Windows
+where python
+# macOS/Linux
+which python3
+
+# To recreate virtual environment
+deactivate
+# Windows
+rmdir /s /q venv
+# macOS/Linux
+rm -rf venv
+# Then follow setup steps again
+```
+
+### Troubleshooting Virtual Environment
+1. **Python not found**
+   - Verify Python installation
+   - Check PATH environment variable
+   - Try using full path to Python executable
+
+2. **Permission errors**
+   - Use `sudo` on Linux/macOS if needed
+   - Run terminal as administrator on Windows
+
+3. **Dependency installation issues**
+   - Update pip: `python -m pip install --upgrade pip`
+   - Try installing packages individually
+   - Check Python version compatibility
+
+4. **Virtual environment activation issues**
+   - Verify correct activation command for your OS
+   - Check if virtual environment was created successfully
+   - Try recreating the virtual environment 
