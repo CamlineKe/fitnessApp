@@ -1,35 +1,50 @@
-.page-content {
-    padding-top: 64px; /* Height of the navbar */
-    min-height: 100vh;
-    background-color: #f4f4f4;
+/* Page Container */
+.page-container {
+    min-height: calc(100vh - var(--nav-height));
+    margin-top: var(--nav-height);
+    background: var(--bg-main);
 }
 
+/* Workout Container */
 .workout-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    min-height: calc(100vh - var(--nav-height));
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 64px);
-    background-color: #f4f4f4;
-    font-family: Arial, sans-serif;
-    margin-top: 0; /* Remove any margin that might cause overlap */
 }
 
+/* Workout Header */
 .workout-header {
-    background: linear-gradient(to right, rgba(44, 62, 80, 0.95), rgba(52, 152, 219, 0.95));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    color: white;
+    background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent),
+        linear-gradient(to right, #1e293b, #0f172a);
     padding: 4rem 5%;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .workout-header h1 {
-    font-size: 3.5rem;
+    font-size: 3rem;
     margin: 0;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: white;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .workout-header p {
-    font-size: 1.4rem;
-    margin-top: 0.5rem;
+    font-size: 1.1rem;
+    margin: 0;
+    color: #94a3b8;
+    max-width: 600px;
+    line-height: 1.6;
 }
 
 .workout-content {
@@ -51,69 +66,80 @@
     margin-bottom: 0.5rem;
 }
 
-.workout-logs {
-    margin-top: 2rem;
-    padding: 1rem;
+/* Workout Logs Section */
+.workout-logs-section {
+    padding: 3rem 0;
 }
 
-.workout-logs h2 {
-    color: #333;
-    margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-    border-bottom: 3px solid #4CAF50;
-    padding-bottom: 0.5rem;
-    display: inline-block;
+.workout-logs-section h2 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 2rem;
+    letter-spacing: -0.025em;
 }
 
-.workout-logs ul {
-    list-style-type: none;
-    padding: 0;
+.workout-logs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
     gap: 1.5rem;
 }
 
-.workout-logs li {
-    background: white;
-    border-radius: 10px;
-    padding: 1.5rem;
-    margin-bottom: 0;
-    border: none;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+.workout-log-card {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    border-radius: var(--border-radius-xl);
+    padding: 2rem;
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
     position: relative;
     overflow: hidden;
 }
 
-.workout-logs li:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-.workout-logs li::before {
+.workout-log-card::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 4px;
-    background: #4CAF50;
+    width: 4px;
+    height: 100%;
+    background: var(--secondary);
+    opacity: 0.6;
 }
 
-.workout-logs li p {
-    margin: 0.8rem 0;
-    font-size: 1rem;
-    color: #555;
+.workout-log-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-premium);
+    background: white;
+    border-color: var(--secondary);
+}
+
+.workout-log-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+    margin: 0 0 1rem;
+    letter-spacing: -0.01em;
+}
+
+.workout-log-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.workout-detail-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    font-size: 0.95rem;
+    color: var(--text-muted);
 }
 
-.workout-logs li p strong {
-    color: #333;
+.workout-detail-item strong {
+    color: var(--text-main);
     font-weight: 600;
-    text-transform: capitalize;
-    min-width: 120px;
 }
 
 /* Empty state styling */
@@ -589,7 +615,8 @@
 
 @media (max-width: 768px) {
     .page-content {
-        padding-top: 64px; /* Ensure consistent spacing on mobile */
+        padding-top: 64px;
+        /* Ensure consistent spacing on mobile */
     }
 
     .workout-container {
@@ -614,7 +641,7 @@
         padding: 1.5rem;
     }
 
-    .todays-workout > div {
+    .todays-workout>div {
         grid-template-columns: 1fr;
         gap: 1rem;
     }
@@ -692,7 +719,8 @@
     .input-with-unit input,
     .input-with-label select,
     .input-with-label textarea {
-        font-size: 16px; /* Prevents zoom on mobile */
+        font-size: 16px;
+        /* Prevents zoom on mobile */
     }
 }
 
