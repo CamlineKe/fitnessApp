@@ -1,8 +1,8 @@
 /* Page Container */
 .page-container {
-    min-height: calc(100vh - 64px);
-    margin-top: 64px;
-    background: #f8f9fa;
+    min-height: calc(100vh - var(--nav-height));
+    margin-top: var(--nav-height);
+    background: var(--bg-main);
 }
 
 /* Recommendation Container */
@@ -10,288 +10,159 @@
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
-    background: #ffffff;
-    min-height: calc(100vh - 64px);
+    min-height: calc(100vh - var(--nav-height));
     display: flex;
     flex-direction: column;
-    margin-top: 0;
+}
+
+/* Header Styling */
+.recommendation-header {
+    background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.1), transparent),
+        linear-gradient(to right, #1e293b, #0f172a);
+    padding: 4rem 5%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.recommendation-header h1 {
+    font-size: 3rem;
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: white;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.recommendation-header p {
+    font-size: 1.1rem;
+    margin: 0;
+    color: #94a3b8;
+    max-width: 600px;
+    line-height: 1.6;
 }
 
 /* Recommendation Content */
 .recommendation-content {
-    flex-grow: 1;
-    padding: 2rem 5%;
-    width: 100%;
-    box-sizing: border-box;
+    padding: 3rem 5%;
 }
 
-.recommendation-content h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1.5rem;
-    color: #2d3436;
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 2rem;
+}
+
+/* Recommendation Cards */
+.recommendation-section {
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    border-radius: var(--border-radius-xl);
+    padding: 2.5rem;
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.recommendation-section:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-premium);
+    background: white;
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+}
+
+.section-header i {
+    font-size: 1.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    background: var(--bg-main);
+}
+
+.section-header h2 {
+    font-size: 1.5rem;
     font-weight: 700;
+    color: var(--text-main);
+    margin: 0;
+    letter-spacing: -0.01em;
 }
 
-.recommendation-content h2 {
-    font-size: 1.8rem;
-    margin: 2rem 0 1rem;
-    color: #2d3436;
-    font-weight: 600;
+/* Specific Section Colors */
+.diet-section .section-header i {
+    color: #f43f5e;
+    background: rgba(244, 63, 94, 0.1);
 }
 
-.recommendation-content p,
-.recommendation-content li {
-    font-size: 1.1rem;
-    margin-bottom: 0.8rem;
-    color: #4a4a4a;
+.stress-section .section-header i {
+    color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.workout-section .section-header i {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
+/* Recommendation Items */
+.recommendation-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.recommendation-item {
+    background: rgba(0, 0, 0, 0.02);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border-left: 4px solid var(--primary);
+    transition: all 0.3s ease;
+}
+
+.recommendation-item:hover {
+    background: white;
+    transform: translateX(8px);
+    box-shadow: var(--shadow-sm);
+}
+
+.recommendation-item p {
+    margin: 0;
+    color: var(--text-main);
+    font-size: 0.95rem;
     line-height: 1.6;
 }
 
-/* Responsive Media Queries */
-@media (max-width: 1200px) {
-    .recommendation-content {
-        padding: 2rem 3%;
-    }
-
-    .recommendations-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+/* Loading Table */
+.loading-message {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-muted);
 }
 
 @media (max-width: 768px) {
-    .page-content {
-        padding-top: 64px;
-    }
-
-    .recommendation-container {
-        margin-top: 0;
-        min-height: calc(100vh - 64px);
-    }
-
-    .recommendation-header {
-        padding: 2rem 1rem;
-        margin-top: 0;
-    }
-
     .recommendation-header h1 {
-        font-size: 2rem;
-        line-height: 1.3;
-    }
-
-    .recommendation-header p {
-        font-size: 1.1rem;
-        margin-top: 0.8rem;
-    }
-
-    .recommendations-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+        font-size: 2.25rem;
     }
 
     .recommendation-section {
         padding: 1.5rem;
     }
-
-    .section-header {
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-    }
-}
-
-@media (max-width: 480px) {
-    .recommendation-header {
-        padding: 1.5rem 1rem;
-    }
-
-    .recommendation-header h1 {
-        font-size: 1.8rem;
-        line-height: 1.4;
-    }
-
-    .recommendation-header p {
-        font-size: 1rem;
-        margin-top: 0.5rem;
-    }
-
-    .recommendation-section {
-        padding: 1rem;
-    }
-
-    .section-header i {
-        font-size: 1.2rem;
-        padding: 0.8rem;
-        width: 2.5rem;
-        height: 2.5rem;
-    }
-
-    .recommendation-item {
-        padding: 1rem;
-    }
-
-    .section-header h2 {
-        font-size: 1.3rem;
-    }
-}
-
-/* Header Styling */
-.recommendation-header {
-    background: linear-gradient(to right, rgba(44, 62, 80, 0.95), rgba(52, 152, 219, 0.95));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    color: white;
-    padding: 3rem 1rem;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    margin-bottom: 2rem;
-    margin-top: 0;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.recommendation-header h1 {
-    font-size: 2.5rem;
-    margin: 0;
-    font-weight: 600;
-    letter-spacing: -0.5px;
-    line-height: 1.2;
-}
-
-.recommendation-header p {
-    font-size: 1.2rem;
-    margin-top: 1rem;
-    opacity: 0.9;
-    line-height: 1.4;
-}
-
-/* Recommendation Cards */
-.recommendation-section {
-    background: white;
-    border-radius: 12px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.recommendation-section:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Diet Recommendations Section */
-.diet-section {
-    border-top: 5px solid #4CAF50;
-}
-
-.diet-section h2 {
-    color: #2E7D32;
-    border-bottom: 2px solid #E8F5E9;
-}
-
-.diet-section li {
-    border-left: 4px solid #4CAF50;
-    background: #F1F8E9;
-}
-
-.diet-section li:hover {
-    background: #E8F5E9;
-}
-
-/* Stress Analysis Section */
-.stress-section {
-    border-top: 5px solid #7E57C2;
-}
-
-.stress-section h2 {
-    color: #4527A0;
-    border-bottom: 2px solid #EDE7F6;
-}
-
-.stress-section li {
-    border-left: 4px solid #7E57C2;
-    background: #F3E5F5;
-}
-
-.stress-section li:hover {
-    background: #EDE7F6;
-}
-
-/* Workout Recommendations Section */
-.workout-section {
-    border-top: 5px solid #42A5F5;
-}
-
-.workout-section h2 {
-    color: #1565C0;
-    border-bottom: 2px solid #E3F2FD;
-}
-
-.workout-section li {
-    border-left: 4px solid #42A5F5;
-    background: #E3F2FD;
-}
-
-.workout-section li:hover {
-    background: #BBDEFB;
-}
-
-/* Section Icons */
-.section-header {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.section-header i {
-    font-size: 2rem;
-}
-
-.diet-section .section-header i {
-    color: #4CAF50;
-}
-
-.stress-section .section-header i {
-    color: #7E57C2;
-}
-
-.workout-section .section-header i {
-    color: #42A5F5;
-}
-
-/* Grid Layout for Recommendations */
-.recommendations-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
-}
-
-/* Recommendation Item Styling */
-.recommendation-item {
-    padding: 1.5rem;
-    border-radius: 10px;
-    margin-bottom: 1rem;
-    transition: all 0.3s ease;
-}
-
-.recommendation-item:hover {
-    transform: translateX(5px);
-}
-
-/* Loading and Error States */
-.loading-message {
-    text-align: center;
-    padding: 2rem;
-    color: #666;
-    font-size: 1.2rem;
-}
-
-.error-message {
-    background: #fee2e2;
-    color: #dc2626;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
 }

@@ -31,17 +31,17 @@ const Dashboard = () => {
     try {
       setIsLoading(true);
       Logger.debug('Dashboard: Fetching fresh data...');
-      
+
       const [nutrition, workouts, mentalHealth, gamification] = await Promise.all([
         getNutritionData(),
-        WorkoutService.getWorkoutLogs(), 
+        WorkoutService.getWorkoutLogs(),
         getMentalHealthData(user._id),
         GamificationService.getGamificationData()
       ]);
 
       // Get today's workout from the workouts array
       const today = new Date();
-      const todayWorkout = workouts?.find(workout => 
+      const todayWorkout = workouts?.find(workout =>
         new Date(workout.date).toDateString() === today.toDateString()
       ) || {
         activityType: 'No workout yet',
@@ -75,7 +75,7 @@ const Dashboard = () => {
             details: `${log.calories} calories`,
             category: log.mealType || 'Meal'
           })),
-        ...(workouts || []) 
+        ...(workouts || [])
           .filter(log => isToday(log.date))
           .map(log => ({
             type: 'workout',
@@ -118,7 +118,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-    
+
     // Listen for workout and gamification updates
     const handleWorkoutUpdate = () => {
       Logger.debug('Dashboard: Workout update detected, refreshing data...');
@@ -202,9 +202,8 @@ const Dashboard = () => {
                   key={index}
                   className="quick-action-card"
                   onClick={action.action}
-                  style={{ backgroundColor: action.color }}
                 >
-                  <i className={`fa ${action.icon}`}></i>
+                  <i className={`fa ${action.icon}`} style={{ color: action.color }}></i>
                   <span>{action.label}</span>
                 </button>
               ))}
@@ -220,7 +219,7 @@ const Dashboard = () => {
             </div>
 
             <div className="stats-grid">
-              <Link to="/nutrition" className="stat-card nutrition">
+              <Link to="/nutrition" className="stat-card calories">
                 <div className="stat-header">
                   <i className="fa fa-utensils"></i>
                   <h3>Nutrition</h3>
@@ -287,7 +286,7 @@ const Dashboard = () => {
                       <span className="streak-label"> day streak</span>
                     </p>
                     <p className="stat-label">
-                      <FaFire style={{ color: gamificationData?.streaks?.currentStreak > 0 ? '#ff6b6b' : '#999' }} /> 
+                      <FaFire style={{ color: gamificationData?.streaks?.currentStreak > 0 ? '#ff6b6b' : '#999' }} />
                       {gamificationData?.streaks?.currentStreak > 0 ? 'Keep it up!' : 'Start your streak!'}
                     </p>
                   </div>

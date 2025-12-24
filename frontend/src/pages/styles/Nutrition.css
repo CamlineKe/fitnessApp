@@ -1,20 +1,8 @@
-/* General Styles */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-}
-
 /* Page Container */
 .page-container {
-    min-height: calc(100vh - 64px);
-    margin-top: 64px;
-    background: #f8f9fa;
-    box-sizing: border-box;
-    width: 100%;
-    overflow-x: hidden;
-    position: relative;
-    padding-top: 0;
+    min-height: calc(100vh - var(--nav-height));
+    margin-top: var(--nav-height);
+    background: var(--bg-main);
 }
 
 /* Nutrition Container */
@@ -22,38 +10,41 @@ body {
     max-width: 1400px;
     margin: 0 auto;
     width: 100%;
-    background: #ffffff;
-    min-height: calc(100vh - 64px);
+    min-height: calc(100vh - var(--nav-height));
     display: flex;
     flex-direction: column;
-    box-sizing: border-box;
-    position: relative;
 }
 
 /* Nutrition Header */
 .nutrition-header {
-    background: linear-gradient(to right, rgba(44, 62, 80, 0.95), rgba(52, 152, 219, 0.95));
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    color: white;
+    background: radial-gradient(circle at top right, rgba(244, 63, 94, 0.1), transparent),
+        linear-gradient(to right, #1e293b, #0f172a);
     padding: 4rem 5%;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    box-sizing: border-box;
-    width: 100%;
     position: relative;
-    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .nutrition-header h1 {
-    font-size: 3.5rem;
+    font-size: 3rem;
     margin: 0;
-    font-weight: 600;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: white;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .nutrition-header p {
-    font-size: 1.4rem;
-    margin-top: 0.5rem;
-    opacity: 0.9;
+    font-size: 1.1rem;
+    margin: 0;
+    color: #94a3b8;
+    max-width: 600px;
+    line-height: 1.6;
 }
 
 @media (max-width: 1200px) {
@@ -71,7 +62,7 @@ body {
         margin-top: 64px;
         padding-top: 0;
     }
-    
+
     .nutrition-header {
         padding: 2rem 1rem;
         margin-top: 0;
@@ -128,11 +119,11 @@ body {
         margin-top: 64px;
         padding-top: 0;
     }
-    
+
     .nutrition-container {
         border-radius: 0;
     }
-    
+
     .nutrition-header {
         padding: 1.5rem 1rem;
         border-radius: 0;
@@ -205,21 +196,25 @@ body {
 /* Quick Stats Grid */
 .nutrition-stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 3rem;
 }
 
 .stat-card {
-    background: #ffffff;
-    border-radius: 16px;
-    padding: 1.8rem;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease;
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    border-radius: var(--border-radius-xl);
+    padding: 2rem;
+    border: 1px solid var(--glass-border);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
 }
 
 .stat-card:hover {
-    transform: translateY(-5px);
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-premium);
+    background: white;
 }
 
 .stat-header {
@@ -230,48 +225,65 @@ body {
 }
 
 .stat-header i {
-    font-size: 1.4rem;
-    padding: 1rem;
-    border-radius: 12px;
-    width: 3rem;
-    height: 3rem;
+    font-size: 1.25rem;
+    width: 3.5rem;
+    height: 3.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
+    border-radius: 14px;
+    background: var(--bg-main);
 }
 
 .stat-content {
-    text-align: center;
+    text-align: left;
 }
 
 .stat-value {
-    font-size: 2.5rem;
-    font-weight: 700;
+    font-size: 2.75rem;
+    font-weight: 800;
     margin: 0;
-    line-height: 1.2;
+    color: var(--text-main);
+    letter-spacing: -0.04em;
+    line-height: 1;
 }
 
 .stat-label {
-    font-size: 0.95rem;
-    color: #636e72;
-    margin: 0.3rem 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: 0.5rem 0 0;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 500;
+    letter-spacing: 0.05em;
+    font-weight: 600;
 }
 
-/* Card-specific styling */
-.stat-card.calories { border-top: 4px solid #FF6B6B; }
-.stat-card.protein { border-top: 4px solid #4ECDC4; }
-.stat-card.carbs { border-top: 4px solid #FFB900; }
-.stat-card.fats { border-top: 4px solid #45B7D1; }
+/* Macro-specific colors */
+.stat-card.calories .stat-header i {
+    color: #f43f5e;
+    background: rgba(244, 63, 94, 0.1);
+}
+
+.stat-card.protein .stat-header i {
+    color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+}
+
+.stat-card.carbs .stat-header i {
+    color: #f59e0b;
+    background: rgba(245, 158, 11, 0.1);
+}
+
+.stat-card.fats .stat-header i {
+    color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.1);
+}
 
 /* Daily Intake Section */
 .daily-intake-section {
     background-color: #fff;
     padding: 1.5rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-bottom: 2rem;
 }
 
@@ -307,9 +319,17 @@ body {
     color: white;
 }
 
-.stat-item.protein { border-top: 3px solid #4caf50; }
-.stat-item.carbs { border-top: 3px solid #ffeb3b; }
-.stat-item.fats { border-top: 3px solid #ff9800; }
+.stat-item.protein {
+    border-top: 3px solid #4caf50;
+}
+
+.stat-item.carbs {
+    border-top: 3px solid #ffeb3b;
+}
+
+.stat-item.fats {
+    border-top: 3px solid #ff9800;
+}
 
 .calories .stat-label,
 .calories .stat-value,
@@ -337,36 +357,36 @@ body {
 
 /* Charts Section */
 .nutrition-charts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin: 2rem 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
 }
 
 .chart-section {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
 }
 
 .chart-section:hover {
-  transform: translateY(-5px);
+    transform: translateY(-5px);
 }
 
 .chart-section h2 {
-  font-size: 1.25rem;
-  margin-bottom: 1.5rem;
-  text-align: center;
-  color: #333;
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #333;
 }
 
 .chart-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
 }
 
 /* Meal Logs Section */
@@ -384,7 +404,7 @@ body {
     margin-bottom: 1rem;
     padding: 1rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .meal-logs-section li p {
@@ -430,7 +450,7 @@ body {
     padding: 20px;
     border-radius: 8px;
     margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .add-meal-form h3 {
@@ -492,7 +512,7 @@ body {
     background-color: #f8f9fa;
     border-radius: 8px 8px 0 0;
     margin-top: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .meal-logs-list {
@@ -501,7 +521,7 @@ body {
     margin: 0;
     background-color: white;
     border-radius: 0 0 8px 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .meal-log-item {
@@ -581,36 +601,36 @@ body {
 
 /* Custom Toast Styling */
 .Toastify__toast {
-  border-radius: 12px;
-  font-family: 'Poppins', sans-serif;
-  font-size: 1rem;
+    border-radius: 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
 }
 
 .Toastify__toast--success {
-  background: #4CAF50;
-  color: white;
+    background: #4CAF50;
+    color: white;
 }
 
 .Toastify__toast--error {
-  background: #f44336;
-  color: white;
+    background: #f44336;
+    color: white;
 }
 
 .Toastify__progress-bar {
-  background: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.7);
 }
 
 .Toastify__close-button {
-  color: white;
-  opacity: 0.7;
+    color: white;
+    opacity: 0.7;
 }
 
 .Toastify__close-button:hover {
-  opacity: 1;
+    opacity: 1;
 }
 
 /* SweetAlert2 Toast Customization */
-.swal2-container.swal2-top-right > .swal2-popup {
+.swal2-container.swal2-top-right>.swal2-popup {
     margin-right: 1rem !important;
 }
 
@@ -742,42 +762,42 @@ body {
 
 /* Today's Meals Section */
 .todays-meals {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .todays-meals h2 {
-  color: #2c3e50;
-  margin-bottom: 1.5rem;
-  font-size: 1.8rem;
-  font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    font-weight: 600;
 }
 
 .todays-total {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  background: #f8f9fa;
-  border-radius: 8px;
-  text-align: right;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: right;
 }
 
 .todays-total p {
-  color: #2c3e50;
-  font-weight: 600;
-  font-size: 1.1rem;
-  margin: 0;
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin: 0;
 }
 
 .no-meals {
-  text-align: center;
-  padding: 2rem;
-  color: #666;
-  background: #f8f9fa;
-  border-radius: 8px;
-  font-size: 1.1rem;
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    background: #f8f9fa;
+    border-radius: 8px;
+    font-size: 1.1rem;
 }
 
 /* Diet Recommendations Section */
@@ -785,7 +805,7 @@ body {
     background-color: #fff;
     padding: 2rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     margin-top: 2rem;
 }
 
@@ -824,7 +844,7 @@ body {
     margin-bottom: 0.5rem;
     background-color: white;
     border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -834,7 +854,7 @@ body {
 
 .recommendation-item:hover {
     transform: translateY(-2px);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .recommendation-item i {
@@ -884,81 +904,87 @@ body {
 
 /* Submit Button Styling */
 #mealForm button[type="submit"] {
-  background: linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%);
-  color: white;
-  padding: 1rem 2rem;
-  border: none;
-  border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
-  max-width: 200px;
-  margin: 1.5rem auto;
-  display: block;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(73, 205, 196, 0.3);
+    background: linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%);
+    color: white;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 200px;
+    margin: 1.5rem auto;
+    display: block;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(73, 205, 196, 0.3);
 }
 
 #mealForm button[type="submit"]:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(73, 205, 196, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(73, 205, 196, 0.4);
 }
 
 #mealForm button[type="submit"]:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 10px rgba(73, 205, 196, 0.3);
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(73, 205, 196, 0.3);
 }
 
 #mealForm button[type="submit"]::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: 0.5s;
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.2),
+            transparent);
+    transition: 0.5s;
 }
 
 #mealForm button[type="submit"]:hover::before {
-  left: 100%;
+    left: 100%;
 }
 
 /* Loading state for button */
 #mealForm button[type="submit"].loading {
-  background: #ccc;
-  cursor: not-allowed;
-  opacity: 0.7;
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.7;
 }
 
 #mealForm button[type="submit"].loading::after {
-  content: '...';
-  display: inline-block;
-  animation: ellipsis 1.5s infinite;
+    content: '...';
+    display: inline-block;
+    animation: ellipsis 1.5s infinite;
 }
 
 @keyframes ellipsis {
-  0% { content: '.'; }
-  33% { content: '..'; }
-  66% { content: '...'; }
+    0% {
+        content: '.';
+    }
+
+    33% {
+        content: '..';
+    }
+
+    66% {
+        content: '...';
+    }
 }
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-  #mealForm button[type="submit"] {
-    width: 100%;
-    max-width: none;
-    padding: 0.875rem 1.5rem;
-    font-size: 1rem;
-  }
+    #mealForm button[type="submit"] {
+        width: 100%;
+        max-width: none;
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
+    }
 }
 
 /* Loading State */
@@ -973,81 +999,81 @@ body {
 
 /* Meal Suggestions Autocomplete Styles */
 .meal-input-container {
-  position: relative;
+    position: relative;
 }
 
 .meal-suggestions {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  max-height: 250px;
-  overflow-y: auto;
-  background-color: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  margin-top: 5px;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    max-height: 250px;
+    overflow-y: auto;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    margin-top: 5px;
 }
 
 .suggestion-item {
-  padding: 10px 15px;
-  cursor: pointer;
-  border-bottom: 1px solid #f0f0f0;
-  transition: background-color 0.2s ease;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
 }
 
 .suggestion-item:last-child {
-  border-bottom: none;
+    border-bottom: none;
 }
 
 .suggestion-item:hover {
-  background-color: #f8f9fa;
+    background-color: #f8f9fa;
 }
 
 .suggestion-name {
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: #333;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #333;
 }
 
 .suggestion-details {
-  display: flex;
-  gap: 10px;
-  font-size: 0.85rem;
-  color: #666;
+    display: flex;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #666;
 }
 
 .suggestion-details span {
-  background-color: #f0f4f8;
-  padding: 2px 6px;
-  border-radius: 4px;
-  white-space: nowrap;
+    background-color: #f0f4f8;
+    padding: 2px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
 }
 
 /* Responsive styles for meal suggestions */
 @media (max-width: 768px) {
-  .meal-suggestions {
-    max-height: 200px;
-  }
-  
-  .suggestion-details {
-    flex-wrap: wrap;
-    gap: 5px;
-  }
+    .meal-suggestions {
+        max-height: 200px;
+    }
+
+    .suggestion-details {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
 }
 
 @media (max-width: 480px) {
-  .suggestion-item {
-    padding: 8px 10px;
-  }
-  
-  .suggestion-name {
-    font-size: 0.9rem;
-  }
-  
-  .suggestion-details {
-    font-size: 0.75rem;
-  }
+    .suggestion-item {
+        padding: 8px 10px;
+    }
+
+    .suggestion-name {
+        font-size: 0.9rem;
+    }
+
+    .suggestion-details {
+        font-size: 0.75rem;
+    }
 }
