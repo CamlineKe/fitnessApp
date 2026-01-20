@@ -1,258 +1,769 @@
+/* Gamification.css - Professional UI Fix */
+
 /* Page Layout */
 .page-container {
-  min-height: calc(100vh - var(--nav-height));
-  margin-top: var(--nav-height);
-  background: var(--bg-main);
+    min-height: calc(100vh - var(--nav-height));
+    margin-top: var(--nav-height);
+    background: var(--bg-main);
 }
 
 /* Container and Header */
 .gamification-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  width: 100%;
-  min-height: calc(100vh - var(--nav-height));
-  display: flex;
-  flex-direction: column;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    min-height: calc(100vh - var(--nav-height));
+    display: flex;
+    flex-direction: column;
 }
 
 .gamification-header {
-  background: radial-gradient(circle at top right, rgba(245, 158, 11, 0.15), transparent),
-    linear-gradient(to right, #1e293b, #0f172a);
-  padding: 4rem 5%;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: radial-gradient(circle at top right, rgba(245, 158, 11, 0.15), transparent),
+                radial-gradient(circle at bottom left, rgba(99, 102, 241, 0.1), transparent),
+                linear-gradient(to right, #1e293b, #0f172a);
+    padding: 4rem 5% 3rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .gamification-header h1 {
-  font-size: 3rem;
-  margin: 0;
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  color: white;
-  background: linear-gradient(to right, #fff, #94a3b8);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+    font-size: 2.75rem;
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: white;
+    background: linear-gradient(to right, #fff, #cbd5e1);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    max-width: 800px;
 }
 
 .gamification-header p {
-  font-size: 1.1rem;
-  margin: 0;
-  color: #94a3b8;
-  max-width: 600px;
-  line-height: 1.6;
+    font-size: 1.125rem;
+    margin: 0;
+    color: #94a3b8;
+    max-width: 600px;
+    line-height: 1.6;
+    opacity: 0.9;
 }
 
-/* Tabs Styling */
+/* Tabs Wrapper */
 .tabs-wrapper {
-  padding: 2rem 5%;
+    padding: 2rem 5%;
+    flex: 1;
 }
 
+/* Custom Tabs Styling - Override Bootstrap */
 .gamification-tabs {
-  margin-bottom: 3rem;
-  border-bottom: 1px solid var(--border-light);
-  display: flex;
-  gap: 2rem;
+    border: none !important;
+    margin-bottom: 2.5rem;
 }
 
-.nav-tabs .nav-link {
-  color: var(--text-muted);
-  border: none;
-  padding: 1rem 0;
-  font-weight: 600;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background: none;
-  border-bottom: 2px solid transparent;
-  cursor: pointer;
+.gamification-tabs .nav-tabs {
+    border: none !important;
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 3rem;
+    padding-bottom: 0;
+    border-bottom: 2px solid var(--border-light) !important;
 }
 
-.nav-tabs .nav-link:hover {
-  color: var(--text-main);
+.gamification-tabs .nav-link {
+    color: var(--text-muted) !important;
+    border: none !important;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 1rem 1.75rem !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    background: none !important;
+    position: relative;
+    display: flex !important;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: -2px !important;
 }
 
-.nav-tabs .nav-link.active {
-  color: var(--primary);
-  border-bottom-color: var(--primary);
+.gamification-tabs .nav-link:hover {
+    color: var(--text-main) !important;
+    background: rgba(99, 102, 241, 0.08) !important;
 }
 
-/* Tab Content */
+.gamification-tabs .nav-link.active {
+    color: var(--primary) !important;
+    background: white !important;
+    border-bottom: 4px solid var(--primary) !important;
+    font-weight: 700 !important;
+}
+
+.gamification-tabs .nav-link svg {
+    font-size: 1.25rem;
+}
+
+.gamification-tabs .tab-content {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+/* Tab Content Sections */
 .tab-content-section {
-  animation: fadeIn 0.4s ease-out;
+    animation: fadeIn 0.4s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
 }
 
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-/* Streak Card */
+/* Streak Card - Fixed to match JSX */
 .streak-card {
-  background: white;
-  border-radius: var(--border-radius-xl);
-  padding: 3rem;
-  text-align: center;
-  box-shadow: var(--shadow-premium);
-  border: 1px solid var(--border-light);
-  position: relative;
-  overflow: hidden;
-  margin-bottom: 3rem;
+    background: white;
+    border-radius: var(--border-radius-xl);
+    padding: 3rem;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .streak-card.active-streak {
-  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-  border-color: #f59e0b;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-color: #f59e0b;
+    box-shadow: 0 20px 40px rgba(245, 158, 11, 0.15);
 }
 
-.streak-card .streak-icon {
-  font-size: 2.5rem;
-  color: #f59e0b;
-  margin-bottom: 1.5rem;
+.streak-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
 }
 
-.streak-card .streak-count {
-  font-size: 4.5rem;
-  font-weight: 900;
-  color: var(--text-main);
-  margin: 0;
-  letter-spacing: -0.05em;
-  line-height: 1;
+.streak-icon {
+    font-size: 3rem;
+    color: #f59e0b;
+    margin-bottom: 1.5rem;
+    display: inline-block;
 }
 
 .streak-card h3 {
-  font-size: 1.25rem;
-  margin: 1rem 0 0;
-  color: var(--text-muted);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+    font-size: 1.25rem;
+    margin: 0 0 1rem 0;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
-/* Stats Row */
+.streak-count {
+    font-size: 4.5rem;
+    font-weight: 900;
+    color: var(--text-main);
+    margin: 0;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    margin-bottom: 1.5rem;
+}
+
+.streak-flame {
+    margin-top: 1.5rem;
+}
+
+.flame {
+    font-size: 2.5rem;
+    transition: all 0.3s ease;
+}
+
+.flame-hot {
+    animation: flameFlicker 1.5s infinite;
+}
+
+.flame.active {
+    animation: flameFlicker 0.8s infinite;
+}
+
+@keyframes flameFlicker {
+    0%, 100% {
+        opacity: 0.9;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+.streak-status {
+    color: #f59e0b;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 20px;
+    display: inline-block;
+}
+
+/* Stats Row - Fixed to match JSX */
 .stats-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 3rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
 }
 
 .stat-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  border-radius: var(--border-radius-lg);
-  padding: 2rem;
-  text-align: left;
-  border: 1px solid var(--glass-border);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-sm);
+    background: var(--bg-card);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    text-align: left;
+    border: 1px solid var(--border-light);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
 }
 
 .stat-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-premium);
-  background: white;
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
 }
 
 .stat-icon {
-  font-size: 1.5rem;
-  color: var(--primary);
-  margin-bottom: 1.5rem;
-  width: 3.5rem;
-  height: 3.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-main);
-  border-radius: 14px;
+    font-size: 1.75rem;
+    color: var(--primary);
+    width: 3.5rem;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(99, 102, 241, 0.1);
+    border-radius: 14px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover .stat-icon {
+    transform: rotate(10deg);
+    background: var(--primary);
+    color: white;
 }
 
 .stat-card h3 {
-  color: var(--text-muted);
-  font-size: 0.875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin: 0;
+    letter-spacing: 0.05em;
 }
 
 .stat-card p {
-  color: var(--text-main);
-  font-size: 2.25rem;
-  font-weight: 800;
-  margin: 0;
-  letter-spacing: -0.02em;
+    color: var(--text-main);
+    font-size: 2.25rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.02em;
+    line-height: 1;
 }
 
-/* Achievement Badges */
+/* Achievement Badges - Fixed to match JSX */
+.achievements-row {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.achievements-row h3 {
+    font-size: 1.5rem;
+    color: var(--text-main);
+    margin: 0;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.achievements-row h3 i {
+    color: var(--primary);
+    font-size: 1.3rem;
+}
+
 .achievement-badges {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
 }
 
 .achievement-badge {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  transition: all 0.3s ease;
-  border: 1px solid var(--border-light);
+    background: white;
+    padding: 1.75rem;
+    border-radius: var(--border-radius-lg);
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.achievement-badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #f59e0b;
 }
 
 .achievement-badge:hover {
-  border-color: var(--primary);
-  transform: scale(1.02);
-  box-shadow: var(--shadow-md);
+    border-color: #f59e0b;
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
 }
 
 .achievement-icon {
-  font-size: 1.75rem;
-  color: #f59e0b;
+    font-size: 2rem;
+    color: #f59e0b;
+    z-index: 1;
+}
+
+.achievement-star {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.25rem;
+    color: #f59e0b;
+    opacity: 0.5;
 }
 
 .achievement-badge span {
-  font-weight: 600;
-  color: var(--text-main);
-  font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 1.05rem;
+    z-index: 1;
 }
 
-/* Loading */
+/* Mood Tracker - Fixed to match JSX */
+.mood-tracker {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+}
+
+.mood-tracker h3 {
+    font-size: 1.5rem;
+    color: var(--text-main);
+    margin: 0 0 1.5rem 0;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-light);
+}
+
+.mood-tracker h3 i {
+    color: var(--primary);
+    font-size: 1.3rem;
+}
+
+.mood-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1rem;
+}
+
+.mood-day {
+    background: var(--bg-main);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    border: 1px solid var(--border-light);
+    transition: all 0.3s ease;
+}
+
+.mood-day:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+    border-color: var(--primary);
+}
+
+.mood-date {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.mood-emoji {
+    font-size: 2rem;
+    display: block;
+    line-height: 1;
+}
+
+/* Mood-specific colors */
+.mood-day.mood-happy {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.2);
+}
+
+.mood-day.mood-sad {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.2);
+}
+
+.mood-day.mood-anxious {
+    background: rgba(244, 63, 94, 0.1);
+    border-color: rgba(244, 63, 94, 0.2);
+}
+
+.mood-day.mood-neutral {
+    background: rgba(148, 163, 184, 0.1);
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+/* Challenges Section - Fixed to match JSX */
+.challenges-section {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 2.5rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+}
+
+.challenges-section h3 {
+    font-size: 1.5rem;
+    color: var(--text-main);
+    margin: 0 0 1.5rem 0;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-light);
+}
+
+.challenges-section h3 i {
+    color: var(--primary);
+    font-size: 1.3rem;
+}
+
+.challenges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.challenge-card {
+    background: var(--bg-main);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    border: 1px solid var(--border-light);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.challenge-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.challenge-card h4 {
+    font-size: 1.25rem;
+    color: var(--text-main);
+    margin: 0 0 0.75rem 0;
+    font-weight: 700;
+}
+
+.challenge-card p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0 0 1.5rem 0;
+}
+
+/* Progress Bar Customization */
+.challenge-card .progress {
+    height: 12px;
+    background-color: var(--border-light);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.challenge-card .progress-bar {
+    background-color: var(--primary);
+    border-radius: 6px;
+    transition: width 0.6s ease;
+}
+
+.challenge-card .progress-bar-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+    line-height: 12px;
+}
+
+.challenge-trophy {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 1.5rem;
+    color: #f59e0b;
+}
+
+/* Error and Loading States */
+.error-message {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--accent);
+    background: rgba(244, 63, 94, 0.1);
+    border-radius: var(--border-radius-lg);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 2rem auto;
+    max-width: 600px;
+}
+
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(99, 102, 241, 0.1);
-  border-top-color: var(--primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 1.5rem;
+}
+
+.loading-spinner::before {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(99, 102, 241, 0.1);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+.loading-spinner::after {
+    content: 'Loading...';
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    font-weight: 500;
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
+/* ========== RESPONSIVE DESIGN ========== */
+
+/* Tablet */
+@media (max-width: 1024px) {
+    .gamification-header {
+        padding: 3rem 5% 2rem;
+    }
+    
+    .gamification-header h1 {
+        font-size: 2.5rem;
+    }
+    
+    .tabs-wrapper {
+        padding: 1.5rem 5%;
+    }
+    
+    .streak-card {
+        padding: 2.5rem;
+    }
+    
+    .streak-count {
+        font-size: 3.5rem;
+    }
+    
+    .challenges-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+}
+
+/* Mobile */
 @media (max-width: 768px) {
-  .gamification-header h1 {
-    font-size: 2.25rem;
-  }
+    .page-container {
+        margin-top: calc(var(--nav-height) + 1rem);
+    }
+    
+    .gamification-header {
+        padding: 2rem 1rem 1.5rem;
+        text-align: center;
+    }
+    
+    .gamification-header h1 {
+        font-size: 2rem;
+        margin: 0 auto;
+    }
+    
+    .gamification-header p {
+        font-size: 1rem;
+        margin: 0.5rem auto 0;
+    }
+    
+    .tabs-wrapper {
+        padding: 1rem;
+    }
+    
+    .gamification-tabs .nav-tabs {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.25rem;
+        margin-bottom: 2rem;
+    }
+    
+    .gamification-tabs .nav-link {
+        padding: 0.75rem 1.25rem !important;
+        font-size: 0.9rem !important;
+        flex: 1;
+        min-width: 120px;
+        justify-content: center;
+    }
+    
+    .gamification-tabs .nav-link svg {
+        font-size: 1.1rem;
+    }
+    
+    .tab-content-section {
+        gap: 2rem;
+    }
+    
+    .streak-card {
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .streak-count {
+        font-size: 3rem;
+    }
+    
+    .streak-icon {
+        font-size: 2.5rem;
+    }
+    
+    .stats-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .achievement-badges,
+    .challenges-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .mood-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .mood-day {
+        padding: 1.25rem;
+    }
+    
+    .mood-emoji {
+        font-size: 1.75rem;
+    }
+    
+    .streak-card,
+    .stat-card,
+    .achievement-badge,
+    .challenge-card,
+    .mood-tracker,
+    .challenges-section {
+        padding: 1.75rem;
+    }
+}
 
-  .streak-card .streak-count {
-    font-size: 3.5rem;
-  }
+/* Small Mobile */
+@media (max-width: 480px) {
+    .gamification-header h1 {
+        font-size: 1.75rem;
+    }
+    
+    .streak-card h3,
+    .stat-card h3,
+    .achievements-row h3,
+    .mood-tracker h3,
+    .challenges-section h3 {
+        font-size: 1.25rem;
+    }
+    
+    .stat-card p {
+        font-size: 2rem;
+    }
+    
+    .gamification-tabs .nav-link {
+        min-width: 100px;
+        padding: 0.625rem 1rem !important;
+        font-size: 0.85rem !important;
+    }
+    
+    .gamification-tabs .nav-link svg {
+        font-size: 1rem;
+    }
+}
 
-  .tabs-wrapper {
-    padding: 1.5rem;
-  }
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+    .tab-content-section,
+    .streak-card,
+    .stat-card,
+    .achievement-badge,
+    .challenge-card,
+    .mood-day,
+    .gamification-tabs .nav-link,
+    .flame {
+        animation: none;
+        transition: none;
+    }
+    
+    .streak-card:hover,
+    .stat-card:hover,
+    .achievement-badge:hover,
+    .challenge-card:hover,
+    .mood-day:hover {
+        transform: none;
+    }
+}
+
+/* Focus States for Accessibility */
+.gamification-tabs .nav-link:focus-visible,
+.streak-card:focus-visible,
+.stat-card:focus-visible,
+.achievement-badge:focus-visible,
+.challenge-card:focus-visible,
+.mood-day:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
 }
