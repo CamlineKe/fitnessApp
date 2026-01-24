@@ -1,3 +1,6 @@
+@import url('@fortawesome/fontawesome-free/css/all.min.css');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 :root {
   /* Modern Color Palette */
   --primary: #6366f1;
@@ -23,9 +26,6 @@
   --border-radius-lg: 16px;
   --border-radius-xl: 24px;
 }
-
-@import url('@fortawesome/fontawesome-free/css/all.min.css');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 * {
   box-sizing: border-box;
