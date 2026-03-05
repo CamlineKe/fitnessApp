@@ -8,7 +8,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: MONGO_URI
-        value: mongodb+srv://camlinemoses01:Camline%402070@cluster0.btydoee.mongodb.net/fitnessApp?retryWrites=true&w=majority
+        fromEnv: MONGO_URI
       - key: PORT
         value: "5000"
       - key: JWT_SECRET
@@ -26,4 +26,4 @@ services:
       - key: FITBIT_REDIRECT_URI
         sync: false
     healthCheckPath: /api/health
-    autoDeploy: true 
+    autoDeploy: true
