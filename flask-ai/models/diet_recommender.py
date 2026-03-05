@@ -2,9 +2,40 @@ import numpy as np
 from datetime import datetime
 import os
 import logging
+import joblib
+import pandas as pd
 
 # Create a logger
 logger = logging.getLogger(__name__)
+
+# Get current directory and model path
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, 'diet_model.pkl')
+
+# Load model at module level
+_model_data = None
+_model = None
+_feature_names = None
+
+def load_model():
+    """Load the trained diet model"""
+    global _model_data, _model, _feature_names
+    try:
+        if os.path.exists(MODEL_PATH):
+            _model_data = joblib.load(MODEL_PATH)
+            _model = _model_data["pipeline"]
+            _feature_names = _model_data["feature_names"]
+            logger.info(f"✅ Diet model loaded from {MODEL_PATH}")
+            return True
+        else:
+            logger.warning(f"Diet model not found at {MODEL_PATH}, using rule-based fallback")
+            return False
+    except Exception as e:
+        logger.error(f"Error loading diet model: {e}")
+        return False
+
+# Try to load model on import
+load_model()
 
 def calculate_age(date_of_birth):
     """Calculate age from date of birth"""
@@ -31,9 +62,37 @@ def calculate_age(date_of_birth):
         logger.error(f"Error calculating age: {str(e)}")
         return None
 
+def get_ml_recommendation(calories, protein, carbs, fats):
+    """Get recommendation from ML model"""
+    try:
+        if _model is None:
+            return None
+        
+        # Create feature vector
+        features = pd.DataFrame([[calories, protein, carbs, fats]], 
+                                columns=['calories', 'protein', 'carbohydrates', 'fats'])
+        
+        # Ensure correct feature order
+        features = features[_feature_names]
+        
+        # Get prediction
+        prediction = _model.predict(features)[0]
+        probabilities = _model.predict_proba(features)[0]
+        
+        logger.info(f"ML prediction: {prediction}, probabilities: {probabilities}")
+        return {
+            'category': prediction,
+            'confidence': float(max(probabilities)),
+            'all_probabilities': dict(zip(_model.classes_, probabilities))
+        }
+    except Exception as e:
+        logger.error(f"Error getting ML recommendation: {e}")
+        return None
+
 def get_diet_recommendations(data):
     """
     Generate personalized diet recommendations based on available user data and nutrition logs.
+    Uses ML model if available, falls back to rule-based logic.
     """
     try:
         user_data = data.get('user_data', {})
@@ -42,16 +101,44 @@ def get_diet_recommendations(data):
 
         # Get user profile data
         date_of_birth = user_data.get('dateOfBirth')
-        logger.info(f"Retrieved date of birth: {date_of_birth}")  # Log the date of birth
+        logger.info(f"Retrieved date of birth: {date_of_birth}")
         gender = user_data.get('gender', 'other')
         age = calculate_age(date_of_birth)
-        logger.info(f"Calculated age: {age}")  # Log the calculated age
+        logger.info(f"Calculated age: {age}")
 
         # Get current intake
         current_calories = daily_intake.get('calories', 0)
         current_protein = daily_intake.get('macronutrients', {}).get('protein', 0)
         current_carbs = daily_intake.get('macronutrients', {}).get('carbohydrates', 0)
         current_fats = daily_intake.get('macronutrients', {}).get('fats', 0)
+
+        # Try to get ML-based recommendation
+        ml_result = get_ml_recommendation(current_calories, current_protein, current_carbs, current_fats)
+        
+        recommendations = []
+        meal_pattern = "Regular"
+
+        # Profile completeness check
+        if not age:
+            recommendations.append("Complete your date of birth for more personalized nutrition recommendations")
+        if gender == 'other':
+            recommendations.append("Specify your gender for tailored nutritional advice")
+
+        # Add ML-based recommendation if available
+        if ml_result:
+            recommendations.append(f"📊 ML Analysis: {ml_result['category']}")
+            if ml_result['confidence'] > 0.7:
+                recommendations.append(f"High confidence recommendation ({(ml_result['confidence']*100):.1f}%)")
+            
+            # Add specific advice based on ML category
+            if 'High Protein' in ml_result['category']:
+                recommendations.append("Your diet is protein-rich - ensure you're getting enough fiber")
+            elif 'High Carb' in ml_result['category']:
+                recommendations.append("Focus on complex carbohydrates for sustained energy")
+            elif 'Increase Protein' in ml_result['category']:
+                recommendations.append("Consider adding more lean protein to your meals")
+            elif 'Balanced' in ml_result['category']:
+                recommendations.append("Great job maintaining balanced nutrition!")
 
         # Analyze meal timing patterns
         meal_times = []
@@ -63,41 +150,34 @@ def get_diet_recommendations(data):
                 except (ValueError, AttributeError):
                     continue
 
-        recommendations = []
-        meal_pattern = "Regular"
-
-        # Profile completeness check
-        if not age:
-            recommendations.append("Complete your date of birth for more personalized nutrition recommendations")
-        if gender == 'other':
-            recommendations.append("Specify your gender for tailored nutritional advice")
-
         # Gender and age-specific base calorie and nutrient recommendations
         base_calories = None
         if age and gender != 'other':
             if gender == 'female':
                 base_calories = 2000 if age < 50 else 1800
-                recommendations.extend([
-                    "Female-specific nutrition tips:",
-                    "- Ensure adequate iron intake, especially if menstruating",
-                    "- Include calcium-rich foods for bone health",
-                    "- Consider folate-rich foods for reproductive health"
-                ])
+                if not ml_result:  # Only add these if no ML result
+                    recommendations.extend([
+                        "Female-specific nutrition tips:",
+                        "- Ensure adequate iron intake, especially if menstruating",
+                        "- Include calcium-rich foods for bone health",
+                        "- Consider folate-rich foods for reproductive health"
+                    ])
             elif gender == 'male':
                 base_calories = 2500 if age < 50 else 2200
-                recommendations.extend([
-                    "Male-specific nutrition tips:",
-                    "- Focus on lean proteins for muscle maintenance",
-                    "- Include zinc-rich foods for hormone balance",
-                    "- Consider heart-healthy fats"
-                ])
+                if not ml_result:
+                    recommendations.extend([
+                        "Male-specific nutrition tips:",
+                        "- Focus on lean proteins for muscle maintenance",
+                        "- Include zinc-rich foods for hormone balance",
+                        "- Consider heart-healthy fats"
+                    ])
 
         # Analyze meal spacing
         if meal_times:
             meal_times.sort()
             time_diffs = []
             for i in range(1, len(meal_times)):
-                diff = (meal_times[i] - meal_times[i-1]).total_seconds() / 3600  # Convert to hours
+                diff = (meal_times[i] - meal_times[i-1]).total_seconds() / 3600
                 time_diffs.append(diff)
 
             if time_diffs:
@@ -115,19 +195,19 @@ def get_diet_recommendations(data):
                     recommendations.append("Consider adding healthy snacks between meals")
                     meal_pattern = "Infrequent"
 
-        # Basic nutrient balance recommendations
-        if current_calories > 0:
+        # Basic nutrient balance recommendations (only if no ML result)
+        if current_calories > 0 and not ml_result:
             protein_ratio = (current_protein * 4 / current_calories) if current_calories > 0 else 0
             carbs_ratio = (current_carbs * 4 / current_calories) if current_calories > 0 else 0
             fats_ratio = (current_fats * 9 / current_calories) if current_calories > 0 else 0
 
             # Adjust protein recommendations based on gender
             if gender == 'male':
-                protein_min = 0.25  # 25% for males
-                protein_max = 0.45  # 45% for males
+                protein_min = 0.25
+                protein_max = 0.45
             else:
-                protein_min = 0.20  # 20% for females and others
-                protein_max = 0.40  # 40% for females and others
+                protein_min = 0.20
+                protein_max = 0.40
 
             if protein_ratio < protein_min:
                 recommendations.append("Try to include more protein-rich foods like lean meats, fish, eggs, or legumes")
@@ -144,7 +224,7 @@ def get_diet_recommendations(data):
             elif fats_ratio > 0.35:
                 recommendations.append("Consider reducing fat intake, especially from processed foods")
 
-        # Age-specific recommendations
+        # Age-specific recommendations (keep these regardless)
         if age is not None:
             if age < 25:
                 recommendations.extend([
@@ -168,6 +248,14 @@ def get_diet_recommendations(data):
                     "- Consider reducing sodium intake"
                 ])
 
+        # Calculate ratios for analysis
+        if current_calories > 0:
+            protein_ratio = (current_protein * 4 / current_calories)
+            carbs_ratio = (current_carbs * 4 / current_calories)
+            fats_ratio = (current_fats * 9 / current_calories)
+        else:
+            protein_ratio = carbs_ratio = fats_ratio = 0
+
         return {
             'recommendations': recommendations,
             'analysis': {
@@ -189,7 +277,9 @@ def get_diet_recommendations(data):
                 'profile_data': {
                     'age': age,
                     'gender': gender
-                }
+                },
+                'ml_used': ml_result is not None,
+                'ml_prediction': ml_result
             },
             'profile_complete': bool(age and gender != 'other')
         }
@@ -206,6 +296,7 @@ def get_diet_recommendations(data):
             ],
             'analysis': {
                 'error': str(e),
-                'profile_complete': False
+                'profile_complete': False,
+                'ml_used': False
             }
         }

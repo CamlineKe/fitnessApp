@@ -14,6 +14,31 @@ logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, 'stress_model.pkl')
 
+# Load model at module level
+_model_data = None
+_model = None
+_feature_names = None
+
+def load_model():
+    """Load the trained stress model"""
+    global _model_data, _model, _feature_names
+    try:
+        if os.path.exists(MODEL_PATH):
+            _model_data = joblib.load(MODEL_PATH)
+            _model = _model_data["pipeline"]
+            _feature_names = _model_data["feature_names"]
+            logger.info(f"✅ Stress model loaded from {MODEL_PATH}")
+            return True
+        else:
+            logger.warning(f"Stress model not found at {MODEL_PATH}, using rule-based fallback")
+            return False
+    except Exception as e:
+        logger.error(f"Error loading stress model: {e}")
+        return False
+
+# Try to load model on import
+load_model()
+
 def calculate_age(date_of_birth):
     """Calculate age from date of birth"""
     if not date_of_birth:
@@ -30,9 +55,108 @@ def calculate_age(date_of_birth):
         logger.error(f"Error calculating age: {e}")
         return None
 
+def get_ml_stress_category(mood, stress_level, sleep_quality):
+    """Get stress category prediction from ML model"""
+    try:
+        if _model is None:
+            return None
+        
+        # One-hot encode mood
+        mood_dummies = {}
+        possible_moods = ['happy', 'sad', 'anxious', 'neutral']
+        
+        for m in possible_moods:
+            mood_dummies[f'mood_{m}'] = 1 if mood == m else 0
+        
+        # Create feature vector
+        features = pd.DataFrame([{
+            **mood_dummies,
+            'stress_level': stress_level,
+            'sleep_quality': sleep_quality
+        }])
+        
+        # Ensure correct feature order
+        features = features[_feature_names]
+        
+        # Get prediction
+        prediction = _model.predict(features)[0]
+        probabilities = _model.predict_proba(features)[0]
+        
+        logger.info(f"ML prediction: {prediction}, probabilities: {probabilities}")
+        return {
+            'category': prediction,
+            'confidence': float(max(probabilities)),
+            'all_probabilities': dict(zip(_model.classes_, probabilities))
+        }
+    except Exception as e:
+        logger.error(f"Error getting ML stress category: {e}")
+        return None
+
+def analyze_stress_pattern(logs):
+    """Analyze stress level patterns from logs"""
+    try:
+        if not logs:
+            return {'trend': 'neutral'}
+        
+        stress_levels = [log.get('stressLevel', 5) for log in logs]
+        if len(stress_levels) >= 3:
+            recent_trend = np.mean(stress_levels[-3:]) - np.mean(stress_levels[:-3])
+            if recent_trend > 1:
+                return {'trend': 'increasing'}
+            elif recent_trend < -1:
+                return {'trend': 'decreasing'}
+        return {'trend': 'stable'}
+    except Exception as e:
+        logger.error("Error analyzing stress pattern: %s", str(e))
+        return {'trend': 'neutral'}
+
+def analyze_sleep_pattern(logs):
+    """Analyze sleep quality patterns from logs"""
+    try:
+        if not logs:
+            return {'trend': 'neutral'}
+        
+        sleep_quality = [log.get('sleepQuality', 5) for log in logs]
+        if len(sleep_quality) >= 3:
+            recent_trend = np.mean(sleep_quality[-3:]) - np.mean(sleep_quality[:-3])
+            if recent_trend > 1:
+                return {'trend': 'improving'}
+            elif recent_trend < -1:
+                return {'trend': 'declining'}
+        return {'trend': 'stable'}
+    except Exception as e:
+        logger.error("Error analyzing sleep pattern: %s", str(e))
+        return {'trend': 'neutral'}
+
+def analyze_mood_pattern(logs):
+    """Analyze mood patterns from logs"""
+    try:
+        if not logs:
+            return {'trend': 'neutral'}
+        
+        mood_mapping = {
+            'happy': 3,
+            'neutral': 2,
+            'anxious': 1,
+            'sad': 0
+        }
+        
+        moods = [mood_mapping.get(log.get('mood', 'neutral'), 2) for log in logs]
+        if len(moods) >= 3:
+            recent_trend = np.mean(moods[-3:]) - np.mean(moods[:-3])
+            if recent_trend > 0.5:
+                return {'trend': 'improving'}
+            elif recent_trend < -0.5:
+                return {'trend': 'declining'}
+        return {'trend': 'stable'}
+    except Exception as e:
+        logger.error("Error analyzing mood pattern: %s", str(e))
+        return {'trend': 'neutral'}
+
 def analyze_stress(data):
     """
     Analyze stress and provide personalized recommendations based on user data.
+    Uses ML model if available, falls back to rule-based logic.
     """
     try:
         logger.info("Starting stress analysis with data: %s", data)
@@ -75,6 +199,9 @@ def analyze_stress(data):
         logger.info("Processed user metrics - Age: %s, Gender: %s, Mood: %s, Stress: %s, Sleep: %s", 
                    age, gender, mood, stress_level, sleep_quality)
 
+        # Try to get ML-based stress category
+        ml_result = get_ml_stress_category(mood, stress_level, sleep_quality)
+
         # Analyze patterns
         stress_pattern = analyze_stress_pattern(daily_logs)
         sleep_pattern = analyze_sleep_pattern(daily_logs)
@@ -85,6 +212,20 @@ def analyze_stress(data):
 
         # Generate recommendations based on current state and patterns
         recommendations = []
+
+        # Add ML-based insight if available
+        if ml_result:
+            recommendations.append(f"📊 ML Analysis: Stress level appears {ml_result['category'].lower()}")
+            if ml_result['confidence'] > 0.7:
+                recommendations.append(f"High confidence assessment ({(ml_result['confidence']*100):.1f}%)")
+            
+            # Add specific advice based on ML category
+            if ml_result['category'] == 'High':
+                recommendations.append("Your stress indicators suggest high stress - prioritize self-care today")
+            elif ml_result['category'] == 'Moderate':
+                recommendations.append("Moderate stress levels detected - maintain your coping strategies")
+            elif ml_result['category'] == 'Low':
+                recommendations.append("Low stress levels - great job managing your wellbeing!")
 
         # Current state analysis with gender and age considerations
         if stress_level >= 7:
@@ -192,7 +333,9 @@ def analyze_stress(data):
                     'stress_trend': stress_pattern['trend'],
                     'sleep_trend': sleep_pattern['trend'],
                     'mood_trend': mood_pattern['trend']
-                }
+                },
+                'ml_used': ml_result is not None,
+                'ml_prediction': ml_result
             },
             'recommendations': recommendations,
             'profile_complete': bool(age and gender != 'other')
@@ -213,7 +356,9 @@ def analyze_stress(data):
                     'stress_trend': 'neutral',
                     'sleep_trend': 'neutral',
                     'mood_trend': 'neutral'
-                }
+                },
+                'ml_used': False,
+                'error': str(e)
             },
             'recommendations': [
                 "Unable to generate personalized recommendations.",
@@ -225,64 +370,3 @@ def analyze_stress(data):
             ],
             'profile_complete': False
         }
-
-def analyze_stress_pattern(logs):
-    """Analyze stress level patterns from logs"""
-    try:
-        if not logs:
-            return {'trend': 'neutral'}
-        
-        stress_levels = [log.get('stressLevel', 5) for log in logs]
-        if len(stress_levels) >= 3:
-            recent_trend = np.mean(stress_levels[-3:]) - np.mean(stress_levels[:-3])
-            if recent_trend > 1:
-                return {'trend': 'increasing'}
-            elif recent_trend < -1:
-                return {'trend': 'decreasing'}
-        return {'trend': 'stable'}
-    except Exception as e:
-        logger.error("Error analyzing stress pattern: %s", str(e))
-        return {'trend': 'neutral'}
-
-def analyze_sleep_pattern(logs):
-    """Analyze sleep quality patterns from logs"""
-    try:
-        if not logs:
-            return {'trend': 'neutral'}
-        
-        sleep_quality = [log.get('sleepQuality', 5) for log in logs]
-        if len(sleep_quality) >= 3:
-            recent_trend = np.mean(sleep_quality[-3:]) - np.mean(sleep_quality[:-3])
-            if recent_trend > 1:
-                return {'trend': 'improving'}
-            elif recent_trend < -1:
-                return {'trend': 'declining'}
-        return {'trend': 'stable'}
-    except Exception as e:
-        logger.error("Error analyzing sleep pattern: %s", str(e))
-        return {'trend': 'neutral'}
-
-def analyze_mood_pattern(logs):
-    """Analyze mood patterns from logs"""
-    try:
-        if not logs:
-            return {'trend': 'neutral'}
-        
-        mood_mapping = {
-            'happy': 3,
-            'neutral': 2,
-            'anxious': 1,
-            'sad': 0
-        }
-        
-        moods = [mood_mapping.get(log.get('mood', 'neutral'), 2) for log in logs]
-        if len(moods) >= 3:
-            recent_trend = np.mean(moods[-3:]) - np.mean(moods[:-3])
-            if recent_trend > 0.5:
-                return {'trend': 'improving'}
-            elif recent_trend < -0.5:
-                return {'trend': 'declining'}
-        return {'trend': 'stable'}
-    except Exception as e:
-        logger.error("Error analyzing mood pattern: %s", str(e))
-        return {'trend': 'neutral'}

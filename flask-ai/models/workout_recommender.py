@@ -13,6 +13,31 @@ logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, 'workout_model.pkl')
 
+# Load model at module level
+_model_data = None
+_model = None
+_feature_names = None
+
+def load_model():
+    """Load the trained workout model"""
+    global _model_data, _model, _feature_names
+    try:
+        if os.path.exists(MODEL_PATH):
+            _model_data = joblib.load(MODEL_PATH)
+            _model = _model_data["pipeline"]
+            _feature_names = _model_data["feature_names"]
+            logger.info(f"✅ Workout model loaded from {MODEL_PATH}")
+            return True
+        else:
+            logger.warning(f"Workout model not found at {MODEL_PATH}, using rule-based fallback")
+            return False
+    except Exception as e:
+        logger.error(f"Error loading workout model: {e}")
+        return False
+
+# Try to load model on import
+load_model()
+
 def calculate_age(date_of_birth):
     """Calculate age from date of birth"""
     if not date_of_birth:
@@ -53,37 +78,48 @@ def get_heart_rate_zones(max_hr):
         'vo2max': (max_hr * 0.9, max_hr * 1.0)
     }
 
-def get_workout_intensity(age, fitness_level):
-    """Calculate safe workout intensity based on age and fitness level"""
-    base_intensity = min(85, 100 - age * 0.5)  # Decrease max intensity with age
-    fitness_multiplier = {1: 0.6, 2: 0.7, 3: 0.8, 4: 0.9, 5: 1.0}
-    return base_intensity * fitness_multiplier[fitness_level]
-
-def get_basic_workout_recommendations(data):
-    """Provide basic rule-based workout recommendations when ML model is unavailable"""
-    activity_type = data.get('activityType', '')
-    duration = data.get('duration', 0)
-    
-    basic_recommendations = [
-        "Maintain consistent workout schedule",
-        "Stay hydrated during exercises",
-        f"Good choice with {activity_type} - try to gradually increase duration",
-    ]
-    
-    return {
-        'recommendations': basic_recommendations,
-        'analysis': {
-            'activity_type': activity_type,
+def get_ml_recommendation(activity_type, duration, calories_burned, heart_rate):
+    """Get workout category recommendation from ML model"""
+    try:
+        if _model is None:
+            return None
+        
+        # One-hot encode activity type
+        activity_dummies = {}
+        possible_activities = ['Running', 'Walking', 'Cycling', 'Swimming', 'Weight Training', 'Yoga', 'HIIT']
+        
+        for act in possible_activities:
+            activity_dummies[f'activity_{act}'] = 1 if activity_type == act else 0
+        
+        # Create feature vector
+        features = pd.DataFrame([{
+            **activity_dummies,
             'duration': duration,
-            'calories_burned': data.get('caloriesBurned', 0),
-            'heart_rate': data.get('heartRate', 0),
-            'category': 'Basic'
+            'calories_burned': calories_burned,
+            'heart_rate': heart_rate
+        }])
+        
+        # Ensure correct feature order
+        features = features[_feature_names]
+        
+        # Get prediction
+        prediction = _model.predict(features)[0]
+        probabilities = _model.predict_proba(features)[0]
+        
+        logger.info(f"ML prediction: {prediction}, probabilities: {probabilities}")
+        return {
+            'category': prediction,
+            'confidence': float(max(probabilities)),
+            'all_probabilities': dict(zip(_model.classes_, probabilities))
         }
-    }
+    except Exception as e:
+        logger.error(f"Error getting ML recommendation: {e}")
+        return None
 
 def get_workout_recommendations(data):
     """
     Generate personalized workout recommendations based on user data and workout history.
+    Uses ML model if available, falls back to rule-based logic.
     """
     try:
         user_data = data.get('user_data', {})
@@ -109,6 +145,9 @@ def get_workout_recommendations(data):
         heart_rate = current_stats.get('heartRate', 0)
         calories_burned = current_stats.get('caloriesBurned', 0)
 
+        # Try to get ML-based recommendation
+        ml_result = get_ml_recommendation(activity_type, duration, calories_burned, heart_rate)
+
         # Analyze workout patterns
         weekly_volume = sum(w.get('duration', 0) for w in workout_history[-7:])
         workout_frequency = len(workout_history[-7:])
@@ -133,7 +172,29 @@ def get_workout_recommendations(data):
             }
         }
 
-        # Profile completeness check with detailed logging
+        # Add ML result to analysis if available
+        if ml_result:
+            analysis['ml_prediction'] = ml_result
+            analysis['ml_used'] = True
+            
+            # Add ML-based recommendation
+            recommendations.append(f"📊 ML Analysis: {ml_result['category']}")
+            if ml_result['confidence'] > 0.7:
+                recommendations.append(f"High confidence recommendation ({(ml_result['confidence']*100):.1f}%)")
+            
+            # Add specific advice based on ML category
+            if 'Recovery' in ml_result['category']:
+                recommendations.append("Focus on light activity and proper rest today")
+            elif 'Maintain' in ml_result['category']:
+                recommendations.append("Continue with your current workout routine")
+            elif 'Increase Duration' in ml_result['category']:
+                recommendations.append("Try extending your workout by 5-10 minutes")
+            elif 'Increase Intensity' in ml_result['category']:
+                recommendations.append("Consider increasing the intensity of your workouts")
+        else:
+            analysis['ml_used'] = False
+
+        # Profile completeness check
         is_profile_complete = bool(age and gender != 'other')
         logger.info(f"Profile completeness check - Age: {age}, Gender: {gender}, Complete: {is_profile_complete}")
 
@@ -169,17 +230,18 @@ def get_workout_recommendations(data):
             intensity = intensity.replace('high', 'moderate-high')
             base_duration += 5  # Slightly longer duration
         
-        # Frequency recommendations
-        if workout_frequency < recommended_frequency:
-            recommendations.append(f"Try to increase workout frequency to {recommended_frequency} times per week")
-        elif workout_frequency > recommended_frequency + 2:
-            recommendations.append("Consider adding more rest days to prevent overtraining")
+        # Frequency recommendations (only if no ML result or ML result has low confidence)
+        if not ml_result or ml_result['confidence'] < 0.6:
+            if workout_frequency < recommended_frequency:
+                recommendations.append(f"Try to increase workout frequency to {recommended_frequency} times per week")
+            elif workout_frequency > recommended_frequency + 2:
+                recommendations.append("Consider adding more rest days to prevent overtraining")
 
-        # Duration recommendations
-        if duration < base_duration:
-            recommendations.append(f"Gradually increase workout duration to {base_duration} minutes")
+            # Duration recommendations
+            if duration < base_duration:
+                recommendations.append(f"Gradually increase workout duration to {base_duration} minutes")
         
-        # Heart rate zone recommendations
+        # Heart rate zone recommendations (always include if heart rate is tracked)
         if heart_rate > 0:  # Only if heart rate is tracked
             for zone, (lower, upper) in hr_zones.items():
                 if lower <= heart_rate <= upper:
@@ -197,7 +259,7 @@ def get_workout_recommendations(data):
             if current_zone in zone_recommendations:
                 recommendations.append(zone_recommendations[current_zone])
 
-        # Age-specific recommendations
+        # Age-specific recommendations (keep these regardless)
         if age > 50:
             recommendations.extend([
                 "For your age group:",
@@ -276,7 +338,7 @@ def get_workout_recommendations(data):
     except Exception as e:
         logger.error(f"Workout recommendation error: {e}")
         # Only return generic recommendations if profile is incomplete
-        if not is_profile_complete:
+        if 'is_profile_complete' in locals() and not is_profile_complete:
             return {
                 'recommendations': [
                     "Please complete your profile for personalized recommendations.",
@@ -293,7 +355,7 @@ def get_workout_recommendations(data):
             }
         # If profile is complete but there's an error, return what we have
         return {
-            'recommendations': recommendations,
-            'analysis': analysis,
+            'recommendations': recommendations if 'recommendations' in locals() else [],
+            'analysis': analysis if 'analysis' in locals() else {'error': str(e)},
             'profile_complete': True
         }
