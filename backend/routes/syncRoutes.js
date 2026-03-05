@@ -1,6 +1,9 @@
 import express from 'express';
+import { body } from 'express-validator'; // Add this import
 import { syncData, getDeviceStatus, getHealthData, getCalories, getDeviceAuthUrl, connectDevice, disconnectDevice, testDeviceConnection } from '../controllers/syncController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
+import { validate } from '../middlewares/validation.js';
+import { deviceValidation } from '../middlewares/validation.js';
 import User from '../models/User.js';
 import GoogleFitService from '../services/googleFitService.js';
 import FitbitService from '../services/fitbitService.js';
@@ -41,13 +44,31 @@ router.get('/calories', authMiddleware, getCalories);
 // Get health data (calories and heart rate)
 router.get('/health-data', authMiddleware, getHealthData);
 
-// Device specific routes
-router.get('/:device/auth-url', authMiddleware, getDeviceAuthUrl);
-router.post('/:device/connect', authMiddleware, connectDevice);
-router.post('/:device/disconnect', authMiddleware, disconnectDevice);
+// Device specific routes with validation
+router.get('/:device/auth-url', 
+  authMiddleware, 
+  validate(deviceValidation.disconnect), // Reusing disconnect validation for device param
+  getDeviceAuthUrl
+);
 
-// Test device connection
-router.get('/:device/test', authMiddleware, testDeviceConnection);
+router.post('/:device/connect', 
+  authMiddleware, 
+  validate(deviceValidation.connect), 
+  connectDevice
+);
+
+router.post('/:device/disconnect', 
+  authMiddleware, 
+  validate(deviceValidation.disconnect), 
+  disconnectDevice
+);
+
+// Test device connection with validation
+router.get('/:device/test', 
+  authMiddleware, 
+  validate(deviceValidation.test), 
+  testDeviceConnection
+);
 
 // Google Fit Routes
 router.get('/google-fit/auth-url', authMiddleware, async (req, res) => {
@@ -60,15 +81,21 @@ router.get('/google-fit/auth-url', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/google-fit/connect', authMiddleware, async (req, res) => {
-  try {
-    const result = await GoogleFitService.connect(req.user._id, req.body.code);
-    res.json(result);
-  } catch (error) {
-    Logger.error('Error connecting Google Fit:', error);
-    res.status(500).json({ message: error.message });
+router.post('/google-fit/connect', 
+  authMiddleware, 
+  validate([
+    body('code').notEmpty().withMessage('Authorization code is required')
+  ]), 
+  async (req, res) => {
+    try {
+      const result = await GoogleFitService.connect(req.user._id, req.body.code);
+      res.json(result);
+    } catch (error) {
+      Logger.error('Error connecting Google Fit:', error);
+      res.status(500).json({ message: error.message });
+    }
   }
-});
+);
 
 router.post('/google-fit/disconnect', authMiddleware, async (req, res) => {
   try {
@@ -101,15 +128,21 @@ router.get('/fitbit/auth-url', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/fitbit/connect', authMiddleware, async (req, res) => {
-  try {
-    const result = await FitbitService.connect(req.user._id, req.body.code);
-    res.json(result);
-  } catch (error) {
-    Logger.error('Error connecting Fitbit:', error);
-    res.status(500).json({ message: error.message });
+router.post('/fitbit/connect', 
+  authMiddleware, 
+  validate([
+    body('code').notEmpty().withMessage('Authorization code is required')
+  ]), 
+  async (req, res) => {
+    try {
+      const result = await FitbitService.connect(req.user._id, req.body.code);
+      res.json(result);
+    } catch (error) {
+      Logger.error('Error connecting Fitbit:', error);
+      res.status(500).json({ message: error.message });
+    }
   }
-});
+);
 
 router.post('/fitbit/disconnect', authMiddleware, async (req, res) => {
   try {

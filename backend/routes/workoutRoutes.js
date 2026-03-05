@@ -1,13 +1,15 @@
 import express from "express";
 import {
   createWorkoutLog,
-  getWorkoutLogs, // ✅ Fetch all workouts for the authenticated user
-  getWorkoutLog, // ✅ Fetch a single workout log by ID
-  updateWorkoutLog, // ✅ Update a workout log
-  deleteWorkoutLog, // ✅ Delete a workout log
-  getTodayWorkout, // ✅ Fetch today's workout
+  getWorkoutLogs,
+  getWorkoutLog,
+  updateWorkoutLog,
+  deleteWorkoutLog,
+  getTodayWorkout,
 } from "../controllers/workoutController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
+import { validate } from "../middlewares/validation.js";
+import { workoutValidation, idValidation } from "../middlewares/validation.js";
 
 const router = express.Router();
 
@@ -20,16 +22,28 @@ router.get("/today", getTodayWorkout);
 // ✅ Get all workout logs for the authenticated user
 router.get("/", getWorkoutLogs);
 
-// ✅ Create a new workout log
-router.post("/", createWorkoutLog);
+// ✅ Create a new workout log with validation
+router.post("/", 
+  validate(workoutValidation.create), 
+  createWorkoutLog
+);
 
-// ✅ Get a specific workout log by ID (Ensure user owns the log)
-router.get("/:id", getWorkoutLog);
+// ✅ Get a specific workout log by ID with ID validation
+router.get("/:id", 
+  validate(idValidation), 
+  getWorkoutLog
+);
 
-// ✅ Update a specific workout log by ID (Ensure user owns the log)
-router.put("/:id", updateWorkoutLog);
+// ✅ Update a specific workout log by ID with validation
+router.put("/:id", 
+  validate([...idValidation, ...workoutValidation.update]), 
+  updateWorkoutLog
+);
 
-// ✅ Delete a specific workout log by ID (Ensure user owns the log)
-router.delete("/:id", deleteWorkoutLog);
+// ✅ Delete a specific workout log by ID with ID validation
+router.delete("/:id", 
+  validate(idValidation), 
+  deleteWorkoutLog
+);
 
 export default router;

@@ -7,6 +7,8 @@ import {
   deleteMentalHealthLog
 } from '../controllers/mentalHealthController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
+import { validate } from '../middlewares/validation.js';
+import { mentalHealthValidation, idValidation } from '../middlewares/validation.js';
 import Logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -21,11 +23,31 @@ router.use(authMiddleware, (req, res, next) => {
   next();
 });
 
-// ✅ Ensure userId is extracted from `req.user` (from authMiddleware)
-router.post('/', createMentalHealthLog);  // Create a new log
-router.get('/', getMentalHealthLogs);  // Get all logs for the user
-router.get('/:id', getMentalHealthLog);  // Get a specific log
-router.put('/:id', updateMentalHealthLog);  // Update a specific log
-router.delete('/:id', deleteMentalHealthLog);  // Delete a specific log
+// Create a new log with validation
+router.post('/', 
+  validate(mentalHealthValidation.create), 
+  createMentalHealthLog
+);
+
+// Get all logs for the user
+router.get('/', getMentalHealthLogs);
+
+// Get a specific log with ID validation
+router.get('/:id', 
+  validate(idValidation), 
+  getMentalHealthLog
+);
+
+// Update a specific log with validation
+router.put('/:id', 
+  validate([...idValidation, ...mentalHealthValidation.update]), 
+  updateMentalHealthLog
+);
+
+// Delete a specific log with ID validation
+router.delete('/:id', 
+  validate(idValidation), 
+  deleteMentalHealthLog
+);
 
 export default router;
