@@ -1,14 +1,15 @@
-import * as fitbitService from '../services/fitbitService.js';
-import * as googleFitService from '../services/googleFitService.js';
-import * as appleHealthService from '../services/appleHealthService.js';
+import Workout from '../models/Workout.js';
+import Nutrition from '../models/Nutrition.js';
+import MentalHealth from '../models/MentalHealth.js';
+import User from '../models/User.js';
 import GoogleFitService from '../services/googleFitService.js';
 import FitbitService from '../services/fitbitService.js';
-import User from '../models/User.js';
+import AppleHealthService from '../services/appleHealthService.js';
 import Logger from '../utils/logger.js';
 
 // Placeholder for actual synchronization logic
 const syncFitbitData = async (userId) => {
-  const fitbitData = await fitbitService.getFitbitData(userId);
+  const fitbitData = await FitbitService.getFitbitData(userId);
   // Process and save Fitbit data to your database
   // Example: Save workout data
   const workoutLog = new Workout({ userId, ...fitbitData.workout });
@@ -16,7 +17,7 @@ const syncFitbitData = async (userId) => {
 };
 
 const syncGoogleFitData = async (userId) => {
-  const googleFitData = await googleFitService.getGoogleFitData(userId);
+  const googleFitData = await GoogleFitService.getGoogleFitData(userId);
   // Process and save Google Fit data to your database
   // Example: Save nutrition data
   const nutritionLog = new Nutrition({ userId, ...googleFitData.nutrition });
@@ -24,7 +25,7 @@ const syncGoogleFitData = async (userId) => {
 };
 
 const syncAppleHealthData = async (userId) => {
-  const appleHealthData = await appleHealthService.getAppleHealthData(userId);
+  const appleHealthData = await AppleHealthService.getAppleHealthData(userId);
   // Process and save Apple Health data to your database
   // Example: Save mental health data
   const mentalHealthLog = new MentalHealth({ userId, ...appleHealthData.mentalHealth });
@@ -39,6 +40,7 @@ export const syncData = async (req, res) => {
     await syncAppleHealthData(userId);
     res.json({ message: 'Data synchronization complete' });
   } catch (error) {
+    Logger.error('Data sync error:', error);
     res.status(500).send('Server error');
   }
 };
@@ -114,7 +116,7 @@ export const getHealthData = async (req, res) => {
           lastSynced: data.lastSynced
         };
       } catch (error) {
-        console.error('Error fetching Google Fit health data:', error);
+        Logger.error('Error fetching Google Fit health data:', error);
       }
     }
     // If Google Fit fails or isn't connected, try Fitbit
@@ -128,13 +130,13 @@ export const getHealthData = async (req, res) => {
           lastSynced: data.lastSynced
         };
       } catch (error) {
-        console.error('Error fetching Fitbit health data:', error);
+        Logger.error('Error fetching Fitbit health data:', error);
       }
     }
 
     res.json(healthData);
   } catch (error) {
-    console.error('Error fetching health data:', error);
+    Logger.error('Error fetching health data:', error);
     res.status(500).json({
       error: 'Failed to fetch health data',
       details: error.message
@@ -156,7 +158,7 @@ export const getDeviceStatus = async (req, res) => {
       fitbit: fitbitStatus
     });
   } catch (error) {
-    console.error('Error fetching device status:', error);
+    Logger.error('Error fetching device status:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -179,7 +181,7 @@ export const getDeviceAuthUrl = async (req, res) => {
 
     res.json({ authUrl });
   } catch (error) {
-    console.error('Error generating auth URL:', error);
+    Logger.error('Error generating auth URL:', error);
     res.status(500).json({
       message: 'Failed to generate authentication URL',
       error: error.message
@@ -223,7 +225,7 @@ export const connectDevice = async (req, res) => {
 
     res.json({ message: `Successfully connected to ${device}` });
   } catch (error) {
-    console.error('Error connecting device:', error);
+    Logger.error('Error connecting device:', error);
     res.status(500).json({
       message: 'Failed to connect device',
       error: error.message
@@ -249,7 +251,7 @@ export const disconnectDevice = async (req, res) => {
 
     res.json({ message: `Successfully disconnected ${device}` });
   } catch (error) {
-    console.error(`Error disconnecting device:`, error);
+    Logger.error(`Error disconnecting device:`, error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -320,7 +322,7 @@ export const testDeviceConnection = async (req, res) => {
 
     res.json(testResult);
   } catch (error) {
-    console.error(`Error testing ${req.params.device} connection:`, error);
+    Logger.error(`Error testing ${req.params.device} connection:`, error);
     res.status(500).json({
       message: 'Error testing device connection',
       error: error.message
