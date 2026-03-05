@@ -24,17 +24,5 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
-  },
-  "oauth2Scopes": {
-    "googleFit": [
-      "https://www.googleapis.com/auth/fitness.activity.read",
-      "https://www.googleapis.com/auth/fitness.heart_rate.read",
-      "https://www.googleapis.com/auth/fitness.body.read"
-    ],
-    "fitbit": [
-      "activity",
-      "heartrate",
-      "profile"
-    ]
   }
 }
