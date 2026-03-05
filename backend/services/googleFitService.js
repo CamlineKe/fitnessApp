@@ -40,11 +40,71 @@ class GoogleFitService {
 
       return {
         accessToken: response.data.access_token,
-        refreshToken: response.data.refresh_token
+        refreshToken: response.data.refresh_token,
+        expiresIn: response.data.expires_in
       };
     } catch (error) {
       Logger.error('Token exchange error:', error.response?.data || error.message);
       throw new Error('Failed to exchange code for tokens');
+    }
+  }
+
+  static async refreshAccessToken(userId, refreshToken) {
+    try {
+      Logger.debug('Refreshing Google Fit access token for user:', userId);
+
+      const response = await axios.post('https://oauth2.googleapis.com/token', {
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        client_secret: process.env.GOOGLE_CLIENT_SECRET,
+        refresh_token: refreshToken,
+        grant_type: 'refresh_token'
+      });
+
+      // Update user with new tokens
+      await User.findByIdAndUpdate(userId, {
+        'devices.googleFit.accessToken': response.data.access_token,
+        'devices.googleFit.refreshToken': response.data.refresh_token || refreshToken,
+        'devices.googleFit.lastSynced': new Date()
+      });
+
+      Logger.info('Successfully refreshed Google Fit token for user:', userId);
+
+      return response.data.access_token;
+    } catch (error) {
+      Logger.error('Error refreshing Google Fit token:', error.response?.data || error.message);
+      
+      // If refresh fails, mark as disconnected
+      await User.findByIdAndUpdate(userId, {
+        'devices.googleFit.connected': false
+      });
+      
+      throw new Error('Failed to refresh Google Fit token');
+    }
+  }
+
+  static async makeAuthenticatedRequest(userId, requestFn) {
+    try {
+      const user = await User.findById(userId);
+      if (!user?.devices?.googleFit?.connected) {
+        throw new Error('Google Fit not connected');
+      }
+
+      // Try the request with current token
+      return await requestFn(user.devices.googleFit.accessToken);
+    } catch (error) {
+      // If token expired, try to refresh and retry once
+      if (error.response?.status === 401 && user?.devices?.googleFit?.refreshToken) {
+        Logger.debug('Google Fit token expired, attempting refresh for user:', userId);
+        
+        // Refresh the token
+        const newToken = await this.refreshAccessToken(userId, user.devices.googleFit.refreshToken);
+        
+        // Retry the request with new token
+        return await requestFn(newToken);
+      }
+      
+      // Re-throw other errors
+      throw error;
     }
   }
 
@@ -55,11 +115,13 @@ class GoogleFitService {
         'devices.googleFit': {
           connected: true,
           accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken
+          refreshToken: tokens.refreshToken,
+          lastSynced: new Date()
         }
       });
       return { success: true };
     } catch (error) {
+      Logger.error('Error connecting Google Fit:', error);
       throw new Error('Failed to connect Google Fit');
     }
   }
@@ -88,64 +150,12 @@ class GoogleFitService {
 
   static async getCaloriesBurned(userId) {
     try {
-      const user = await User.findById(userId);
-      if (!user?.devices?.googleFit?.connected) {
-        throw new Error('Google Fit not connected');
-      }
+      return await this.makeAuthenticatedRequest(userId, async (accessToken) => {
+        const endTime = new Date();
+        const startTime = new Date();
+        startTime.setHours(0, 0, 0, 0);
 
-      const endTime = new Date();
-      const startTime = new Date();
-      startTime.setHours(0, 0, 0, 0);
-
-      const response = await axios.post(
-        'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate',
-        {
-          aggregateBy: [{
-            dataTypeName: "com.google.calories.expended"
-          }],
-          startTimeMillis: startTime.getTime(),
-          endTimeMillis: endTime.getTime()
-        },
-        {
-          headers: {
-            'Authorization': `Bearer ${user.devices.googleFit.accessToken}`
-          }
-        }
-      );
-
-      const caloriesData = response.data.bucket[0]?.dataset[0]?.point[0]?.value[0]?.fpVal || 0;
-
-      // Update last synced time
-      await User.findByIdAndUpdate(userId, {
-        'devices.googleFit.lastSynced': new Date()
-      });
-
-      return {
-        calories: Math.round(caloriesData),
-        lastSynced: new Date()
-      };
-    } catch (error) {
-      if (error.response?.status === 401) {
-        // Handle token refresh here if needed
-        throw new Error('Authentication expired');
-      }
-      throw new Error('Failed to fetch calories from Google Fit');
-    }
-  }
-
-  static async getHealthData(userId) {
-    try {
-      const user = await User.findById(userId);
-      if (!user?.devices?.googleFit?.connected) {
-        throw new Error('Google Fit not connected');
-      }
-
-      const endTime = new Date();
-      const startTime = new Date();
-      startTime.setHours(0, 0, 0, 0);
-
-      const [caloriesResponse, heartRateResponse] = await Promise.all([
-        axios.post(
+        const response = await axios.post(
           'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate',
           {
             aggregateBy: [{
@@ -156,49 +166,89 @@ class GoogleFitService {
           },
           {
             headers: {
-              'Authorization': `Bearer ${user.devices.googleFit.accessToken}`
+              'Authorization': `Bearer ${accessToken}`
             }
           }
-        ),
-        axios.post(
-          'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate',
-          {
-            aggregateBy: [{
-              dataTypeName: "com.google.heart_rate.bpm"
-            }],
-            startTimeMillis: startTime.getTime(),
-            endTimeMillis: endTime.getTime()
+        );
+
+        const caloriesData = response.data.bucket[0]?.dataset[0]?.point[0]?.value[0]?.fpVal || 0;
+
+        // Update last synced time
+        await User.findByIdAndUpdate(userId, {
+          'devices.googleFit.lastSynced': new Date()
+        });
+
+        return {
+          calories: Math.round(caloriesData),
+          lastSynced: new Date()
+        };
+      });
+    } catch (error) {
+      Logger.error('Error fetching calories from Google Fit:', error);
+      throw new Error('Failed to fetch calories from Google Fit');
+    }
+  }
+
+  static async getHealthData(userId) {
+    try {
+      return await this.makeAuthenticatedRequest(userId, async (accessToken) => {
+        const endTime = new Date();
+        const startTime = new Date();
+        startTime.setHours(0, 0, 0, 0);
+
+        const [caloriesResponse, heartRateResponse] = await Promise.all([
+          axios.post(
+            'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate',
+            {
+              aggregateBy: [{
+                dataTypeName: "com.google.calories.expended"
+              }],
+              startTimeMillis: startTime.getTime(),
+              endTimeMillis: endTime.getTime()
+            },
+            {
+              headers: {
+                'Authorization': `Bearer ${accessToken}`
+              }
+            }
+          ),
+          axios.post(
+            'https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate',
+            {
+              aggregateBy: [{
+                dataTypeName: "com.google.heart_rate.bpm"
+              }],
+              startTimeMillis: startTime.getTime(),
+              endTimeMillis: endTime.getTime()
+            },
+            {
+              headers: {
+                'Authorization': `Bearer ${accessToken}`
+              }
+            }
+          )
+        ]);
+
+        const calories = caloriesResponse.data.bucket[0]?.dataset[0]?.point[0]?.value[0]?.fpVal || 0;
+        const heartRate = heartRateResponse.data.bucket[0]?.dataset[0]?.point[0]?.value[0]?.fpVal || 0;
+
+        await User.findByIdAndUpdate(userId, {
+          'devices.googleFit.healthData': {
+            calories: Math.round(calories),
+            heartRate: Math.round(heartRate),
+            lastUpdated: new Date()
           },
-          {
-            headers: {
-              'Authorization': `Bearer ${user.devices.googleFit.accessToken}`
-            }
-          }
-        )
-      ]);
+          'devices.googleFit.lastSynced': new Date()
+        });
 
-      const calories = caloriesResponse.data.bucket[0]?.dataset[0]?.point[0]?.value[0]?.fpVal || 0;
-      const heartRate = heartRateResponse.data.bucket[0]?.dataset[0]?.point[0]?.value[0]?.fpVal || 0;
-
-      await User.findByIdAndUpdate(userId, {
-        'devices.googleFit.healthData': {
+        return {
           calories: Math.round(calories),
           heartRate: Math.round(heartRate),
-          lastUpdated: new Date()
-        },
-        'devices.googleFit.lastSynced': new Date()
+          lastSynced: new Date()
+        };
       });
-
-      return {
-        calories: Math.round(calories),
-        heartRate: Math.round(heartRate),
-        lastSynced: new Date()
-      };
     } catch (error) {
       Logger.error('Error fetching Google Fit health data:', error);
-      if (error.response?.status === 401) {
-        throw new Error('Authentication expired');
-      }
       throw new Error('Failed to fetch health data from Google Fit');
     }
   }
