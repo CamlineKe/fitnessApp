@@ -613,8 +613,9 @@
 
 /* Mobile */
 @media (max-width: 768px) {
+    /* ✅ FIXED: Removed the overriding margin-top */
     .page-container {
-        margin-top: calc(var(--nav-height) + 1rem);
+        margin-top: var(--nav-height); /* Now consistent with desktop */
     }
     
     .gamification-header {
