@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import "./styles/AuthhCallback.css";
+import './styles/AuthCallback.css';
 import Logger from '../utils/logger';
 
 const AuthCallback = () => {

@@ -22,6 +22,19 @@ const Dashboard = () => {
   const [gamificationData, setGamificationData] = useState(null);
   const [activityFeed, setActivityFeed] = useState([]);
 
+  // Helper function to check if a date is today
+  const isToday = (date) => {
+    const today = new Date();
+    const activityDate = new Date(date);
+    return activityDate.toDateString() === today.toDateString();
+  };
+
+  // Helper function to safely parse date
+  const parseDate = (dateStr) => {
+    const parsed = new Date(dateStr);
+    return isNaN(parsed.getTime()) ? new Date() : parsed;
+  };
+
   const fetchDashboardData = async () => {
     if (!user?._id) {
       toast.error("Please log in to view your dashboard");
@@ -47,19 +60,6 @@ const Dashboard = () => {
         activityType: 'No workout yet',
         duration: 0,
         caloriesBurned: 0
-      };
-
-      // Helper function to check if a date is today
-      const isToday = (date) => {
-        const today = new Date();
-        const activityDate = new Date(date);
-        return activityDate.toDateString() === today.toDateString();
-      };
-
-      // Helper function to safely parse date
-      const parseDate = (dateStr) => {
-        const parsed = new Date(dateStr);
-        return isNaN(parsed.getTime()) ? new Date() : parsed;
       };
 
       // Combine all activities into a single feed
@@ -105,7 +105,7 @@ const Dashboard = () => {
 
       setActivityFeed(sortedActivities);
       setNutritionData(nutrition);
-      setWorkoutData(todayWorkout); // Set the actual today's workout
+      setWorkoutData(todayWorkout);
       setMentalHealthData(mentalHealth);
       setGamificationData(gamification);
     } catch (error) {
@@ -119,30 +119,51 @@ const Dashboard = () => {
   useEffect(() => {
     fetchDashboardData();
 
-    // Listen for workout and gamification updates
+    // Listen for workout and gamification updates using EventEmitter constants
     const handleWorkoutUpdate = () => {
       Logger.debug('Dashboard: Workout update detected, refreshing data...');
       fetchDashboardData();
     };
 
-    const handleGamificationUpdate = (streakData) => {
-      Logger.debug('Dashboard: Gamification update detected with data:', streakData);
-      // Update gamification data with new streak info
-      setGamificationData(prevData => ({
-        ...prevData,
-        streaks: {
-          ...prevData?.streaks,
-          ...streakData
-        }
-      }));
+    const handleGamificationUpdate = (data) => {
+      Logger.debug('Dashboard: Gamification update detected with data:', data);
+      
+      // If we received streak data, update it directly
+      if (data?.streaks) {
+        setGamificationData(prevData => ({
+          ...prevData,
+          streaks: {
+            ...prevData?.streaks,
+            ...data.streaks
+          }
+        }));
+      } else {
+        // Otherwise refresh all data
+        fetchDashboardData();
+      }
     };
 
-    EventEmitter.on('workout-updated', handleWorkoutUpdate);
-    EventEmitter.on('gamification-updated', handleGamificationUpdate);
+    const handleNutritionUpdate = () => {
+      Logger.debug('Dashboard: Nutrition update detected, refreshing data...');
+      fetchDashboardData();
+    };
+
+    const handleMentalHealthUpdate = () => {
+      Logger.debug('Dashboard: Mental health update detected, refreshing data...');
+      fetchDashboardData();
+    };
+
+    // Use EventEmitter constants
+    EventEmitter.on(EventEmitter.Events.WORKOUT_UPDATED, handleWorkoutUpdate);
+    EventEmitter.on(EventEmitter.Events.GAMIFICATION_UPDATED, handleGamificationUpdate);
+    EventEmitter.on(EventEmitter.Events.NUTRITION_UPDATED, handleNutritionUpdate);
+    EventEmitter.on(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, handleMentalHealthUpdate);
 
     return () => {
-      EventEmitter.off('workout-updated', handleWorkoutUpdate);
-      EventEmitter.off('gamification-updated', handleGamificationUpdate);
+      EventEmitter.off(EventEmitter.Events.WORKOUT_UPDATED, handleWorkoutUpdate);
+      EventEmitter.off(EventEmitter.Events.GAMIFICATION_UPDATED, handleGamificationUpdate);
+      EventEmitter.off(EventEmitter.Events.NUTRITION_UPDATED, handleNutritionUpdate);
+      EventEmitter.off(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, handleMentalHealthUpdate);
     };
   }, [user?._id]); // Only re-run if user ID changes
 
@@ -234,7 +255,7 @@ const Dashboard = () => {
                   <span>Fat: {nutritionData?.macronutrients?.fats || 0}g</span>
                 </div>
                 <div className="stat-footer">
-                  View Nutrion <i className="fas fa-arrow-right"></i>
+                  View Nutrition <i className="fas fa-arrow-right"></i>
                 </div>
               </Link>
 
