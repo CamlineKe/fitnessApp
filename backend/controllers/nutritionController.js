@@ -40,7 +40,7 @@ export const getNutritionLogs = async (req, res) => {
 
     return res.json(nutritionLogs);
   } catch (error) {
-    console.error("Error fetching nutrition logs:", error);
+    Logger.error("Error fetching nutrition logs:", error);
     return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -56,7 +56,7 @@ export const getNutritionLog = async (req, res) => {
 
     return res.json(nutritionLog);
   } catch (error) {
-    console.error("Error fetching nutrition log:", error);
+    Logger.error("Error fetching nutrition log:", error);
     return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -78,7 +78,7 @@ export const updateNutritionLog = async (req, res) => {
 
     return res.json(updatedLog);
   } catch (error) {
-    console.error("Error updating nutrition log:", error);
+    Logger.error("Error updating nutrition log:", error);
     return res.status(500).json({ message: "Server error", error: error.message });
   }
 };
@@ -94,7 +94,7 @@ export const deleteNutritionLog = async (req, res) => {
 
     return res.json({ message: "Nutrition log deleted successfully" });
   } catch (error) {
-    console.error("Error deleting nutrition log:", error);
+    Logger.error("Error deleting nutrition log:", error);
     return res.status(500).json({ message: "Server error", error: error.message });
   }
 };

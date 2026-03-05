@@ -262,6 +262,7 @@ export const getUserProfile = async (req, res) => {
     }
     res.json(user);
   } catch (error) {
+    Logger.error('Error fetching user profile:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
@@ -360,6 +361,7 @@ export const getAllUsers = async (req, res) => {
     const users = await User.find().select('-password');
     res.json(users);
   } catch (error) {
+    Logger.error('Error fetching all users:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
