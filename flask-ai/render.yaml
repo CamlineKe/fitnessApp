@@ -6,8 +6,12 @@ services:
     startCommand: gunicorn app:app
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.0
+        value: 3.12.0  # Updated to match development version
       - key: PORT
         value: 10000
+      - key: FLASK_ENV
+        value: production
+      - key: CORS_ORIGIN
+        fromEnv: FRONTEND_URL  # To be set in Render dashboard
     healthCheckPath: /api/health
-    autoDeploy: true 
+    autoDeploy: true
