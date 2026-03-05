@@ -3,15 +3,20 @@ from flask_cors import CORS
 import os
 import logging
 
-# ✅ Ensure correct imports from models
+# ✅ Configure logging FIRST (before any logger usage)
+env = os.getenv('FLASK_ENV', 'development')
+logging.basicConfig(
+    level=logging.DEBUG if env == 'development' else logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# ✅ Import models after logging is configured
 from models.diet_recommender import get_diet_recommendations
 from models.stress_analysis import analyze_stress
 from models.workout_recommender import get_workout_recommendations
 
 app = Flask(__name__)
-
-# Get environment
-env = os.getenv('FLASK_ENV', 'development')
 
 # Configure CORS with both development and production origins
 allowed_origins = [
@@ -31,7 +36,7 @@ if os.getenv('CORS_ORIGIN'):
 # Remove any None values and duplicates
 allowed_origins = list(set(filter(None, allowed_origins)))
 
-# Log allowed origins in development
+# Log allowed origins in development (logger is now defined)
 if env == 'development':
     logger.info(f"CORS allowed origins: {allowed_origins}")
 
@@ -42,13 +47,6 @@ CORS(app, resources={
         "allow_headers": ["Content-Type", "Authorization"]
     }
 })
-
-# Configure logging
-logging.basicConfig(
-    level=logging.DEBUG if env == 'development' else logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 # ✅ Utility function to validate input data
 def validate_request(req):
