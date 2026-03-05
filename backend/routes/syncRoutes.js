@@ -3,6 +3,7 @@ import { syncData, getDeviceStatus, getHealthData, getCalories, getDeviceAuthUrl
 import authMiddleware from '../middlewares/authMiddleware.js';
 import User from '../models/User.js';
 import GoogleFitService from '../services/googleFitService.js';
+import FitbitService from '../services/fitbitService.js';
 import Logger from '../utils/logger.js';
 
 const router = express.Router();
@@ -64,6 +65,7 @@ router.post('/google-fit/connect', authMiddleware, async (req, res) => {
     const result = await GoogleFitService.connect(req.user._id, req.body.code);
     res.json(result);
   } catch (error) {
+    Logger.error('Error connecting Google Fit:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -73,6 +75,7 @@ router.post('/google-fit/disconnect', authMiddleware, async (req, res) => {
     const result = await GoogleFitService.disconnect(req.user._id);
     res.json(result);
   } catch (error) {
+    Logger.error('Error disconnecting Google Fit:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -82,6 +85,7 @@ router.get('/google-fit/status', authMiddleware, async (req, res) => {
     const status = await GoogleFitService.getConnectionStatus(req.user._id);
     res.json(status);
   } catch (error) {
+    Logger.error('Error getting Google Fit status:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -92,6 +96,7 @@ router.get('/fitbit/auth-url', authMiddleware, async (req, res) => {
     const authUrl = await FitbitService.getAuthUrl();
     res.json({ authUrl });
   } catch (error) {
+    Logger.error('Error generating Fitbit auth URL:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -101,6 +106,7 @@ router.post('/fitbit/connect', authMiddleware, async (req, res) => {
     const result = await FitbitService.connect(req.user._id, req.body.code);
     res.json(result);
   } catch (error) {
+    Logger.error('Error connecting Fitbit:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -110,6 +116,7 @@ router.post('/fitbit/disconnect', authMiddleware, async (req, res) => {
     const result = await FitbitService.disconnect(req.user._id);
     res.json(result);
   } catch (error) {
+    Logger.error('Error disconnecting Fitbit:', error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -119,6 +126,7 @@ router.get('/fitbit/status', authMiddleware, async (req, res) => {
     const status = await FitbitService.getConnectionStatus(req.user._id);
     res.json(status);
   } catch (error) {
+    Logger.error('Error getting Fitbit status:', error);
     res.status(500).json({ message: error.message });
   }
 });

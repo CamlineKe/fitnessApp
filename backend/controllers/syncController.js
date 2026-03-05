@@ -4,7 +4,6 @@ import MentalHealth from '../models/MentalHealth.js';
 import User from '../models/User.js';
 import GoogleFitService from '../services/googleFitService.js';
 import FitbitService from '../services/fitbitService.js';
-import AppleHealthService from '../services/appleHealthService.js';
 import Logger from '../utils/logger.js';
 
 // Placeholder for actual synchronization logic
@@ -24,20 +23,11 @@ const syncGoogleFitData = async (userId) => {
   await nutritionLog.save();
 };
 
-const syncAppleHealthData = async (userId) => {
-  const appleHealthData = await AppleHealthService.getAppleHealthData(userId);
-  // Process and save Apple Health data to your database
-  // Example: Save mental health data
-  const mentalHealthLog = new MentalHealth({ userId, ...appleHealthData.mentalHealth });
-  await mentalHealthLog.save();
-};
-
 export const syncData = async (req, res) => {
   try {
     const userId = req.user.userId;
     await syncFitbitData(userId);
     await syncGoogleFitData(userId);
-    await syncAppleHealthData(userId);
     res.json({ message: 'Data synchronization complete' });
   } catch (error) {
     Logger.error('Data sync error:', error);
