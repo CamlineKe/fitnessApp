@@ -4,7 +4,6 @@ import { UserContext } from "../components/UserContext";
 import UserService from "../services/UserService";
 import GoogleFitService from '../services/GoogleFitService';
 import FitbitService from '../services/FitbitService';
-import AppleHealthService from '../services/AppleHealthService';
 import "./styles/Profile.css";
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -123,7 +122,7 @@ const Profile = () => {
       handleSuccess("Profile updated successfully!");
     } catch (error) {
       Logger.error("Failed to update profile:", error);
-      handleError("Failed to update profile");
+      handleError(error.response?.data?.message || "Failed to update profile");
     }
   };
 
@@ -235,20 +234,18 @@ const Profile = () => {
 
   const fetchHealthData = async () => {
     try {
-      if (deviceStates.googleFit.connected || deviceStates.fitbit.connected) {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/sync/health-data`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        });
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/sync/health-data`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
 
-        setHealthData({
-          calories: response.data.calories,
-          heartRate: response.data.heartRate,
-          lastSynced: response.data.lastSynced,
-          source: response.data.source
-        });
-      }
+      setHealthData({
+        calories: response.data.calories || 0,
+        heartRate: response.data.heartRate || 0,
+        lastSynced: response.data.lastSynced,
+        source: response.data.source
+      });
     } catch (error) {
       Logger.error('Failed to fetch health data:', error);
       handleError('Failed to fetch health data');
@@ -262,40 +259,39 @@ const Profile = () => {
         [service]: { ...prev[service], loading: true }
       }));
 
-      // Add event listener before opening popup
-      const handleAuthMessage = async (event) => {
-        if (event.origin !== window.location.origin) return;
-
-        Logger.debug('Received auth message:', event.data);
-
-        if (event.data.type === 'FITBIT_AUTH_SUCCESS' || event.data.type === 'GOOGLE_FIT_AUTH_SUCCESS') {
-          window.removeEventListener('message', handleAuthMessage);
-
-          // Update device state immediately
-          setDeviceStates(prev => ({
-            ...prev,
-            [service]: { ...prev[service], connected: true, loading: false }
-          }));
-
-          await fetchHealthData();
-          toast.success(`Successfully connected to ${event.data.service}`);
-        } else if (event.data.type === 'FITBIT_AUTH_ERROR' || event.data.type === 'GOOGLE_FIT_AUTH_ERROR') {
-          window.removeEventListener('message', handleAuthMessage);
-          throw new Error(event.data.error);
-        }
-      };
-
-      window.addEventListener('message', handleAuthMessage);
-
-      const ServiceClass = service === 'googleFit' ? GoogleFitService : FitbitService;
-      await ServiceClass.connect();
-
+      // Get the auth URL from the backend
+      const serviceClass = service === 'googleFit' ? GoogleFitService : FitbitService;
+      const response = await serviceClass.getAuthUrl();
+      
+      if (response && response.authUrl) {
+        // Open the auth URL in a popup
+        const width = 600;
+        const height = 700;
+        const left = window.screen.width / 2 - width / 2;
+        const top = window.screen.height / 2 - height / 2;
+        
+        window.open(
+          response.authUrl,
+          `${service}Auth`,
+          `width=${width},height=${height},left=${left},top=${top}`
+        );
+        
+        // The callback page will handle the rest
+        // No need for message listener as we use redirect flow
+      } else {
+        throw new Error('Failed to get authentication URL');
+      }
     } catch (error) {
       Logger.error(`${service} connection error:`, error);
       toast.error(`Failed to connect to ${service}: ${error.message}`);
       setDeviceStates(prev => ({
         ...prev,
         [service]: { ...prev[service], connected: false, loading: false }
+      }));
+    } finally {
+      setDeviceStates(prev => ({
+        ...prev,
+        [service]: { ...prev[service], loading: false }
       }));
     }
   };
@@ -307,22 +303,29 @@ const Profile = () => {
     }));
 
     try {
-      if (service === 'googleFit') {
-        await GoogleFitService.disconnect();
-      } else if (service === 'fitbit') {
-        await FitbitService.disconnect();
-      } else if (service === 'appleHealth') {
-        await AppleHealthService.disconnect();
-      }
+      const serviceClass = service === 'googleFit' ? GoogleFitService : FitbitService;
+      await serviceClass.disconnect();
 
       setDeviceStates(prev => ({
         ...prev,
         [service]: { connected: false, loading: false }
       }));
-      handleSuccess(`Successfully disconnected from ${service}`);
+      
+      // Reset health data if both devices are disconnected
+      if (!deviceStates.googleFit.connected && !deviceStates.fitbit.connected) {
+        setHealthData({
+          calories: 0,
+          heartRate: 0,
+          lastSynced: null,
+          source: null
+        });
+      }
+      
+      handleSuccess(`Successfully disconnected from ${service === 'googleFit' ? 'Google Fit' : 'Fitbit'}`);
     } catch (error) {
       Logger.error(`Failed to disconnect ${service}:`, error);
-      handleError(`Failed to disconnect ${service}`);
+      handleError(`Failed to disconnect ${service === 'googleFit' ? 'Google Fit' : 'Fitbit'}`);
+    } finally {
       setDeviceStates(prev => ({
         ...prev,
         [service]: { ...prev[service], loading: false }
@@ -370,14 +373,15 @@ const Profile = () => {
 
   return (
     <div className="page-content">
-
       <div className="profile-container">
         <div className="profile-header">
-        <h1>Profile</h1>
-        <p>Manage your profile and connected devices</p>
-      </div>
+          <h1>Profile</h1>
+          <p>Manage your profile and connected devices</p>
+        </div>
+        
         <div className="profile-content">
           <div className="profile-information-section">
+            <h2>Personal Information</h2>
             {editMode ? (
               <form onSubmit={(e) => e.preventDefault()}>
                 {['username', 'email', 'firstName', 'lastName', 'dateOfBirth', 'gender', 'healthGoals'].map((field) => (
@@ -478,21 +482,22 @@ const Profile = () => {
                 <div className="health-metrics">
                   <div className="metric-card calories">
                     <h3>Calories Burned</h3>
-                    <div className="metric-value">{healthData.calories} kcal</div>
+                    <div className="metric-value">{healthData.calories || 0} kcal</div>
+                    <div className="metric-source">Source: {healthData.source || 'N/A'}</div>
                   </div>
                   <div className="metric-card heart-rate">
                     <h3>Heart Rate</h3>
-                    <div className="metric-value">{healthData.heartRate} bpm</div>
+                    <div className="metric-value">{healthData.heartRate || 0} bpm</div>
                   </div>
                   {healthData.lastSynced && (
                     <div className="last-synced">
-                      Last updated: {new Date(healthData.lastSynced).toLocaleString()}
+                      <span>Last updated: {new Date(healthData.lastSynced).toLocaleString()}</span>
                     </div>
                   )}
                 </div>
               ) : (
                 <div className="no-device-message">
-                  Connect to Google Fit or Fitbit to view your health data
+                  <p>Connect to Google Fit or Fitbit to view your health data</p>
                 </div>
               )}
             </div>
@@ -503,13 +508,13 @@ const Profile = () => {
                 {['googleFit', 'fitbit'].map((service) => (
                   <div className="device-item" key={service}>
                     <div className="device-info">
-                      <p>
-                        <strong>
-                          {service === 'googleFit' ? 'Google Fit' : 'Fitbit'}:
-                        </strong>
+                      <strong>
+                        {service === 'googleFit' ? 'Google Fit' : 'Fitbit'}:
+                      </strong>
+                      <span className={`connection-status ${deviceStates[service].connected ? 'connected' : 'disconnected'}`}>
                         {deviceStates[service].connected ? ' Connected' : ' Not Connected'}
-                      </p>
-                      {deviceStates[service].loading && <span className="loading-spinner" />}
+                      </span>
+                      {deviceStates[service].loading && <span className="loading-spinner-small" />}
                     </div>
                     <div className="device-buttons">
                       <button
@@ -532,7 +537,7 @@ const Profile = () => {
             <div className="settings-section">
               <h2>Settings</h2>
               <div className="setting-item">
-                <p><strong>Change Password</strong></p>
+                <strong>Change Password</strong>
                 <button onClick={() => setChangePasswordMode(true)} className="change-password-button">
                   Change Password
                 </button>
@@ -549,6 +554,7 @@ const Profile = () => {
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           className="form-control"
+                          placeholder="Enter current password"
                         />
                         <button
                           type="button"
@@ -568,6 +574,7 @@ const Profile = () => {
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           className="form-control"
+                          placeholder="Enter new password"
                         />
                         <button
                           type="button"
@@ -587,6 +594,7 @@ const Profile = () => {
                           value={confirmNewPassword}
                           onChange={(e) => setConfirmNewPassword(e.target.value)}
                           className="form-control"
+                          placeholder="Confirm new password"
                         />
                         <button
                           type="button"
