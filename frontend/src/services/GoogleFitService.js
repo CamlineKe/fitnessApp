@@ -1,62 +1,41 @@
 import axios from 'axios';
+import Logger from '../utils/logger';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/sync`;
 
 class GoogleFitService {
   static async connect() {
     try {
-      console.log('Starting Google Fit connection...');
+      Logger.debug('Starting Google Fit connection...');
 
       const response = await axios.get(`${API_URL}/google-fit/auth-url`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
-        },
-        params: {
-          redirectUri: `${window.location.origin}/auth/callback`
         }
       });
 
-      console.log('Received auth URL:', response.data.authUrl);
+      Logger.debug('Received auth URL:', response.data.authUrl);
 
-      return new Promise((resolve, reject) => {
-        const width = 600;
-        const height = 800;
-        const left = window.screenX + (window.outerWidth - width) / 2;
-        const top = window.screenY + (window.outerHeight - height) / 2;
+      // Open the auth URL in a popup - the callback page will handle the redirect
+      const width = 600;
+      const height = 800;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
 
-        const authWindow = window.open(
-          response.data.authUrl,
-          'Google Fit Auth',
-          `width=${width},height=${height},left=${left},top=${top}`
-        );
+      const authWindow = window.open(
+        response.data.authUrl,
+        'Google Fit Auth',
+        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
+      );
 
-        if (!authWindow) {
-          reject(new Error('Popup window was blocked'));
-          return;
-        }
+      if (!authWindow) {
+        throw new Error('Popup window was blocked. Please allow popups for this site.');
+      }
 
-        const handleMessage = (event) => {
-          if (event.origin !== window.location.origin) return;
-
-          if (event.data.type === 'GOOGLE_FIT_AUTH_SUCCESS') {
-            window.removeEventListener('message', handleMessage);
-            resolve({ success: true });
-          } else if (event.data.type === 'GOOGLE_FIT_AUTH_ERROR') {
-            window.removeEventListener('message', handleMessage);
-            reject(new Error(event.data.error));
-          }
-        };
-
-        window.addEventListener('message', handleMessage);
-
-        // Timeout after 5 minutes
-        setTimeout(() => {
-          window.removeEventListener('message', handleMessage);
-          reject(new Error('Authentication timed out'));
-        }, 300000);
-      });
+      // The callback page will handle the rest and redirect back to profile
+      return { success: true, message: 'Authentication window opened' };
     } catch (error) {
-      console.error('Connection error:', error);
+      Logger.error('Google Fit connection error:', error);
       throw error;
     }
   }
@@ -72,9 +51,10 @@ class GoogleFitService {
           }
         }
       );
+      Logger.info('Google Fit disconnected successfully');
       return response.data;
     } catch (error) {
-      console.error('Disconnect error:', error);
+      Logger.error('Google Fit disconnect error:', error);
       throw error;
     }
   }
@@ -88,30 +68,21 @@ class GoogleFitService {
       });
       return response.data;
     } catch (error) {
-      console.error('Health data error:', error);
+      Logger.error('Health data error:', error);
       throw error;
     }
   }
 
-  static async handleAuthCallback(code) {
+  static async getAuthUrl() {
     try {
-      const response = await fetch('http://localhost:3000/auth/google/callback', {
-        method: 'POST',
+      const response = await axios.get(`${API_URL}/google-fit/auth-url`, {
         headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code }),
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to exchange authorization code');
-      }
-
-      const data = await response.json();
-      // Store the access token or handle the response as needed
-      return data;
+      return response.data;
     } catch (error) {
-      console.error('Error handling auth callback:', error);
+      Logger.error('Error getting auth URL:', error);
       throw error;
     }
   }

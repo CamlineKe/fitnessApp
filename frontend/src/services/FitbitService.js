@@ -1,11 +1,12 @@
 import axios from 'axios';
+import Logger from '../utils/logger';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/sync`;
 
 class FitbitService {
   static async connect() {
     try {
-      console.log('Starting Fitbit connection...');
+      Logger.debug('Starting Fitbit connection...');
 
       const response = await axios.get(`${API_URL}/fitbit/auth-url`, {
         headers: {
@@ -13,65 +14,28 @@ class FitbitService {
         }
       });
 
-      console.log('Received auth URL:', response.data.authUrl);
+      Logger.debug('Received auth URL:', response.data.authUrl);
 
-      return new Promise((resolve, reject) => {
-        const width = 600;
-        const height = 800;
-        const left = window.screenX + (window.outerWidth - width) / 2;
-        const top = window.screenY + (window.outerHeight - height) / 2;
+      // Open the auth URL in a popup - the callback page will handle the redirect
+      const width = 600;
+      const height = 800;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
 
-        const authWindow = window.open(
-          response.data.authUrl,
-          'Fitbit Auth',
-          `width=${width},height=${height},left=${left},top=${top}`
-        );
-
-        if (!authWindow) {
-          reject(new Error('Popup window was blocked'));
-          return;
-        }
-
-        const handleMessage = (event) => {
-          if (event.origin !== window.location.origin) return;
-
-          if (event.data.type === 'FITBIT_AUTH_SUCCESS') {
-            window.removeEventListener('message', handleMessage);
-            resolve({ success: true, service: event.data.service });
-          } else if (event.data.type === 'FITBIT_AUTH_ERROR') {
-            window.removeEventListener('message', handleMessage);
-            reject(new Error(event.data.error));
-          }
-        };
-
-        window.addEventListener('message', handleMessage);
-
-        // Timeout after 5 minutes
-        setTimeout(() => {
-          window.removeEventListener('message', handleMessage);
-          reject(new Error('Authentication timed out'));
-        }, 300000);
-      });
-    } catch (error) {
-      console.error('Connection error:', error);
-      throw error;
-    }
-  }
-
-  static async handleAuthCallback(code) {
-    try {
-      const response = await axios.post(
-        `${API_URL}/fitbit/connect`,
-        { code },
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
-          }
-        }
+      const authWindow = window.open(
+        response.data.authUrl,
+        'Fitbit Auth',
+        `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,resizable=yes`
       );
-      return response.data;
+
+      if (!authWindow) {
+        throw new Error('Popup window was blocked. Please allow popups for this site.');
+      }
+
+      // The callback page will handle the rest and redirect back to profile
+      return { success: true, message: 'Authentication window opened' };
     } catch (error) {
-      console.error('Error handling Fitbit callback:', error);
+      Logger.error('Fitbit connection error:', error);
       throw error;
     }
   }
@@ -87,8 +51,10 @@ class FitbitService {
           }
         }
       );
+      Logger.info('Fitbit disconnected successfully');
       return response.data;
     } catch (error) {
+      Logger.error('Fitbit disconnect error:', error);
       throw error;
     }
   }
@@ -102,6 +68,21 @@ class FitbitService {
       });
       return response.data;
     } catch (error) {
+      Logger.error('Health data error:', error);
+      throw error;
+    }
+  }
+
+  static async getAuthUrl() {
+    try {
+      const response = await axios.get(`${API_URL}/fitbit/auth-url`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      return response.data;
+    } catch (error) {
+      Logger.error('Error getting auth URL:', error);
       throw error;
     }
   }
