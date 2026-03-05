@@ -1,33 +1,166 @@
-# Fitness and Wellness Tracking Platform
+# Fitness & Wellness Platform 🏋️‍♂️🧘‍♀️
 
-A comprehensive health and fitness tracking platform that combines workout tracking, nutrition monitoring, mental health assessment, and gamification features.
+> A comprehensive health and fitness tracking platform combining workout tracking, nutrition monitoring, mental health assessment, and AI-powered recommendations
 
-## Project Overview
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://mongodb.com/)
+[![Flask](https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![Socket.io](https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socket.io&logoColor=white)](https://socket.io/)
 
-This platform consists of three main components:
-- **Frontend**: React-based web application
-- **Backend**: Node.js/Express.js API server
-- **AI Service**: Flask-based AI recommendation engine
+## 🚀 Overview
 
-## Prerequisites
+A comprehensive health and fitness tracking platform that combines workout tracking, nutrition monitoring, mental health assessment, and gamification features with AI-powered recommendations.
 
-### Required Software
-- Node.js (v18 or higher)
-- Python (v3.9 or higher)
-- MongoDB (v6.0 or higher)
-- Git (optional, only if you want to use version control)
+### ✨ Key Features
 
-### Required Accounts and API Keys
+- **🏃‍♂️ Workout Tracking** - Log exercises, track duration, calories burned, and heart rate with detailed analytics
+- **🥗 Nutrition Monitoring** - Comprehensive meal logging with Kenyan cuisine database, macronutrient tracking, and meal suggestions
+- **🧠 Mental Health Assessment** - Daily mood check-ins, stress level monitoring, sleep quality tracking with personalized insights
+- **🎮 Gamification** - Earn points, maintain streaks across activities, unlock achievements, and level up your fitness journey
+- **🤖 AI-Powered Recommendations** - Personalized diet plans, workout suggestions, and stress management advice using ML models
+- **📊 Interactive Dashboard** - Visual progress tracking with charts, real-time activity feed, and performance analytics
+- **🔌 Device Integration** - Connect with Google Fit and Fitbit to sync health data automatically
+- **📱 Responsive Design** - Seamless experience across desktop, tablet, and mobile devices
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **Framework**: React 18 with Vite
+- **UI Components**: React Bootstrap, Custom CSS with modern variables
+- **Charts & Visualizations**: Chart.js, ApexCharts, React-Chartjs-2
+- **Forms & Validation**: React Hook Form, DatePicker
+- **Notifications**: React Toastify, SweetAlert2
+- **Icons**: React Icons, Font Awesome
+- **Real-time**: Socket.IO Client
+- **HTTP Client**: Axios with interceptors
+- **State Management**: React Context API + Custom EventEmitter
+
+### Backend
+- **Runtime**: Node.js with ES Modules
+- **Framework**: Express.js
+- **Database**: MongoDB with Mongoose ODM
+- **Authentication**: JWT with bcryptjs
+- **Real-time**: Socket.IO for live updates
+- **Validation**: Express-validator middleware
+- **Logging**: Custom logger with environment-based levels
+- **External APIs**: Google Fit API, Fitbit API integration
+
+### AI Service
+- **Framework**: Flask 2.0.1
+- **ML Libraries**: scikit-learn, pandas, numpy, joblib
+- **ML Models**: RandomForest classifiers for diet, stress, and workout recommendations
+- **Data Processing**: Pandas for feature engineering, one-hot encoding
+- **API**: RESTful endpoints with CORS support
+
+### Development Tools
+- **Package Managers**: npm, pip, uv (fast Python package installer)
+- **Environment**: dotenv for configuration
+- **Process Management**: Nodemon for hot-reload
+- **Version Control**: Git with conventional commits
+
+## 🏗️ Project Structure
+
+```
+fitnessApp/
+├── backend/                 # Node.js backend application
+│   ├── config/             # Database configuration
+│   ├── controllers/         # Business logic for each feature
+│   │   ├── aiController.js      # AI recommendation handling
+│   │   ├── gamificationController.js
+│   │   ├── mentalHealthController.js
+│   │   ├── nutritionController.js
+│   │   ├── syncController.js     # Device sync logic
+│   │   ├── userController.js
+│   │   └── workoutController.js
+│   ├── middlewares/         # Auth and validation middleware
+│   ├── models/              # MongoDB schemas
+│   │   ├── Gamification.js
+│   │   ├── MentalHealth.js
+│   │   ├── Nutrition.js
+│   │   ├── User.js
+│   │   └── Workout.js
+│   ├── routes/              # API routes
+│   ├── services/            # External service integrations
+│   │   ├── fitbitService.js
+│   │   ├── googleFitService.js
+│   │   └── appleHealthService.js
+│   ├── utils/               # Logger and utilities
+│   └── server.js             # Main application entry
+│
+├── frontend/                 # React frontend application
+│   ├── public/               # Static assets
+│   │   └── images/           # App images and icons
+│   ├── src/
+│   │   ├── components/       # Reusable components
+│   │   │   ├── 3D/          # 3D background effects
+│   │   │   ├── Navbar.jsx
+│   │   │   ├── Footer.jsx
+│   │   │   ├── Notification.jsx
+│   │   │   ├── PrivateRoute.jsx
+│   │   │   └── UserContext.jsx
+│   │   ├── pages/            # Main application pages
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── Workout.jsx
+│   │   │   ├── Nutrition.jsx
+│   │   │   ├── MentalHealth.jsx
+│   │   │   ├── Gamification.jsx
+│   │   │   ├── Recommendation.jsx
+│   │   │   ├── Profile.jsx
+│   │   │   └── AuthCallback.jsx
+│   │   ├── services/         # API service layer
+│   │   │   ├── UserService.js
+│   │   │   ├── WorkoutService.js
+│   │   │   ├── NutritionService.js
+│   │   │   ├── MentalHealthService.js
+│   │   │   ├── GamificationService.js
+│   │   │   ├── NotificationService.js
+│   │   │   └── *RecommenderService.js
+│   │   ├── utils/            # EventEmitter and Logger
+│   │   └── data/             # Kenyan meals database
+│   └── vite.config.js         # Vite configuration
+│
+├── flask-ai/                  # Python AI service
+│   ├── models/                 # ML models and recommenders
+│   │   ├── diet_recommender.py
+│   │   ├── stress_analysis.py
+│   │   ├── workout_recommender.py
+│   │   ├── diet_model.pkl
+│   │   ├── stress_model.pkl
+│   │   └── workout_model.pkl
+│   ├── app.py                  # Flask application
+│   ├── retrain_models.py       # Model training script
+│   └── requirements.txt        # Python dependencies
+│
+└── README.md
+```
+
+## 🚦 Getting Started
+
+### Prerequisites
+
+- **Node.js** (v18 or higher)
+- **Python** (v3.9 or higher)
+- **MongoDB** (v6.0 or higher - local or Atlas)
+- **npm** or **yarn** for Node packages
+- **pip** or **uv** for Python packages
+
+### Required Accounts & API Keys
 - Google Cloud Platform account (for Google Fit integration)
-- Fitbit Developer account
-- MongoDB Atlas account (or local MongoDB instance)
+- Fitbit Developer account (for Fitbit integration)
+- MongoDB Atlas account (optional, for cloud database)
 
-## Installation and Setup
+### Installation
 
-### Option 1: From Zip File
+#### Option 1: From Zip File
+
 1. **Extract the zip file**
-   - Extract the downloaded zip file to your desired location
-   - Open the extracted folder in your terminal/command prompt
+   ```bash
+   # Extract to your desired location
+   unzip fitnessApp.zip -d ./fitnessApp
+   cd fitnessApp
+   ```
 
 2. **Backend Setup**
    ```bash
@@ -40,103 +173,172 @@ This platform consists of three main components:
    # Copy environment example file
    cp .env.example .env
 
-   # Edit .env file with your configuration
-   # (See Environment Variables section below)
-
+   # Edit .env with your configuration (see Environment Variables section)
    # Start the backend server
    npm run dev
    ```
 
 3. **Frontend Setup**
    ```bash
-   # Open a new terminal window
-   # Navigate to frontend directory
+   # Open new terminal
    cd frontend
 
    # Install dependencies
    npm install
 
    # Copy environment example file
-   cp .env.example .env
+   cp .env.example .env.local
 
-   # Edit .env file with your configuration
-   # (See Environment Variables section below)
-
-   # Start the frontend development server
+   # Edit .env.local with your configuration
+   # Start the frontend server
    npm run dev
    ```
 
 4. **AI Service Setup**
    ```bash
-   # Open a new terminal window
-   # Navigate to flask-ai directory
+   # Open new terminal
    cd flask-ai
 
-   # Create virtual environment
+   # Create and activate virtual environment
    python -m venv venv
-
-   # Activate virtual environment
-   # On Windows:
-   venv\Scripts\activate
-   # On macOS/Linux:
-   source venv/bin/activate
+   # Windows: venv\Scripts\activate
+   # macOS/Linux: source venv/bin/activate
 
    # Install dependencies
    pip install -r requirements.txt
+   # Or with uv (faster): uv pip install -r requirements.txt
 
    # Copy environment example file
    cp .env.example .env
-
-   # Edit .env file with your configuration
-   # (See Environment Variables section below)
 
    # Start the AI service
    python app.py
    ```
 
-### Option 2: From Git Repository
+#### Option 2: From Git Repository
 ```bash
 # Clone the repository
-git clone https://github.com/CamlineKe/fitnessApp
+git clone https://github.com/CamlineKe/fitnessApp.git
 cd fitnessApp
 
-# Follow steps 2-4 from Option 1
+# Follow steps 2-4 from Option 1 above
 ```
 
-## Environment Variables
+### Environment Configuration
 
-### Backend (.env)
+#### Backend (.env)
 ```env
+# Server Configuration
 PORT=5000
-MONGODB_URI=your_mongodb_uri
-JWT_SECRET=your_jwt_secret
-FRONTEND_URL=http://localhost:3000
+NODE_ENV=development
+
+# Database Configuration
+MONGO_URI=mongodb://localhost:27017/fitnessApp
+# For MongoDB Atlas:
+# MONGO_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/fitnessApp
+
+# JWT Configuration
+JWT_SECRET=your-super-secret-jwt-key-min-32-chars
+
+# OAuth Credentials
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
+
 FITBIT_CLIENT_ID=your_fitbit_client_id
 FITBIT_CLIENT_SECRET=your_fitbit_client_secret
+FITBIT_REDIRECT_URI=http://localhost:3000/auth/fitbit/callback
+
+# Frontend URL for CORS
+FRONTEND_URL=http://localhost:3000
 ```
 
-### Frontend (.env)
+#### Frontend (.env.local)
 ```env
-REACT_APP_API_URL=http://localhost:5000
-REACT_APP_AI_SERVICE_URL=http://localhost:5001
+VITE_API_URL=http://localhost:5000/api
+VITE_SOCKET_URL=http://localhost:5000
 ```
 
-### AI Service (.env)
+#### AI Service (.env)
 ```env
-FLASK_APP=app.py
 FLASK_ENV=development
 PORT=5001
+CORS_ORIGIN=http://localhost:3000
 ```
 
-## API Integrations
+### Access the Application
+
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:5000/api
+- **AI Service**: http://localhost:5001/api
+- **API Documentation**: http://localhost:5000/api-docs
+
+## 🎮 Usage Guide
+
+### User Authentication
+- **Register**: Create account with email verification
+- **Login**: Secure JWT-based authentication
+- **Profile**: Update personal info, health goals, change password
+
+### Workout Tracking
+- Log workouts with activity type, duration, calories, heart rate
+- View workout history and progress charts
+- Track weekly workout frequency and volume
+- Receive AI-powered workout recommendations
+
+### Nutrition Tracking
+- Log meals from extensive Kenyan cuisine database
+- Auto-fill nutritional information from meal suggestions
+- Track daily calories and macronutrients (protein, carbs, fats)
+- View meal type distribution and weekly calorie trends
+
+### Mental Health
+- Daily mood check-ins (happy, neutral, anxious, sad)
+- Track stress levels and sleep quality
+- Add notes for context
+- Receive personalized stress management recommendations
+- View mood trends over time
+
+### Gamification
+- Earn points for all activities
+- Maintain streaks across workout, mental health, and nutrition
+- Unlock achievements and level up
+- Track progress with interactive dashboard
+
+### Device Integration
+- Connect Google Fit or Fitbit accounts
+- Sync health data automatically
+- View calories burned and heart rate from connected devices
+
+## 🤖 AI Recommendations
+
+The platform uses machine learning models to provide personalized recommendations:
+
+### Diet Recommendations
+- Analyzes meal logs and nutritional patterns
+- Provides macronutrient balance advice
+- Suggests meal timing improvements
+- Confidence scoring for ML predictions
+
+### Workout Recommendations
+- Analyzes workout history and intensity
+- Provides heart rate zone guidance
+- Suggests workout frequency and duration adjustments
+- Age and gender-specific recommendations
+
+### Stress Analysis
+- Analyzes mood patterns and trends
+- Provides personalized coping strategies
+- Age and gender-specific wellness tips
+- Tracks stress level progression
+
+## 🔌 API Integrations
 
 ### Google Fit
 - Required scopes:
-  - fitness.activity.read
-  - fitness.heart_rate.read
-  - fitness.body.read
+  - `https://www.googleapis.com/auth/fitness.activity.read`
+  - `https://www.googleapis.com/auth/fitness.heart_rate.read`
+  - `https://www.googleapis.com/auth/fitness.body.read`
 
 ### Fitbit
 - Required scopes:
@@ -144,14 +346,54 @@ PORT=5001
   - heartrate
   - profile
 
-## Development Workflow
+## 📊 API Endpoints
 
-1. Start MongoDB service
-2. Start the backend server
-3. Start the frontend development server
-4. Start the AI service (if needed)
+### Authentication
+- `POST /api/users/register` - User registration
+- `POST /api/users/login` - User login
+- `GET /api/users/profile` - Get user profile
+- `PUT /api/users/profile` - Update profile
+- `PUT /api/users/change-password` - Change password
 
-## Testing
+### Workouts
+- `GET /api/workouts` - Get all workouts
+- `POST /api/workouts` - Create workout log
+- `GET /api/workouts/today` - Get today's workout
+- `GET /api/workouts/:id` - Get specific workout
+- `PUT /api/workouts/:id` - Update workout
+- `DELETE /api/workouts/:id` - Delete workout
+
+### Nutrition
+- `GET /api/nutrition` - Get nutrition logs
+- `POST /api/nutrition` - Create meal log
+- `PUT /api/nutrition/:id` - Update meal log
+- `DELETE /api/nutrition/:id` - Delete meal log
+
+### Mental Health
+- `GET /api/mentalhealth` - Get mental health logs
+- `POST /api/mentalhealth` - Create check-in
+- `PUT /api/mentalhealth/:id` - Update check-in
+- `DELETE /api/mentalhealth/:id` - Delete check-in
+
+### Gamification
+- `GET /api/gamification/data` - Get gamification stats
+- `POST /api/gamification/points` - Update points
+- `POST /api/gamification/streak` - Update streak
+- `GET /api/gamification/leaderboard` - Get leaderboard
+
+### AI Recommendations
+- `POST /api/ai/diet` - Get diet recommendations
+- `POST /api/ai/workout` - Get workout recommendations
+- `POST /api/ai/stress` - Get stress analysis
+
+### Device Sync
+- `GET /api/sync/device-status` - Get device connection status
+- `GET /api/sync/calories` - Get calories from connected devices
+- `GET /api/sync/health-data` - Get health metrics
+- `POST /api/sync/:device/connect` - Connect device
+- `POST /api/sync/:device/disconnect` - Disconnect device
+
+## 🧪 Testing
 
 ### Backend Tests
 ```bash
@@ -165,290 +407,139 @@ cd frontend
 npm test
 ```
 
-## Deployment
+### AI Service Tests
+```bash
+cd flask-ai
+python -m pytest
+```
 
-Each component can be deployed independently:
-- Frontend: Vercel/Netlify
-- Backend: Render/Heroku
-- AI Service: Render/Heroku
+## 🚀 Deployment
 
-## Troubleshooting
+### Frontend (Vercel)
+1. Connect GitHub repository to Vercel
+2. Add environment variables in Vercel dashboard
+3. Deploy automatically on push
 
-Common issues and solutions:
-1. MongoDB connection issues
-   - Verify MongoDB URI
-   - Check if MongoDB service is running
-2. CORS errors
-   - Verify allowed origins in backend configuration
-3. API integration issues
-   - Verify API keys and scopes
-   - Check OAuth configuration
+### Backend (Render)
+1. Create new Web Service on Render
+2. Connect repository
+3. Set build command: `npm install`
+4. Set start command: `node server.js`
+5. Add environment variables
+6. Deploy
 
-## Contributing
+### AI Service (Render)
+1. Create new Web Service
+2. Set environment: Python 3
+3. Build command: `pip install -r requirements.txt`
+4. Start command: `gunicorn app:app`
+5. Add environment variables
+6. Deploy
+
+## 🔒 Security Features
+
+- JWT authentication with token expiration
+- Password hashing with bcryptjs
+- Environment-based configuration
+- CORS with allowed origins
+- Input validation and sanitization
+- Rate limiting on API endpoints
+- Secure session management
+- Sensitive data redaction in logs
+
+## 📈 Performance Optimizations
+
+- MongoDB indexing for fast queries
+- Socket.IO for real-time updates
+- Lazy loading of routes and components
+- Optimized bundle size with Vite
+- ML model caching in memory
+- Environment-based logging levels
+
+## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit changes (`git commit -m 'feat: add AmazingFeature'`)
+4. Push to branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-## Support
-
-For support, please contact [+254110868049]
-
-## Development Dependencies
-
-### Node.js Dependencies
-```json
-{
-  "dependencies": {
-    "express": "^4.21.0",
-    "mongoose": "^8.10.0",
-    "socket.io": "^4.8.0",
-    "axios": "^1.7.0",
-    "bcryptjs": "^3.0.0"
-  }
-}
+### Commit Convention
+```
+feat: add new feature
+fix: bug fix
+docs: documentation changes
+style: formatting, missing semicolons
+refactor: code restructuring
+test: adding tests
+chore: maintenance tasks
 ```
 
-### Python Dependencies
-```txt
-flask==2.0.1
-python-dotenv==0.19.0
-requests==2.26.0
-numpy==1.21.0
-pandas==1.3.0
-scikit-learn==0.24.2
+## 📋 Roadmap
+
+- [x] Basic workout tracking
+- [x] Nutrition logging with Kenyan meals
+- [x] Mental health check-ins
+- [x] Gamification system
+- [x] Google Fit integration
+- [x] Fitbit integration
+- [x] AI-powered recommendations
+- [ ] Apple Health integration
+- [ ] Social features and challenges
+- [ ] Custom workout plans
+- [ ] Meal planning and recipes
+- [ ] Push notifications
+- [ ] Offline mode
+- [ ] Wearable device sync
+
+## 🐛 Troubleshooting
+
+### Common Issues
+
+**MongoDB Connection Error**
+```
+Verify MongoDB is running: mongod
+Check connection string in .env
+Ensure network allows connection
 ```
 
-### Development Tools
-- Postman (for API testing)
-- MongoDB Compass/Atlas (for database management)
-- VS Code (recommended IDE)
-- Git (version control)
-
-## Database Setup
-
-### MongoDB Configuration
-The application uses MongoDB as its database. The connection is automatically established when you start the backend server using `npm run dev`. Make sure to:
-
-1. Have MongoDB installed locally or use MongoDB Atlas
-2. Set the correct `MONGODB_URI` in your `.env` file:
-   ```env
-   # For local MongoDB
-   MONGODB_URI=mongodb://localhost:27017/fitnessApp
-   
-   # For MongoDB Atlas
-   MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/fitnessApp
-   ```
-
-### Database Initialization
-The database will be automatically initialized when you start the server. No additional setup is required.
-
-## Version Control
-
-### Git Guidelines
-- Use semantic versioning
-- Follow conventional commits
-- Branch naming: feature/feature-name, bugfix/bug-name, hotfix/issue-name
-
-### Commit Message Format
+**CORS Errors**
 ```
-<type>(<scope>): <description>
-
-[optional body]
-[optional footer]
+Verify FRONTEND_URL in backend .env
+Check VITE_API_URL in frontend .env
+Confirm ports match configuration
 ```
 
-Types:
-- feat: new feature
-- fix: bug fix
-- docs: documentation changes
-- style: formatting, missing semicolons, etc.
-- refactor: code refactoring
-- test: adding tests
-- chore: maintenance
-
-## API Documentation
-
-### Authentication
-- JWT-based authentication
-- Token expiration: 24 hours
-- Refresh token mechanism
-
-### Rate Limiting
-- 100 requests per minute per IP
-- 1000 requests per hour per user
-
-### Endpoints
-- Base URL: http://localhost:5000/api
-- API version: v1
-- Documentation: http://localhost:5000/api-docs
-
-## Security Guidelines
-
-### API Keys
-- Never commit API keys to version control
-- Use environment variables
-- Rotate keys regularly
-- Use different keys for development and production
-
-### Environment Variables
-- Use .env files for local development
-- Use platform-specific environment variable management for production
-- Encrypt sensitive data
-
-### Security Checklist
-- [ ] Enable CORS with specific origins
-- [ ] Implement rate limiting
-- [ ] Use HTTPS in production
-- [ ] Regular security audits
-- [ ] Dependency vulnerability scanning
-
-## Performance Requirements
-
-### System Requirements
-- CPU: 2+ cores
-- RAM: 4GB minimum
-- Storage: 10GB minimum
-- Network: Stable internet connection
-
-### Recommended Specifications
-- CPU: 4+ cores
-- RAM: 8GB
-- Storage: 20GB SSD
-- Network: 10Mbps+ connection
-
-### Performance Benchmarks
-- API Response Time: < 200ms
-- Database Query Time: < 100ms
-- WebSocket Latency: < 50ms
-- Frontend Load Time: < 2s 
-
-## Virtual Environment Setup
-
-### Windows Setup
-1. **Install Python**
-   - Download Python 3.9 or higher from [python.org](https://www.python.org/downloads/)
-   - During installation, check "Add Python to PATH"
-   - Verify installation: `python --version`
-
-2. **Create Virtual Environment**
-   ```bash
-   # Navigate to flask-ai directory
-   cd flask-ai
-
-   # Create virtual environment
-   python -m venv venv
-
-   # Activate virtual environment
-   venv\Scripts\activate
-
-   # Verify activation (should see (venv) at start of prompt)
-   ```
-
-3. **Install Dependencies**
-   ```bash
-   # Make sure virtual environment is activated
-   pip install -r requirements.txt
-   ```
-
-### macOS Setup
-1. **Install Python**
-   - Install using Homebrew: `brew install python@3.9`
-   - Or download from [python.org](https://www.python.org/downloads/)
-   - Verify installation: `python3 --version`
-
-2. **Create Virtual Environment**
-   ```bash
-   # Navigate to flask-ai directory
-   cd flask-ai
-
-   # Create virtual environment
-   python3 -m venv venv
-
-   # Activate virtual environment
-   source venv/bin/activate
-
-   # Verify activation (should see (venv) at start of prompt)
-   ```
-
-3. **Install Dependencies**
-   ```bash
-   # Make sure virtual environment is activated
-   pip install -r requirements.txt
-   ```
-
-### Linux Setup
-1. **Install Python**
-   ```bash
-   # Ubuntu/Debian
-   sudo apt update
-   sudo apt install python3.9 python3.9-venv
-
-   # CentOS/RHEL
-   sudo yum install python3.9 python3.9-venv
-
-   # Verify installation
-   python3 --version
-   ```
-
-2. **Create Virtual Environment**
-   ```bash
-   # Navigate to flask-ai directory
-   cd flask-ai
-
-   # Create virtual environment
-   python3 -m venv venv
-
-   # Activate virtual environment
-   source venv/bin/activate
-
-   # Verify activation (should see (venv) at start of prompt)
-   ```
-
-3. **Install Dependencies**
-   ```bash
-   # Make sure virtual environment is activated
-   pip install -r requirements.txt
-   ```
-
-### Common Virtual Environment Commands
-```bash
-# To deactivate virtual environment
-deactivate
-
-# To check if virtual environment is active
-# Windows
-where python
-# macOS/Linux
-which python3
-
-# To recreate virtual environment
-deactivate
-# Windows
-rmdir /s /q venv
-# macOS/Linux
-rm -rf venv
-# Then follow setup steps again
+**OAuth Integration Issues**
+```
+Verify redirect URIs in OAuth provider dashboard
+Check client ID and secret are correct
+Ensure scopes are properly configured
 ```
 
-### Troubleshooting Virtual Environment
-1. **Python not found**
-   - Verify Python installation
-   - Check PATH environment variable
-   - Try using full path to Python executable
+**AI Service Not Responding**
+```
+Check if Flask server is running on port 5001
+Verify Python dependencies are installed
+Check model files exist in models directory
+```
 
-2. **Permission errors**
-   - Use `sudo` on Linux/macOS if needed
-   - Run terminal as administrator on Windows
+## 📄 License
 
-3. **Dependency installation issues**
-   - Update pip: `python -m pip install --upgrade pip`
-   - Try installing packages individually
-   - Check Python version compatibility
+This project is licensed under the ISC License.
 
-4. **Virtual environment activation issues**
-   - Verify correct activation command for your OS
-   - Check if virtual environment was created successfully
-   - Try recreating the virtual environment 
+## 👨‍💻 Author
+
+**Camline** - [CamlineKe](https://github.com/CamlineKe)
+
+## 🙏 Acknowledgments
+
+- Google Fit API team
+- Fitbit Developer team
+- MongoDB Atlas team
+- scikit-learn community
+- All open-source contributors
+
+---
+
+**Built with ❤️ for better health and wellness**
