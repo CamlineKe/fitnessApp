@@ -14,6 +14,10 @@ DIET_MODEL_PATH = os.path.join(MODELS_DIR, "diet_model.pkl")
 STRESS_MODEL_PATH = os.path.join(MODELS_DIR, "stress_model.pkl")
 WORKOUT_MODEL_PATH = os.path.join(MODELS_DIR, "workout_model.pkl")
 
+# Ensure models directory exists
+os.makedirs(MODELS_DIR, exist_ok=True)
+print(f"📁 Models directory: {MODELS_DIR}")
+
 def load_sample_data():
     np.random.seed(42)
     data_size = 10000  # Increased dataset size for better training
@@ -150,6 +154,12 @@ def train_model(X, y, model, model_path, feature_names=None):
     print(f"✅ Model saved: {model_path}")
     print(f"   Training accuracy: {train_score:.2f}")
     print(f"   Testing accuracy: {test_score:.2f}")
+    
+    return {
+        "train_score": train_score,
+        "test_score": test_score,
+        "feature_names": feature_names
+    }
 
 def determine_workout_category(duration, heart_rate, calories_burned):
     """Determine workout category based on metrics"""
@@ -169,14 +179,17 @@ def determine_workout_category(duration, heart_rate, calories_burned):
         return "Increase Intensity"
 
 # Generate and prepare training data
-print("Generating training data...")
+print("\n🔄 Generating training data...")
 diet_data, stress_data, workout_data = load_sample_data()
+print(f"   Diet data: {len(diet_data)} samples")
+print(f"   Stress data: {len(stress_data)} samples")
+print(f"   Workout data: {len(workout_data)} samples")
 
 # Train Diet Model
-print("\nTraining diet model...")
+print("\n🥗 Training diet model...")
 X_diet = diet_data[["calories", "protein", "carbohydrates", "fats"]]
 y_diet = diet_data["diet_recommendation"]
-train_model(
+diet_results = train_model(
     X_diet, 
     y_diet,
     RandomForestClassifier(n_estimators=100, random_state=42),
@@ -184,7 +197,7 @@ train_model(
 )
 
 # Train Stress Model
-print("\nTraining stress model...")
+print("\n🧠 Training stress model...")
 X_stress = pd.concat([
     pd.get_dummies(stress_data["mood"], prefix="mood"),
     stress_data[["stress_level", "sleep_quality"]]
@@ -201,7 +214,7 @@ stress_model = RandomForestClassifier(
     random_state=42
 )
 
-train_model(
+stress_results = train_model(
     X_stress,
     y_stress,
     stress_model,
@@ -209,7 +222,7 @@ train_model(
 )
 
 # Train Workout Model
-print("\nTraining workout model...")
+print("\n💪 Training workout model...")
 X_workout = pd.concat([
     pd.get_dummies(workout_data["activity_type"], prefix="activity"),
     workout_data[["duration", "calories_burned", "heart_rate"]]
@@ -226,11 +239,20 @@ workout_data["category"] = workout_data.apply(
 )
 y_workout = workout_data["category"]
 
-train_model(
+workout_results = train_model(
     X_workout,
     y_workout,
     RandomForestClassifier(n_estimators=100, random_state=42),
     WORKOUT_MODEL_PATH
 )
 
+# Summary
+print("\n" + "="*50)
+print("📊 TRAINING SUMMARY")
+print("="*50)
+print(f"Diet Model:     Accuracy {diet_results['test_score']:.2f} - Features: {len(diet_results['feature_names'])}")
+print(f"Stress Model:   Accuracy {stress_results['test_score']:.2f} - Features: {len(stress_results['feature_names'])}")
+print(f"Workout Model:  Accuracy {workout_results['test_score']:.2f} - Features: {len(workout_results['feature_names'])}")
+print("="*50)
 print("\n✅ All models trained and saved successfully!")
+print(f"📁 Models saved in: {MODELS_DIR}")
