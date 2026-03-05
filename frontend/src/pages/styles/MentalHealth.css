@@ -528,11 +528,59 @@
     border-radius: 8px;
 }
 
-/* Mood Selection Buttons */
+/* Mood Selection Buttons - Updated to compact chips */
 .mood-selection {
     margin-bottom: 2rem;
 }
 
+.mood-buttons-compact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.mood-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid var(--border-light);
+    border-radius: 30px;
+    background: white;
+    color: var(--text-main);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex: 0 1 auto;
+    min-width: fit-content;
+}
+
+.mood-chip:hover {
+    background: #f8f9fa;
+    border-color: var(--primary);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.mood-chip.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+.mood-chip.selected span {
+    color: white;
+}
+
+.mood-chip span {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+/* Keep original mood buttons for backward compatibility */
 .mood-buttons {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
@@ -606,6 +654,10 @@
     .check-in-container {
         grid-template-columns: 1fr;
     }
+    
+    .mood-buttons-compact {
+        justify-content: center;
+    }
 }
 
 @media (max-width: 1200px) {
@@ -674,6 +726,15 @@
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
+    
+    .mood-buttons-compact {
+        gap: 6px;
+    }
+    
+    .mood-chip {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -710,6 +771,15 @@
 
     .mood-emoji {
         font-size: 3rem;
+    }
+    
+    .mood-chip {
+        padding: 4px 10px;
+        font-size: 12px;
+    }
+    
+    .mood-chip span {
+        font-size: 1rem;
     }
 }
 

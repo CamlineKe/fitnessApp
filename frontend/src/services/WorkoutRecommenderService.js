@@ -1,4 +1,5 @@
 import axios from 'axios';
+import Logger from '../utils/logger';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/ai/workout`;
 
@@ -9,11 +10,15 @@ const getWorkoutRecommendations = async () => {
   }
 
   try {
-    const response = await axios.post(API_URL, null, {
-      headers: { Authorization: `Bearer ${token}` },
+    // The backend will fetch user data and workout history automatically
+    const response = await axios.post(API_URL, {}, {
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
     });
 
-    console.log('Workout recommendations response:', response.data);
+    Logger.debug('Workout recommendations response:', response.data);
 
     // Ensure we have a consistent response format
     const data = response.data;
@@ -28,9 +33,9 @@ const getWorkoutRecommendations = async () => {
       profile_complete: data.profile_complete || false
     };
   } catch (error) {
-    console.error('Error fetching workout recommendations:', error);
+    Logger.error('Error fetching workout recommendations:', error);
     if (error.response) {
-      console.error('Error response data:', error.response.data);
+      Logger.error('Error response data:', error.response.data);
     }
     throw error;
   }
