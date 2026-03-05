@@ -30,6 +30,12 @@ const Nutrition = () => {
   // ✅ State for storing meal logs separately
   const [mealLogs, setMealLogs] = useState([]);
   const [editMeal, setEditMeal] = useState(null); // Stores meal being edited
+  const [editFormData, setEditFormData] = useState({
+    meal: "",
+    type: "",
+    calories: 0,
+    nutrients: { protein: 0, carbohydrates: 0, fats: 0 },
+  });
 
   // ✅ State for new meal input fields
   const [newMeal, setNewMeal] = useState({
@@ -42,10 +48,9 @@ const Nutrition = () => {
   const [dietRecommendations, setDietRecommendations] = useState(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // ✅ New state for meal suggestions autocomplete
+  // ✅ State for meal suggestions autocomplete
   const [mealInput, setMealInput] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -101,7 +106,6 @@ const Nutrition = () => {
       } catch (err) {
         Logger.error('Error fetching diet recommendations:', err);
         // Don't set the main error state, just log it
-        // You could set a separate state for recommendation errors if needed
       }
     };
 
@@ -262,9 +266,10 @@ const Nutrition = () => {
       await GamificationService.updateStreak('nutrition');
       await GamificationService.checkAchievements();
 
-      // Emit events for dashboard update
-      EventEmitter.emit('nutrition-updated');
-      EventEmitter.emit('gamification-updated');
+      // Emit events for dashboard update using EventEmitter constants
+      EventEmitter.emit(EventEmitter.Events.NUTRITION_UPDATED, { meal: mealData });
+      EventEmitter.emit(EventEmitter.Events.MEAL_ADDED, { meal: mealData });
+      EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, { type: 'nutrition' });
 
       // Show success toast
       notifySuccess('Meal added successfully! 🍽️');
@@ -278,14 +283,63 @@ const Nutrition = () => {
   // ✅ Function to set the selected meal for editing
   const handleEditMealLog = (meal) => {
     setEditMeal(meal);
-    setNewMeal(meal);
+    setEditFormData({
+      meal: meal.foodItems?.join(", ") || "",
+      type: meal.mealType || "breakfast",
+      calories: meal.calories || 0,
+      nutrients: {
+        protein: meal.macronutrients?.protein || 0,
+        carbohydrates: meal.macronutrients?.carbohydrates || 0,
+        fats: meal.macronutrients?.fats || 0
+      }
+    });
+  };
+
+  // ✅ Handle edit form input changes
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    
+    if (name.startsWith('nutrient.')) {
+      const nutrient = name.split('.')[1];
+      setEditFormData(prev => ({
+        ...prev,
+        nutrients: {
+          ...prev.nutrients,
+          [nutrient]: parseFloat(value) || 0
+        }
+      }));
+    } else {
+      setEditFormData(prev => ({
+        ...prev,
+        [name]: name === 'calories' ? parseFloat(value) || 0 : value
+      }));
+    }
+  };
+
+  // ✅ Cancel edit mode
+  const handleCancelEdit = () => {
+    setEditMeal(null);
+    setEditFormData({
+      meal: "",
+      type: "",
+      calories: 0,
+      nutrients: { protein: 0, carbohydrates: 0, fats: 0 }
+    });
   };
 
   // ✅ Function to save an updated meal log
   const handleSaveMealLog = async () => {
     try {
-      const oldMeal = editMeal; // Store the old meal data
-      const updatedLog = await updateNutritionLog(editMeal._id, newMeal);
+      const oldMeal = editMeal;
+      
+      const updatedMealData = {
+        mealType: editFormData.type,
+        foodItems: [editFormData.meal],
+        calories: editFormData.calories,
+        macronutrients: editFormData.nutrients,
+      };
+
+      const updatedLog = await updateNutritionLog(editMeal._id, updatedMealData);
 
       if (updatedLog) {
         // Update meal logs
@@ -294,25 +348,27 @@ const Nutrition = () => {
         // Update today's nutrition data by subtracting old values and adding new ones
         setNutritionData(prev => ({
           ...prev,
-          calories: prev.calories - Number(oldMeal.calories) + Number(newMeal.calories),
+          calories: prev.calories - Number(oldMeal.calories) + Number(editFormData.calories),
           macronutrients: {
-            protein: prev.macronutrients.protein - Number(oldMeal.macronutrients?.protein || 0) + Number(newMeal.nutrients.protein),
-            carbohydrates: prev.macronutrients.carbohydrates - Number(oldMeal.macronutrients?.carbohydrates || 0) + Number(newMeal.nutrients.carbohydrates),
-            fats: prev.macronutrients.fats - Number(oldMeal.macronutrients?.fats || 0) + Number(newMeal.nutrients.fats)
+            protein: prev.macronutrients.protein - Number(oldMeal.macronutrients?.protein || 0) + Number(editFormData.nutrients.protein),
+            carbohydrates: prev.macronutrients.carbohydrates - Number(oldMeal.macronutrients?.carbohydrates || 0) + Number(editFormData.nutrients.carbohydrates),
+            fats: prev.macronutrients.fats - Number(oldMeal.macronutrients?.fats || 0) + Number(editFormData.nutrients.fats)
           }
         }));
         
         // Update gamification for nutrition tracking
         await GamificationService.updatePoints('nutrition', {
-          calories: newMeal.calories,
-          macronutrients: newMeal.nutrients,
-          mealType: newMeal.type
+          calories: editFormData.calories,
+          macronutrients: editFormData.nutrients,
+          mealType: editFormData.type
         });
         await GamificationService.updateStreak('nutrition');
         await GamificationService.checkAchievements();
         
-        // Emit event for dashboard update
-        EventEmitter.emit('nutrition-updated');
+        // Emit events for dashboard update using EventEmitter constants
+        EventEmitter.emit(EventEmitter.Events.NUTRITION_UPDATED, { meal: updatedLog });
+        EventEmitter.emit(EventEmitter.Events.MEAL_UPDATED, { meal: updatedLog });
+        EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, { type: 'nutrition' });
 
         setEditMeal(null); // Clear edit mode after saving
         notifySuccess('Meal updated successfully! 🔄');
@@ -354,6 +410,11 @@ const Nutrition = () => {
         });
         await GamificationService.updateStreak('nutrition');
         await GamificationService.checkAchievements();
+        
+        // Emit events for dashboard update using EventEmitter constants
+        EventEmitter.emit(EventEmitter.Events.NUTRITION_UPDATED, { deletedId: id });
+        EventEmitter.emit(EventEmitter.Events.MEAL_DELETED, { deletedId: id });
+        EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, { type: 'nutrition' });
         
         notifySuccess('Meal deleted successfully! 🗑️');
       }
@@ -449,6 +510,15 @@ const Nutrition = () => {
         strokeWidth: 2,
       }
     }
+  };
+
+  // Get today's meals
+  const getTodaysMeals = () => {
+    const today = new Date().toDateString();
+    return mealLogs.filter(log => {
+      const logDate = new Date(log.date);
+      return logDate.toDateString() === today;
+    });
   };
 
   return (
@@ -569,53 +639,77 @@ const Nutrition = () => {
         {/* Today's Meals Section */}
         <div className="nutrition-section todays-meals">
           <h2>Today's Meals</h2>
-          {mealLogs.filter(log => {
-            const logDate = new Date(log.date);
-            const today = new Date();
-            return logDate.toDateString() === today.toDateString();
-          }).length > 0 ? (
+          {getTodaysMeals().length > 0 ? (
             <>
               <div className="meal-logs-header">
                 <div className="meal-log-item">
-                  <span className="meal-name">Meal Name</span>
+                  <span className="meal-name">Meal</span>
                   <span className="meal-type">Type</span>
                   <span className="meal-calories">Calories</span>
                   <span className="meal-actions-header">Actions</span>
                 </div>
               </div>
               <ul className="meal-logs-list">
-                {mealLogs
-                  .filter(log => {
-                    const logDate = new Date(log.date);
-                    const today = new Date();
-                    return logDate.toDateString() === today.toDateString();
-                  })
+                {getTodaysMeals()
                   .sort((a, b) => new Date(b.date) - new Date(a.date))
                   .map((log) => (
                     <li key={log._id} className="meal-log-item">
-                      <span className="meal-name">{log.foodItems?.join(", ") || "N/A"}</span>
-                      <span className="meal-type">{log.mealType || "N/A"}</span>
-                      <span className="meal-calories">{log.calories} kcal</span>
-                      <div className="meal-actions">
-                        {editMeal && editMeal._id === log._id ? (
-                          <button onClick={handleSaveMealLog}>Save</button>
-                        ) : (
-                          <button onClick={() => handleEditMealLog(log)}>Edit</button>
-                        )}
-                        <button onClick={() => handleDeleteMealLog(log._id)} className="delete-btn">Delete</button>
-                      </div>
+                      {editMeal && editMeal._id === log._id ? (
+                        // Edit mode
+                        <>
+                          <span className="meal-name">
+                            <input
+                              type="text"
+                              name="meal"
+                              value={editFormData.meal}
+                              onChange={handleEditInputChange}
+                              placeholder="Meal name"
+                            />
+                          </span>
+                          <span className="meal-type">
+                            <select
+                              name="type"
+                              value={editFormData.type}
+                              onChange={handleEditInputChange}
+                            >
+                              <option value="breakfast">Breakfast</option>
+                              <option value="lunch">Lunch</option>
+                              <option value="dinner">Dinner</option>
+                              <option value="snack">Snack</option>
+                            </select>
+                          </span>
+                          <span className="meal-calories">
+                            <input
+                              type="number"
+                              name="calories"
+                              value={editFormData.calories}
+                              onChange={handleEditInputChange}
+                              min="0"
+                            /> kcal
+                          </span>
+                          <div className="meal-actions">
+                            <button onClick={handleSaveMealLog} className="save-btn">Save</button>
+                            <button onClick={handleCancelEdit} className="cancel-btn">Cancel</button>
+                          </div>
+                        </>
+                      ) : (
+                        // View mode
+                        <>
+                          <span className="meal-name">{log.foodItems?.join(", ") || "N/A"}</span>
+                          <span className="meal-type">{log.mealType || "N/A"}</span>
+                          <span className="meal-calories">{log.calories} kcal</span>
+                          <div className="meal-actions">
+                            <button onClick={() => handleEditMealLog(log)} className="edit-btn">Edit</button>
+                            <button onClick={() => handleDeleteMealLog(log._id)} className="delete-btn">Delete</button>
+                          </div>
+                        </>
+                      )}
                     </li>
                   ))}
               </ul>
               <div className="todays-total">
                 <p>Total Calories Today: {
-                  mealLogs
-                    .filter(log => {
-                      const logDate = new Date(log.date);
-                      const today = new Date();
-                      return logDate.toDateString() === today.toDateString();
-                    })
-                    .reduce((sum, log) => sum + (log.calories || 0), 0)
+                  getTodaysMeals().reduce((sum, log) => sum + (log.calories || 0), 0)
                 } kcal</p>
               </div>
             </>
@@ -861,14 +955,14 @@ const Nutrition = () => {
           </div>
         </div>
 
-        {/* Meal Logs Section */}
+        {/* Recent Meal Logs Section */}
         <div className="nutrition-section meal-logs">
-          <h2>Meal Logs</h2>
+          <h2>Recent Meal Logs</h2>
           {mealLogs.length > 0 ? (
             <>
               <div className="meal-logs-header">
                 <div className="meal-log-item">
-                  <span className="meal-name">Meal Name</span>
+                  <span className="meal-name">Date & Meal</span>
                   <span className="meal-type">Type</span>
                   <span className="meal-calories">Calories</span>
                   <span className="meal-actions-header">Actions</span>
@@ -876,39 +970,77 @@ const Nutrition = () => {
               </div>
               <ul className="meal-logs-list">
                 {[...mealLogs]
-                  .sort((a, b) => new Date(b.date) - new Date(a.date)) // Sort by most recent
-                  .filter(log => {
-                    const logDate = new Date(log.date);
-                    const sevenDaysAgo = new Date();
-                    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-                    return logDate >= sevenDaysAgo;
-                  })
+                  .sort((a, b) => new Date(b.date) - new Date(a.date))
+                  .slice(0, 10) // Show only last 10 meals
                   .map((log) => {
                     const logDate = new Date(log.date);
                     const isToday = logDate.toDateString() === new Date().toDateString();
                     return (
                       <li key={log._id} className="meal-log-item">
-                        <span className="meal-name">
-                          {isToday ? "Today" : logDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} - {log.foodItems?.join(", ") || "N/A"}
-                        </span>
-                        <span className="meal-type">{log.mealType || "N/A"}</span>
-                        <span className="meal-calories">{log.calories} kcal</span>
-                        <div className="meal-actions">
-                          {editMeal && editMeal._id === log._id ? (
-                            <button onClick={handleSaveMealLog}>Save</button>
-                          ) : (
-                            <button onClick={() => handleEditMealLog(log)}>Edit</button>
-                          )}
-                          <button onClick={() => handleDeleteMealLog(log._id)} className="delete-btn">Delete</button>
-                        </div>
+                        {editMeal && editMeal._id === log._id ? (
+                          // Edit mode for recent meals
+                          <>
+                            <span className="meal-name">
+                              <input
+                                type="text"
+                                name="meal"
+                                value={editFormData.meal}
+                                onChange={handleEditInputChange}
+                                placeholder="Meal name"
+                              />
+                            </span>
+                            <span className="meal-type">
+                              <select
+                                name="type"
+                                value={editFormData.type}
+                                onChange={handleEditInputChange}
+                              >
+                                <option value="breakfast">Breakfast</option>
+                                <option value="lunch">Lunch</option>
+                                <option value="dinner">Dinner</option>
+                                <option value="snack">Snack</option>
+                              </select>
+                            </span>
+                            <span className="meal-calories">
+                              <input
+                                type="number"
+                                name="calories"
+                                value={editFormData.calories}
+                                onChange={handleEditInputChange}
+                                min="0"
+                              /> kcal
+                            </span>
+                            <div className="meal-actions">
+                              <button onClick={handleSaveMealLog} className="save-btn">Save</button>
+                              <button onClick={handleCancelEdit} className="cancel-btn">Cancel</button>
+                            </div>
+                          </>
+                        ) : (
+                          // View mode for recent meals
+                          <>
+                            <span className="meal-name">
+                              {isToday ? "Today" : logDate.toLocaleDateString('en-US', { 
+                                month: 'short', 
+                                day: 'numeric' 
+                              })} - {log.foodItems?.join(", ") || "N/A"}
+                            </span>
+                            <span className="meal-type">{log.mealType || "N/A"}</span>
+                            <span className="meal-calories">{log.calories} kcal</span>
+                            <div className="meal-actions">
+                              <button onClick={() => handleEditMealLog(log)} className="edit-btn">Edit</button>
+                              <button onClick={() => handleDeleteMealLog(log._id)} className="delete-btn">Delete</button>
+                            </div>
+                          </>
+                        )}
                       </li>
                     );
                   })}
               </ul>
             </>
-          ) : <p>No meal logs yet. Start by adding one!</p>}
+          ) : (
+            <p>No meal logs yet. Start by adding one!</p>
+          )}
         </div>
-
       </div>
     </div>
     </div>

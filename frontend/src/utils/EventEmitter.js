@@ -8,7 +8,10 @@ class EventEmitter {
     MENTAL_HEALTH_RECOMMENDATIONS_UPDATED: 'mentalHealthRecommendationsUpdated',
     MEAL_ADDED: 'mealAdded',
     MEAL_UPDATED: 'mealUpdated',
-    MEAL_DELETED: 'mealDeleted'
+    MEAL_DELETED: 'mealDeleted',
+    NUTRITION_UPDATED: 'nutritionUpdated',
+    WORKOUT_UPDATED: 'workoutUpdated',
+    GAMIFICATION_UPDATED: 'gamificationUpdated'
   };
 
   static on(event, callback) {

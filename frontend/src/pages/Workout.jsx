@@ -81,29 +81,40 @@ const Workout = () => {
     });
   };
 
+  // Helper function to check if a date is today
+  const isToday = (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+
+  // Helper function to format date
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      month: 'short', 
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
+
   useEffect(() => {
     if (!user || !user._id) {
-      console.warn("User not authenticated, skipping fetch.");
+      Logger.warn("User not authenticated, skipping fetch.");
       return;
     }
 
     const fetchInitialData = async () => {
       try {
         setLoading(true);
-        const [workoutData, workoutLogs] = await Promise.all([
-          WorkoutService.getWorkoutData(user._id),
-          WorkoutService.getWorkoutLogs(user._id)
-        ]);
-
-        // Set workout logs first
-        setWorkoutLogs(workoutLogs || []);
+        
+        // Fetch workout logs first (service handles auth internally)
+        const logs = await WorkoutService.getWorkoutLogs();
+        Logger.debug('Fetched workout logs:', logs);
+        setWorkoutLogs(logs || []);
 
         // Find today's workout from logs
-        const today = new Date();
-        const todayWorkout = workoutLogs?.find(log => {
-          const logDate = new Date(log.date);
-          return logDate.toDateString() === today.toDateString();
-        });
+        const todayWorkout = logs?.find(log => isToday(log.date));
 
         // Set workout data with either today's workout or default values
         setWorkoutData(todayWorkout || {
@@ -117,6 +128,7 @@ const Workout = () => {
         // Try to get recommendations, but don't fail if they're not available
         try {
           const recommendations = await WorkoutRecommenderService.getWorkoutRecommendations();
+          Logger.debug('Fetched workout recommendations:', recommendations);
           setWorkoutRecommendations(recommendations);
         } catch (recError) {
           Logger.warn('Could not fetch workout recommendations:', recError);
@@ -125,7 +137,7 @@ const Workout = () => {
       } catch (err) {
         Logger.error('Error fetching workout data:', err);
         setError('Failed to load workout data');
-        if (err.message.includes("No authentication token found") || err.response?.status === 401) {
+        if (err.message?.includes("No authentication token found") || err.response?.status === 401) {
           handleError("Session expired. Please log in again");
           logout();
         }
@@ -218,9 +230,7 @@ const Workout = () => {
       };
       
       // Update today's workout data if the new log is for today
-      const today = new Date();
-      const logDate = new Date(workoutEventData.date);
-      if (logDate.toDateString() === today.toDateString()) {
+      if (isToday(workoutEventData.date)) {
         setWorkoutData(workoutEventData);
       }
 
@@ -236,12 +246,12 @@ const Workout = () => {
         const streakResponse = await GamificationService.updateStreak("workout");
         Logger.debug('Updated streak data:', streakResponse);
         
-        // Emit events for dashboard update
-        EventEmitter.emit('workout-updated', workoutEventData);
-        EventEmitter.emit('gamification-updated', streakResponse.streaks);
+        // Emit events for dashboard update using EventEmitter constants
+        EventEmitter.emit(EventEmitter.Events.WORKOUT_UPDATED, workoutEventData);
+        EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, streakResponse?.streaks);
 
         // Show success message with streak info
-        const streakMsg = streakResponse.streaks?.currentStreak > 1 
+        const streakMsg = streakResponse?.streaks?.currentStreak > 1 
           ? `${streakResponse.streaks.currentStreak} day streak! 🔥` 
           : '';
         handleSuccess(`Workout logged successfully! ${streakMsg}`);
@@ -271,16 +281,14 @@ const Workout = () => {
   // Prepare data for the line chart (workout duration and calories over time)
   const workoutMetricsData = {
     labels: workoutLogs
-      .slice(0, 14) // Show last 14 days
-      .reverse()
-      .map((log) => new Date(log.date).toLocaleDateString()),
+      .slice(-14) // Get last 14 logs
+      .map((log) => formatDate(log.date)),
     datasets: [
       {
         label: 'Duration (minutes)',
         data: workoutLogs
-          .slice(0, 14)
-          .reverse()
-          .map((log) => log.duration),
+          .slice(-14)
+          .map((log) => log.duration || 0),
         borderColor: '#4CAF50',
         backgroundColor: 'rgba(76, 175, 80, 0.2)',
         yAxisID: 'y',
@@ -290,9 +298,8 @@ const Workout = () => {
       {
         label: 'Calories Burned',
         data: workoutLogs
-          .slice(0, 14)
-          .reverse()
-          .map((log) => log.caloriesBurned),
+          .slice(-14)
+          .map((log) => log.caloriesBurned || 0),
         borderColor: '#2196F3',
         backgroundColor: 'rgba(33, 150, 243, 0.2)',
         yAxisID: 'y1',
@@ -397,17 +404,34 @@ const Workout = () => {
             <>
               {/* Today's Workout Section */}
               <div className="todays-workout">
-                <h2>Todays Workout</h2>
+                <h2>Today's Workout</h2>
                 {workoutData ? (
-                  <div>
-                    {["activityType", "duration", "caloriesBurned", "heartRate", "feedback"].map((field) => (
-                      <p key={field}>
-                        <strong>{field.replace(/([A-Z])/g, " $1")}:</strong> {workoutData?.[field] || "N/A"}
-                      </p>
-                    ))}
+                  <div className="workout-stats">
+                    <div className="stat-item">
+                      <span className="stat-label">Activity:</span>
+                      <span className="stat-value">{workoutData.activityType}</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-label">Duration:</span>
+                      <span className="stat-value">{workoutData.duration} min</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-label">Calories:</span>
+                      <span className="stat-value">{workoutData.caloriesBurned} kcal</span>
+                    </div>
+                    <div className="stat-item">
+                      <span className="stat-label">Heart Rate:</span>
+                      <span className="stat-value">{workoutData.heartRate} bpm</span>
+                    </div>
+                    {workoutData.feedback && (
+                      <div className="stat-item feedback">
+                        <span className="stat-label">Feedback:</span>
+                        <span className="stat-value">{workoutData.feedback}</span>
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <p>Loading...</p>
+                  <p>No workout logged today</p>
                 )}
               </div>
 
@@ -500,8 +524,8 @@ const Workout = () => {
                     </div>
                   </div>
 
-                  <button type="submit" className="add-log-button">
-                    <FaPlus /> Add Workout Log
+                  <button type="submit" className="add-log-button" disabled={loading}>
+                    <FaPlus /> {loading ? 'Adding...' : 'Add Workout Log'}
                   </button>
                 </form>
               </div>
@@ -543,20 +567,26 @@ const Workout = () => {
 
               {/* Workout Logs Section - At the end */}
               <div className="workout-logs">
-                <h2>Workout Logs</h2>
+                <h2>Recent Workout Logs</h2>
                 {workoutLogs.length > 0 ? (
-                  <ul>
-                    {workoutLogs.map((log, index) => (
-                      <li key={log._id || index}>
-                        {["date", "activityType", "duration", "caloriesBurned", "heartRate", "feedback"].map((field) => (
-                          <p key={field}>
-                            <strong>{field.replace(/([A-Z])/g, " $1")}:</strong>{" "}
-                            {field === "date" ? new Date(log[field]).toLocaleDateString() : log[field] || "N/A"}
-                          </p>
-                        ))}
-                      </li>
+                  <div className="logs-grid">
+                    {workoutLogs.slice(0, 10).map((log, index) => (
+                      <div key={log._id || index} className="log-card">
+                        <div className="log-header">
+                          <span className="log-date">{formatDate(log.date)}</span>
+                          <span className="log-type">{log.activityType}</span>
+                        </div>
+                        <div className="log-details">
+                          <span className="log-duration">⏱️ {log.duration} min</span>
+                          <span className="log-calories">🔥 {log.caloriesBurned} kcal</span>
+                          <span className="log-heartrate">❤️ {log.heartRate} bpm</span>
+                        </div>
+                        {log.feedback && (
+                          <div className="log-feedback">💬 {log.feedback}</div>
+                        )}
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 ) : (
                   <p>No workout logs available.</p>
                 )}
