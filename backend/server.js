@@ -32,8 +32,7 @@ const io = new Server(server, {
     origin: [
       'http://localhost:3000',
       'http://localhost:5000',
-      process.env.FRONTEND_URL,
-      'https://fitness-3doakdbyh-camlinekes-projects.vercel.app'
+      process.env.FRONTEND_URL
     ].filter(Boolean),
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
@@ -49,8 +48,7 @@ app.use(express.json());
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5000',
-  process.env.FRONTEND_URL,
-  'https://fitness-app-dusky-six.vercel.app' // Removed trailing slash
+  process.env.FRONTEND_URL
 ].filter(Boolean);
 
 app.use(cors({
@@ -140,6 +138,7 @@ const startServer = async () => {
     });
   } catch (error) {
     Logger.error('Server error:', error);
+    process.exit(1);
   }
 };
 
@@ -159,6 +158,19 @@ app.use((err, req, res, next) => {
 
 // Error handling
 process.on('uncaughtException', (error) => {
-  Logger.error('Server error:', error);
-  // ... existing code ...
+  Logger.error('Uncaught Exception:', error);
+  // Gracefully shutdown the server
+  server.close(() => {
+    Logger.info('Server closed due to uncaught exception');
+    process.exit(1);
+  });
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  Logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Optionally shutdown the server
+  server.close(() => {
+    Logger.info('Server closed due to unhandled rejection');
+    process.exit(1);
+  });
 });
