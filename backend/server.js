@@ -6,6 +6,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import Logger from './utils/logger.js';
+import validateEnv from './config/validation.js'; // Import environment validation
 
 // Import routes
 import userRoutes from './routes/userRoutes.js';
@@ -18,6 +19,12 @@ import syncRoutes from './routes/syncRoutes.js';
 
 // Load environment variables from .env file
 dotenv.config();
+
+// Validate environment variables before starting the server
+if (!validateEnv()) {
+  Logger.error('❌ Environment validation failed. Server cannot start.');
+  process.exit(1);
+}
 
 // Initialize Express app
 const app = express();
@@ -134,10 +141,10 @@ const startServer = async () => {
     await connectDB();
     // Start the server
     server.listen(PORT, () => {
-      Logger.info(`Server running on port ${PORT}`);
+      Logger.info(`✅ Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
     });
   } catch (error) {
-    Logger.error('Server error:', error);
+    Logger.error('❌ Server error:', error);
     process.exit(1);
   }
 };
@@ -158,7 +165,7 @@ app.use((err, req, res, next) => {
 
 // Error handling
 process.on('uncaughtException', (error) => {
-  Logger.error('Uncaught Exception:', error);
+  Logger.error('❌ Uncaught Exception:', error);
   // Gracefully shutdown the server
   server.close(() => {
     Logger.info('Server closed due to uncaught exception');
@@ -167,7 +174,7 @@ process.on('uncaughtException', (error) => {
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  Logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  Logger.error('❌ Unhandled Rejection at:', promise, 'reason:', reason);
   // Optionally shutdown the server
   server.close(() => {
     Logger.info('Server closed due to unhandled rejection');
