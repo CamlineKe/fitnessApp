@@ -1,0 +1,61 @@
+.auth-callback-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.auth-callback-card {
+    background: white;
+    padding: 3rem;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #667eea;
+    border-radius: 50%;
+    margin: 0 auto 1.5rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.auth-callback-card h2 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.auth-callback-card p {
+    color: #666;
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+}
+
+.auth-callback-card .note {
+    font-size: 0.9rem;
+    color: #999;
+    margin-top: 1rem;
+    font-style: italic;
+}
+
+@media (max-width: 480px) {
+    .auth-callback-card {
+        padding: 2rem;
+    }
+    
+    .auth-callback-card h2 {
+        font-size: 1.25rem;
+    }
+}

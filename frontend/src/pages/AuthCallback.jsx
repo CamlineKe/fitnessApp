@@ -1,30 +1,45 @@
 import { useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import "./styles/AuthhCallback.css";
 import Logger from '../utils/logger';
 
 const AuthCallback = () => {
+    const navigate = useNavigate();
+
     useEffect(() => {
         const handleCallback = async () => {
             try {
                 const urlParams = new URLSearchParams(window.location.search);
                 const code = urlParams.get('code');
-                const state = urlParams.get('state');
+                const error = urlParams.get('error');
+                
+                // Determine which service this is for
+                const isFitbit = window.location.pathname.includes('/auth/fitbit');
+                const service = isFitbit ? 'Fitbit' : 'Google Fit';
+                const endpoint = isFitbit ? 'fitbit' : 'google-fit';
 
-                if (!code) {
-                    Logger.error('No authorization code found');
-                    window.opener?.postMessage({
-                        type: 'FITBIT_AUTH_ERROR',
-                        error: 'No authorization code found'
-                    }, window.location.origin);
-                    window.close();
+                // Check for error in URL params (some providers send error directly)
+                if (error) {
+                    Logger.error(`Auth error from ${service}:`, error);
+                    
+                    // Redirect back to profile with error
+                    navigate(`/profile?status=error&message=${encodeURIComponent(error)}&service=${service}`);
                     return;
                 }
 
-                // Determine if this is a Fitbit callback by checking the URL path
-                const isFitbit = window.location.pathname.includes('/auth/fitbit');
-                const endpoint = isFitbit ? 'fitbit' : 'google-fit';
+                if (!code) {
+                    Logger.error('No authorization code found');
+                    
+                    // Redirect back to profile with error
+                    navigate(`/profile?status=error&message=${encodeURIComponent('No authorization code received')}&service=${service}`);
+                    return;
+                }
 
-                await axios.post(
+                Logger.debug(`Exchanging code for ${service} tokens...`);
+
+                // Exchange the code for tokens
+                const response = await axios.post(
                     `${import.meta.env.VITE_API_URL}/sync/${endpoint}/connect`,
                     { code },
                     {
@@ -34,31 +49,35 @@ const AuthCallback = () => {
                     }
                 );
 
-                // Send success message to opener window
-                window.opener?.postMessage({
-                    type: 'FITBIT_AUTH_SUCCESS',
-                    service: isFitbit ? 'Fitbit' : 'Google Fit'
-                }, window.location.origin);
-                window.close();
+                Logger.debug(`${service} connection successful:`, response.data);
+
+                // Redirect back to profile with success message
+                navigate(`/profile?status=success&message=${encodeURIComponent('Successfully connected')}&service=${service}`);
+
             } catch (error) {
                 Logger.error('Error handling auth callback:', error);
-                const errorMessage = error.response?.data?.message || `Failed to connect to service`;
-                window.opener?.postMessage({
-                    type: 'FITBIT_AUTH_ERROR',
-                    error: errorMessage
-                }, window.location.origin);
-                window.close();
+                
+                // Determine service for error message
+                const isFitbit = window.location.pathname.includes('/auth/fitbit');
+                const service = isFitbit ? 'Fitbit' : 'Google Fit';
+                
+                const errorMessage = error.response?.data?.message || error.message || 'Failed to connect to service';
+                
+                // Redirect back to profile with error
+                navigate(`/profile?status=error&message=${encodeURIComponent(errorMessage)}&service=${service}`);
             }
         };
 
         handleCallback();
-    }, []);
+    }, [navigate]);
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-white">
-            <div className="text-center">
-                <h2 className="text-xl font-semibold mb-4">Processing authentication...</h2>
-                <p className="text-gray-600">Please wait while we complete the connection.</p>
+        <div className="auth-callback-container">
+            <div className="auth-callback-card">
+                <div className="spinner"></div>
+                <h2>Processing Authentication...</h2>
+                <p>Please wait while we complete the connection to your service.</p>
+                <p className="note">You will be redirected back to your profile automatically.</p>
             </div>
         </div>
     );
