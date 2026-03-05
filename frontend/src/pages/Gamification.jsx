@@ -5,7 +5,8 @@ import './styles/Gamification.css';
 import { Tab, Tabs, ProgressBar } from 'react-bootstrap';
 import {
   FaTrophy, FaMedal, FaStar, FaFire, FaRunning, FaDumbbell,
-  FaSwimmer, FaHeart, FaBolt, FaStopwatch, FaBrain, FaAppleAlt
+  FaSwimmer, FaHeart, FaBolt, FaStopwatch, FaBrain, FaAppleAlt,
+  FaCalendarCheck, FaClock
 } from 'react-icons/fa';
 import { GiMeditation } from 'react-icons/gi';
 import { toast } from 'react-toastify';
@@ -24,6 +25,21 @@ const getMoodEmoji = (mood) => {
       return '😐';
     default:
       return '❓';
+  }
+};
+
+const getMoodColor = (mood) => {
+  switch (mood?.toLowerCase()) {
+    case 'happy':
+      return '#4CAF50';
+    case 'sad':
+      return '#2196F3';
+    case 'anxious':
+      return '#FF9800';
+    case 'neutral':
+      return '#9E9E9E';
+    default:
+      return '#9E9E9E';
   }
 };
 
@@ -58,6 +74,7 @@ const Gamification = () => {
 
     if (!user) {
       setError('Please log in to view your gamification data');
+      setLoading(false);
       return;
     }
 
@@ -69,7 +86,10 @@ const Gamification = () => {
         if (data) {
           setGamificationData(data);
         } else {
-          await initializeNewUserData();
+          // Initialize if no data exists
+          const initialized = await GamificationService.initializeGamification();
+          setGamificationData(initialized);
+          toast.info('Welcome! Start your wellness journey by completing activities.');
         }
       } catch (error) {
         Logger.error('Failed to fetch gamification data:', error);
@@ -83,55 +103,12 @@ const Gamification = () => {
     fetchGamificationData();
   }, [user, isAuthLoading]);
 
-  const initializeNewUserData = async () => {
-    try {
-      // Initialize with default values
-      const defaultData = {
-        points: { workout: 0, mental: 0, nutrition: 0 },
-        streaks: {
-          currentStreak: 0,
-          bestStreak: 0,
-          lastActivityDate: null,
-          workoutStreak: 0,
-          mentalStreak: 0,
-          nutritionStreak: 0
-        },
-        stats: {
-          totalWorkoutTime: 0,
-          totalCaloriesBurned: 0,
-          totalMealsLogged: 0,
-          totalMoodChecks: 0
-        },
-        achievements: [],
-        challenges: [
-          {
-            id: 'welcome',
-            name: 'Welcome Challenge',
-            description: 'Complete your first activity in each category',
-            category: 'workout',
-            target: 100,
-            progress: 0,
-            completed: false,
-            startDate: new Date(),
-            endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
-          }
-        ],
-        moodLog: []
-      };
-      setGamificationData(defaultData);
-      toast.info('Welcome! Start your wellness journey by completing activities.');
-    } catch (error) {
-      Logger.error('Failed to initialize new user data:', error);
-      toast.error('Error setting up your profile');
-    }
-  };
-
   const renderStreakCard = (category) => {
     const streak = gamificationData?.streaks?.[`${category}Streak`] || 0;
-    const lastActivityDate = new Date(gamificationData?.streaks?.lastActivityDate || null);
+    const lastActivityDate = gamificationData?.streaks?.[`last${category.charAt(0).toUpperCase() + category.slice(1)}Date`];
     const today = new Date();
-    const isActiveStreak = lastActivityDate &&
-      lastActivityDate.toDateString() === today.toDateString();
+    const isActiveStreak = lastActivityDate && 
+      new Date(lastActivityDate).toDateString() === today.toDateString();
 
     const icons = {
       workout: <FaRunning className="streak-icon" />,
@@ -143,7 +120,7 @@ const Gamification = () => {
       <div className={`streak-card ${isActiveStreak ? 'active-streak' : ''}`}>
         {icons[category]}
         <h3>{category.charAt(0).toUpperCase() + category.slice(1)} Streak</h3>
-        <p className="streak-count">{streak} days</p>
+        <p className="streak-count">{streak} {streak === 1 ? 'day' : 'days'}</p>
         <div className="streak-flame">
           {streak > 0 && (
             <FaFire
@@ -152,27 +129,50 @@ const Gamification = () => {
             />
           )}
         </div>
-        {isActiveStreak && <p className="streak-status">Active Today!</p>}
+        {isActiveStreak ? (
+          <p className="streak-status active">Active Today! 🔥</p>
+        ) : lastActivityDate ? (
+          <p className="streak-status inactive">Last active: {GamificationService.formatDate(lastActivityDate)}</p>
+        ) : (
+          <p className="streak-status new">Start your streak today!</p>
+        )}
       </div>
     );
   };
 
   const renderChallenges = (category) => {
     const challenges = gamificationData?.challenges?.filter(c => c.category === category) || [];
+    
+    if (challenges.length === 0) {
+      return (
+        <div className="challenges-section">
+          <h3>Active Challenges</h3>
+          <p className="no-challenges">No active challenges. Keep up the good work!</p>
+        </div>
+      );
+    }
+
     return (
       <div className="challenges-section">
         <h3>Active Challenges</h3>
         <div className="challenges-grid">
           {challenges.map((challenge, index) => (
-            <div key={index} className="challenge-card">
+            <div key={challenge.id || index} className="challenge-card">
               <h4>{challenge.name}</h4>
               <p>{challenge.description}</p>
-              <ProgressBar
-                now={challenge.progress}
-                label={`${challenge.progress}%`}
-                variant={challenge.progress === 100 ? "success" : "info"}
-              />
-              {challenge.completed && <FaTrophy className="challenge-trophy" />}
+              <div className="challenge-progress">
+                <ProgressBar
+                  now={challenge.progress}
+                  label={`${challenge.progress}%`}
+                  variant={challenge.progress === 100 ? "success" : "info"}
+                />
+              </div>
+              {challenge.completed && (
+                <div className="challenge-completed">
+                  <FaTrophy className="challenge-trophy" />
+                  <span>Completed!</span>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -187,17 +187,22 @@ const Gamification = () => {
         <div className="stat-card">
           <FaDumbbell className="stat-icon" />
           <h3>Workout Points</h3>
-          <p>{gamificationData?.points?.workout || 0}</p>
+          <p className="stat-value">{gamificationData?.points?.workout || 0}</p>
         </div>
         <div className="stat-card">
           <FaBolt className="stat-icon" />
           <h3>Active Achievements</h3>
-          <p>{gamificationData?.achievements?.filter(a => a.category === 'workout' && a.unlocked)?.length || 0}</p>
+          <p className="stat-value">{gamificationData?.achievements?.filter(a => a.category === 'workout' && a.unlocked)?.length || 0}</p>
         </div>
         <div className="stat-card">
-          <FaStopwatch className="stat-icon" />
+          <FaClock className="stat-icon" />
           <h3>Total Time</h3>
-          <p>{Math.round(gamificationData?.stats?.totalWorkoutTime || 0)} mins</p>
+          <p className="stat-value">{Math.round(gamificationData?.stats?.totalWorkoutTime || 0)} mins</p>
+        </div>
+        <div className="stat-card">
+          <FaHeart className="stat-icon" />
+          <h3>Calories Burned</h3>
+          <p className="stat-value">{Math.round(gamificationData?.stats?.totalCaloriesBurned || 0)} kcal</p>
         </div>
       </div>
       <div className="achievements-row">
@@ -207,12 +212,19 @@ const Gamification = () => {
             ?.filter(a => a.category === 'workout' && a.unlocked)
             ?.slice(-3)
             .map((achievement, index) => (
-              <div key={index} className="achievement-badge">
+              <div key={achievement.id || index} className="achievement-badge">
                 <FaMedal className="achievement-icon" />
-                <FaStar className="achievement-star" />
-                <span>{achievement.name}</span>
+                <div className="achievement-info">
+                  <span className="achievement-name">{achievement.name}</span>
+                  <span className="achievement-date">
+                    {GamificationService.formatDate(achievement.unlockedAt)}
+                  </span>
+                </div>
               </div>
             ))}
+          {(!gamificationData?.achievements?.filter(a => a.category === 'workout' && a.unlocked)?.length > 0) && (
+            <p className="no-achievements">Complete workouts to earn achievements!</p>
+          )}
         </div>
       </div>
       {renderChallenges('workout')}
@@ -226,32 +238,38 @@ const Gamification = () => {
         <div className="stat-card">
           <FaHeart className="stat-icon" />
           <h3>Mental Points</h3>
-          <p>{gamificationData?.points?.mental || 0}</p>
+          <p className="stat-value">{gamificationData?.points?.mental || 0}</p>
         </div>
         <div className="stat-card">
           <FaBrain className="stat-icon" />
           <h3>Active Achievements</h3>
-          <p>{gamificationData?.achievements?.filter(a => a.category === 'mental' && a.unlocked)?.length || 0}</p>
+          <p className="stat-value">{gamificationData?.achievements?.filter(a => a.category === 'mental' && a.unlocked)?.length || 0}</p>
         </div>
         <div className="stat-card">
-          <FaBrain className="stat-icon" />
+          <FaCalendarCheck className="stat-icon" />
           <h3>Mood Checks</h3>
-          <p>{gamificationData?.stats?.totalMoodChecks || 0}</p>
+          <p className="stat-value">{gamificationData?.stats?.totalMoodChecks || 0}</p>
         </div>
       </div>
       <div className="mood-tracker">
-        <h3>Mood Log</h3>
+        <h3>Recent Moods</h3>
         <div className="mood-grid">
-          {gamificationData?.moodLog?.slice(-7).map((log, index) => (
-            <div key={index} className={`mood-day mood-${log.mood}`}>
-              <span className="mood-date">
-                {GamificationService.formatDate(log.timestamp)}
-              </span>
-              <span className="mood-emoji">
-                {getMoodEmoji(log.mood)}
-              </span>
-            </div>
-          ))}
+          {gamificationData?.moodLog?.length > 0 ? (
+            gamificationData.moodLog.slice(-7).map((log, index) => (
+              <div key={index} className="mood-day">
+                <span className="mood-date">{GamificationService.formatDate(log.timestamp)}</span>
+                <span 
+                  className="mood-emoji"
+                  style={{ backgroundColor: getMoodColor(log.mood) + '20' }}
+                >
+                  {getMoodEmoji(log.mood)}
+                </span>
+                <span className="mood-label">{log.mood}</span>
+              </div>
+            ))
+          ) : (
+            <p className="no-moods">No mood logs yet. Check in daily to track your mental wellness!</p>
+          )}
         </div>
       </div>
       {renderChallenges('mental')}
@@ -265,29 +283,84 @@ const Gamification = () => {
         <div className="stat-card">
           <FaAppleAlt className="stat-icon" />
           <h3>Nutrition Points</h3>
-          <p>{gamificationData?.points?.nutrition || 0}</p>
+          <p className="stat-value">{gamificationData?.points?.nutrition || 0}</p>
         </div>
         <div className="stat-card">
           <FaAppleAlt className="stat-icon" />
           <h3>Meals Logged</h3>
-          <p>{gamificationData?.stats?.totalMealsLogged || 0}</p>
+          <p className="stat-value">{gamificationData?.stats?.totalMealsLogged || 0}</p>
+        </div>
+        <div className="stat-card">
+          <FaMedal className="stat-icon" />
+          <h3>Active Achievements</h3>
+          <p className="stat-value">{gamificationData?.achievements?.filter(a => a.category === 'nutrition' && a.unlocked)?.length || 0}</p>
+        </div>
+      </div>
+      <div className="achievements-row">
+        <h3>Latest Achievements</h3>
+        <div className="achievement-badges">
+          {gamificationData?.achievements
+            ?.filter(a => a.category === 'nutrition' && a.unlocked)
+            ?.slice(-3)
+            .map((achievement, index) => (
+              <div key={achievement.id || index} className="achievement-badge">
+                <FaMedal className="achievement-icon" />
+                <div className="achievement-info">
+                  <span className="achievement-name">{achievement.name}</span>
+                  <span className="achievement-date">
+                    {GamificationService.formatDate(achievement.unlockedAt)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          {(!gamificationData?.achievements?.filter(a => a.category === 'nutrition' && a.unlocked)?.length > 0) && (
+            <p className="no-achievements">Log meals to earn nutrition achievements!</p>
+          )}
         </div>
       </div>
       {renderChallenges('nutrition')}
     </div>
   );
 
+  // Calculate total points
+  const totalPoints = 
+    (gamificationData?.points?.workout || 0) + 
+    (gamificationData?.points?.mental || 0) + 
+    (gamificationData?.points?.nutrition || 0);
+
   return (
     <div className="page-container">
       {error ? (
-        <div className="error-message">{error}</div>
+        <div className="error-container">
+          <div className="error-message">{error}</div>
+          <button onClick={() => window.location.reload()} className="retry-button">
+            Try Again
+          </button>
+        </div>
       ) : loading ? (
-        <div className="loading-spinner">Loading...</div>
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading your gamification data...</p>
+        </div>
       ) : (
         <div className="gamification-container">
           <div className="gamification-header">
             <h1>Gamification Dashboard</h1>
             <p>Track your progress and unlock achievements</p>
+            <div className="header-stats">
+              <div className="header-stat">
+                <FaStar className="header-icon" />
+                <span className="header-stat-label">Level {gamificationData?.level || 1}</span>
+              </div>
+              <div className="header-stat">
+                <FaFire className="header-icon" />
+                <span className="header-stat-label">{gamificationData?.streaks?.currentStreak || 0} Day Streak</span>
+              </div>
+              <div className="header-stat">
+                <FaTrophy className="header-icon" />
+                <span className="header-stat-label">{totalPoints} Total Points</span>
+              </div>
+            </div>
           </div>
           <div className="tabs-wrapper">
             <Tabs
