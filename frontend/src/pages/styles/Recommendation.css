@@ -82,6 +82,7 @@
     display: flex;
     align-items: center;
     gap: 1.25rem;
+    margin-bottom: 1rem;
 }
 
 .section-header i {
@@ -119,8 +120,208 @@
     background: rgba(16, 185, 129, 0.1);
 }
 
+/* Section Headers */
+.recommendation-section h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin: 1rem 0 0.75rem 0;
+    letter-spacing: -0.01em;
+}
+
+/* Current Intake / Status Sections */
+.current-intake,
+.nutrient-balance,
+.meal-pattern,
+.stress-status,
+.stress-patterns,
+.current-workout,
+.workout-stats {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+.current-intake p,
+.nutrient-balance p,
+.meal-pattern p,
+.stress-status p,
+.stress-patterns p,
+.current-workout p,
+.workout-stats p {
+    margin: 0.5rem 0;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.05);
+    padding-bottom: 0.5rem;
+}
+
+.current-intake p:last-child,
+.nutrient-balance p:last-child,
+.meal-pattern p:last-child,
+.stress-status p:last-child,
+.stress-patterns p:last-child,
+.current-workout p:last-child,
+.workout-stats p:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+/* Macronutrient Grid */
+.macros,
+.macro-targets {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.macros p,
+.macro-targets p {
+    text-align: center;
+    background: white;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-light);
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.macros p:before {
+    content: attr(data-label);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-weight: normal;
+}
+
+/* Heart Rate Zones */
+.heart-rate-zones {
+    margin: 1rem 0;
+}
+
+.zones-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.zone-card {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid var(--border-light);
+}
+
+.zone-name {
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+    text-transform: capitalize;
+}
+
+.zone-range {
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+.zone-description {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+/* ML Badge */
+.ml-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    margin: 1rem 0;
+}
+
+.ml-badge i {
+    font-size: 1rem;
+    width: auto;
+    height: auto;
+    background: transparent;
+}
+
+.ml-badge .confidence {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    margin-left: 0.5rem;
+}
+
+/* Error Message */
+.error-message {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: #fee2e2;
+    color: #dc2626;
+    padding: 1rem;
+    border-radius: 8px;
+    margin: 1rem 0;
+}
+
+.error-message i {
+    font-size: 1.25rem;
+    width: auto;
+    height: auto;
+    background: transparent;
+}
+
+.error-message p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* Loading State */
+.loading-message {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.loading-message i {
+    font-size: 2.5rem;
+    color: var(--primary);
+}
+
+/* No Recommendations */
+.no-recommendations {
+    text-align: center;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    color: var(--text-muted);
+}
+
+.no-recommendations p {
+    margin: 0.5rem 0;
+    font-size: 0.95rem;
+}
+
 /* Recommendation Items */
-.recommendation-content ul {
+.recommendation-section ul {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -130,11 +331,14 @@
 }
 
 .recommendation-item {
-    background: rgba(0, 0, 0, 0.02);
+    background: #f8fafc;
     padding: 1.25rem;
     border-radius: 12px;
     border-left: 4px solid var(--primary);
     transition: all 0.3s ease;
+    color: var(--text-main);
+    font-size: 0.95rem;
+    line-height: 1.6;
 }
 
 .recommendation-item:hover {
@@ -143,26 +347,86 @@
     box-shadow: var(--shadow-sm);
 }
 
-.recommendation-item p {
-    margin: 0;
-    color: var(--text-main);
-    font-size: 0.95rem;
-    line-height: 1.6;
+/* Diet specific recommendations */
+.diet-section .recommendation-item {
+    border-left-color: #f43f5e;
 }
 
-/* Loading Table */
-.loading-message {
-    text-align: center;
-    padding: 4rem;
-    color: var(--text-muted);
+/* Stress specific recommendations */
+.stress-section .recommendation-item {
+    border-left-color: #6366f1;
+}
+
+/* Workout specific recommendations */
+.workout-section .recommendation-item {
+    border-left-color: #10b981;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .recommendations-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 @media (max-width: 768px) {
+    .recommendation-header {
+        padding: 2rem 1rem;
+    }
+
     .recommendation-header h1 {
         font-size: 2.25rem;
     }
 
+    .recommendation-header p {
+        font-size: 1rem;
+    }
+
+    .recommendation-content {
+        padding: 1.5rem;
+    }
+
+    .recommendations-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
     .recommendation-section {
         padding: 1.5rem;
+    }
+
+    .section-header i {
+        width: 2.5rem;
+        height: 2.5rem;
+        font-size: 1.25rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.25rem;
+    }
+
+    .zones-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .macros,
+    .macro-targets {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .recommendation-header h1 {
+        font-size: 1.75rem;
+    }
+
+    .recommendation-section {
+        padding: 1rem;
+    }
+
+    .recommendation-item {
+        padding: 1rem;
+        font-size: 0.9rem;
     }
 }

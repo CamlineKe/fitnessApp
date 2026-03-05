@@ -5,7 +5,10 @@ class EventEmitter {
   static Events = {
     DIET_RECOMMENDATIONS_UPDATED: 'dietRecommendationsUpdated',
     WORKOUT_RECOMMENDATIONS_UPDATED: 'workoutRecommendationsUpdated',
-    MENTAL_HEALTH_RECOMMENDATIONS_UPDATED: 'mentalHealthRecommendationsUpdated'
+    MENTAL_HEALTH_RECOMMENDATIONS_UPDATED: 'mentalHealthRecommendationsUpdated',
+    MEAL_ADDED: 'mealAdded',
+    MEAL_UPDATED: 'mealUpdated',
+    MEAL_DELETED: 'mealDeleted'
   };
 
   static on(event, callback) {

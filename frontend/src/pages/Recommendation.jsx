@@ -5,6 +5,7 @@ import WorkoutRecommenderService from '../services/WorkoutRecommenderService';
 import { getMentalHealthData } from '../services/MentalHealthService';
 import { UserContext } from "../components/UserContext";
 import { EventEmitter } from '../utils/EventEmitter';
+import Logger from '../utils/logger';
 import './styles/Recommendation.css';
 
 const Recommendation = () => {
@@ -30,16 +31,20 @@ const Recommendation = () => {
 
     try {
       // First fetch mental health logs
-      console.log("Fetching mental health logs for user:", user._id);
-      const logs = await getMentalHealthData(user._id);
-      console.log("Received mental health logs:", logs);
+      Logger.debug("Fetching mental health logs for user:", user?._id);
+      const logs = await getMentalHealthData(user?._id);
+      Logger.debug("Received mental health logs:", logs);
       setMentalLogs(logs);
 
       // Handle empty or null data
       if (!logs || (Array.isArray(logs) && logs.length === 0)) {
-        console.log("No mental health records found");
+        Logger.log("No mental health records found");
         setStressAnalysis({
-          recommendations: []
+          recommendations: [],
+          analysis: {
+            current_state: {},
+            patterns: {}
+          }
         });
       } else {
         // Ensure data is an array and sort by date (newest first)
@@ -50,38 +55,45 @@ const Recommendation = () => {
         // Fetch recommendations for each service separately to handle errors individually
         try {
           const dietData = await DietRecommendationService.getDietRecommendations();
-          setDietRecommendations(dietData || { recommendations: [] });
+          Logger.debug("Diet recommendations:", dietData);
+          setDietRecommendations(dietData || { recommendations: [], analysis: {} });
           EventEmitter.emit(EventEmitter.Events.DIET_RECOMMENDATIONS_UPDATED, dietData);
         } catch (err) {
-          console.error('Failed to fetch diet recommendations:', err);
+          Logger.error('Failed to fetch diet recommendations:', err);
           setErrors(prev => ({ ...prev, diet: 'Diet recommendation service is currently unavailable. Please try again later.' }));
-          setDietRecommendations({ recommendations: [] });
+          setDietRecommendations({ recommendations: [], analysis: {} });
         }
 
         try {
           const stressData = await StressAnalysisService.getStressAnalysis(sortedLogs);
+          Logger.debug("Stress analysis:", stressData);
           setStressAnalysis(stressData);
           EventEmitter.emit(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, stressData);
         } catch (err) {
-          console.error('Failed to fetch stress analysis:', err);
+          Logger.error('Failed to fetch stress analysis:', err);
           setErrors(prev => ({ ...prev, stress: 'Stress analysis service is currently unavailable. Please try again later.' }));
           setStressAnalysis({
-            recommendations: []
+            recommendations: [],
+            analysis: {
+              current_state: {},
+              patterns: {}
+            }
           });
         }
 
         try {
           const workoutData = await WorkoutRecommenderService.getWorkoutRecommendations();
-          setWorkoutRecommendations(workoutData || { recommendations: [] });
+          Logger.debug("Workout recommendations:", workoutData);
+          setWorkoutRecommendations(workoutData || { recommendations: [], analysis: {} });
           EventEmitter.emit(EventEmitter.Events.WORKOUT_RECOMMENDATIONS_UPDATED, workoutData);
         } catch (err) {
-          console.error('Failed to fetch workout recommendations:', err);
+          Logger.error('Failed to fetch workout recommendations:', err);
           setErrors(prev => ({ ...prev, workout: 'Workout recommendation service is currently unavailable. Please try again later.' }));
-          setWorkoutRecommendations({ recommendations: [] });
+          setWorkoutRecommendations({ recommendations: [], analysis: {} });
         }
       }
     } catch (err) {
-      console.error('Failed to fetch mental health logs:', err);
+      Logger.error('Failed to fetch mental health logs:', err);
       setErrors(prev => ({ ...prev, stress: 'Unable to load mental health data. Please try again later.' }));
     } finally {
       setLoading(false);
@@ -90,7 +102,7 @@ const Recommendation = () => {
 
   useEffect(() => {
     if (!user || !user._id) {
-      console.warn("User not authenticated, skipping fetch.");
+      Logger.warn("User not authenticated, skipping fetch.");
       return;
     }
 
@@ -98,7 +110,7 @@ const Recommendation = () => {
 
     // Subscribe to meal update events
     const handleMealUpdated = () => {
-      console.log("Meal updated, refreshing recommendations");
+      Logger.debug("Meal updated, refreshing recommendations");
       fetchRecommendations();
     };
 
@@ -159,16 +171,33 @@ const Recommendation = () => {
                       </div>
                     )}
 
-                    {/* Target Nutrition */}
-                    {dietRecommendations.analysis?.targets && (
-                      <div className="nutrition-targets">
-                        <h3>Daily Targets</h3>
-                        <p>Target Calories: {dietRecommendations.analysis.targets.calories} kcal</p>
-                        <div className="macro-targets">
-                          <p>Target Protein: {dietRecommendations.analysis.targets.protein}g</p>
-                          <p>Target Carbs: {dietRecommendations.analysis.targets.carbs}g</p>
-                          <p>Target Fats: {dietRecommendations.analysis.targets.fats}g</p>
-                        </div>
+                    {/* Nutrient Balance */}
+                    {dietRecommendations.analysis?.nutrient_balance && (
+                      <div className="nutrient-balance">
+                        <h3>Macronutrient Balance</h3>
+                        <p>Protein: {dietRecommendations.analysis.nutrient_balance.protein_ratio || 0}%</p>
+                        <p>Carbs: {dietRecommendations.analysis.nutrient_balance.carbs_ratio || 0}%</p>
+                        <p>Fats: {dietRecommendations.analysis.nutrient_balance.fats_ratio || 0}%</p>
+                      </div>
+                    )}
+
+                    {/* Meal Pattern */}
+                    {dietRecommendations.analysis?.meal_pattern && (
+                      <div className="meal-pattern">
+                        <h3>Meal Pattern</h3>
+                        <p>{dietRecommendations.analysis.meal_pattern}</p>
+                      </div>
+                    )}
+
+                    {/* ML Info */}
+                    {dietRecommendations.analysis?.ml_used && (
+                      <div className="ml-badge">
+                        <i className="fas fa-robot"></i> AI-Powered Analysis
+                        {dietRecommendations.analysis.ml_prediction && (
+                          <span className="confidence">
+                            Confidence: {Math.round(dietRecommendations.analysis.ml_prediction.confidence * 100)}%
+                          </span>
+                        )}
                       </div>
                     )}
 
@@ -209,6 +238,29 @@ const Recommendation = () => {
                       <p>Stress Level: {stressAnalysis?.analysis?.current_state?.stress_level ? `${stressAnalysis.analysis.current_state.stress_level}/10` : 'N/A'}</p>
                       <p>Sleep Quality: {stressAnalysis?.analysis?.current_state?.sleep_quality ? `${stressAnalysis.analysis.current_state.sleep_quality}/10` : 'N/A'}</p>
                     </div>
+
+                    {/* Patterns */}
+                    {stressAnalysis?.analysis?.patterns && (
+                      <div className="stress-patterns">
+                        <h3>Trends</h3>
+                        <p>Stress: {stressAnalysis.analysis.patterns.stress_trend}</p>
+                        <p>Sleep: {stressAnalysis.analysis.patterns.sleep_trend}</p>
+                        <p>Mood: {stressAnalysis.analysis.patterns.mood_trend}</p>
+                      </div>
+                    )}
+
+                    {/* ML Info */}
+                    {stressAnalysis?.analysis?.ml_used && (
+                      <div className="ml-badge">
+                        <i className="fas fa-robot"></i> AI-Powered Analysis
+                        {stressAnalysis.analysis.ml_prediction && (
+                          <span className="confidence">
+                            Confidence: {Math.round(stressAnalysis.analysis.ml_prediction.confidence * 100)}%
+                          </span>
+                        )}
+                      </div>
+                    )}
+
                     <div className="stress-recommendations">
                       <h3>Recommendations</h3>
                       {stressAnalysis?.recommendations?.length > 0 ? (
@@ -239,53 +291,23 @@ const Recommendation = () => {
                 )}
                 {workoutRecommendations && (
                   <div>
-                    {/* Fitness Level */}
-                    {workoutRecommendations.analysis?.fitness_level && (
-                      <div className="fitness-level">
-                        <h3>Your Fitness Level</h3>
-                        <div className="fitness-badge">
-                          {['Beginner', 'Intermediate', 'Advanced', 'Expert', 'Elite'][workoutRecommendations.analysis.fitness_level - 1]}
-                        </div>
+                    {/* Current Workout */}
+                    {workoutRecommendations.analysis?.current_workout && (
+                      <div className="current-workout">
+                        <h3>Today's Workout</h3>
+                        <p>Activity: {workoutRecommendations.analysis.current_workout.activity_type || 'N/A'}</p>
+                        <p>Duration: {workoutRecommendations.analysis.current_workout.duration || 0} min</p>
+                        <p>Calories: {workoutRecommendations.analysis.current_workout.calories_burned || 0} kcal</p>
+                        <p>Heart Rate: {workoutRecommendations.analysis.current_workout.heart_rate || 0} bpm</p>
                       </div>
                     )}
 
                     {/* Weekly Stats */}
-                    {workoutRecommendations.analysis?.pattern_analysis?.weekly_stats && (
+                    {workoutRecommendations.analysis?.weekly_stats && (
                       <div className="workout-stats">
                         <h3>Weekly Overview</h3>
-                        <div className="stats-grid">
-                          {Object.entries(workoutRecommendations.analysis.pattern_analysis.weekly_stats).map(([week, stats]) => (
-                            <div key={week} className="week-stats">
-                              <h4>Week {week}</h4>
-                              <p>Avg Duration: {Math.round(stats.duration)} min</p>
-                              <p>Avg Calories: {Math.round(stats.caloriesBurned)} kcal</p>
-                              <p>Avg Heart Rate: {Math.round(stats.heartRate)} bpm</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Activity Distribution */}
-                    {workoutRecommendations.analysis?.pattern_analysis?.activity_distribution && (
-                      <div className="activity-distribution">
-                        <h3>Your Activity Distribution</h3>
-                        <div className="activity-chart">
-                          {Object.entries(workoutRecommendations.analysis.pattern_analysis.activity_distribution)
-                            .sort((a, b) => b[1] - a[1])
-                            .map(([activity, percentage]) => (
-                              <div key={activity} className="activity-bar">
-                                <div className="activity-label">{activity}</div>
-                                <div className="activity-progress">
-                                  <div 
-                                    className="activity-fill" 
-                                    style={{ width: `${percentage * 100}%` }}
-                                  ></div>
-                                </div>
-                                <div className="activity-percentage">{Math.round(percentage * 100)}%</div>
-                              </div>
-                            ))}
-                        </div>
+                        <p>Total Volume: {workoutRecommendations.analysis.weekly_stats.total_volume || 0} min</p>
+                        <p>Frequency: {workoutRecommendations.analysis.weekly_stats.frequency || 0} workouts</p>
                       </div>
                     )}
 
@@ -298,15 +320,21 @@ const Recommendation = () => {
                             <div key={zone} className="zone-card">
                               <div className="zone-name">{zone.charAt(0).toUpperCase() + zone.slice(1)}</div>
                               <div className="zone-range">{Math.round(lower)} - {Math.round(upper)} BPM</div>
-                              <div className="zone-description">
-                                {zone === 'recovery' && "Active recovery, focus on technique"}
-                                {zone === 'aerobic' && "Endurance building, fat burning"}
-                                {zone === 'anaerobic' && "Cardiovascular fitness"}
-                                {zone === 'vo2max' && "Maximum effort, limit duration"}
-                              </div>
                             </div>
                           ))}
                         </div>
+                      </div>
+                    )}
+
+                    {/* ML Info */}
+                    {workoutRecommendations.analysis?.ml_used && (
+                      <div className="ml-badge">
+                        <i className="fas fa-robot"></i> AI-Powered Analysis
+                        {workoutRecommendations.analysis.ml_prediction && (
+                          <span className="confidence">
+                            Confidence: {Math.round(workoutRecommendations.analysis.ml_prediction.confidence * 100)}%
+                          </span>
+                        )}
                       </div>
                     )}
 
@@ -314,14 +342,11 @@ const Recommendation = () => {
                     <div className="workout-recommendations">
                       <h3>Personalized Recommendations</h3>
                       {workoutRecommendations.recommendations?.length > 0 ? (
-                        <div className="recommendations-grid">
+                        <ul>
                           {workoutRecommendations.recommendations.map((rec, index) => (
-                            <div key={index} className="recommendation-card">
-                              <i className="fas fa-check-circle"></i>
-                              <p>{rec}</p>
-                            </div>
+                            <li key={index} className="recommendation-item">{rec}</li>
                           ))}
-                        </div>
+                        </ul>
                       ) : (
                         <div className="no-recommendations">
                           <p>No workout recommendations available at the moment.</p>
