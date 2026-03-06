@@ -80,34 +80,214 @@
     border-color: var(--primary);
 }
 
-/* Header Styles - Fixed spacing */
+/* Header Styles - Redesigned */
 .home-header {
     text-align: center;
     width: 100%;
-    padding: 6rem 5% 4rem;
+    padding: 5rem 5% 4rem;
     position: relative;
     z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
+/* Badge */
+.header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 50px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.badge-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Typography */
 .home-header h2 {
     font-size: 3.5rem;
     margin-bottom: 1.5rem;
     color: var(--text-main);
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
     line-height: 1.1;
     max-width: 900px;
-    margin-left: auto;
-    margin-right: auto;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--primary) 0%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .home-header p {
     font-size: 1.25rem;
     color: var(--text-muted);
-    max-width: 650px;
-    margin: 0 auto 3rem;
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
     line-height: 1.7;
     font-weight: 400;
+}
+
+/* CTA Buttons */
+.header-cta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.cta-primary {
+    padding: 1rem 2rem;
+    background: var(--primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+    border: 2px solid transparent;
+}
+
+.cta-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.23);
+    background: var(--primary-hover);
+}
+
+.cta-secondary {
+    padding: 1rem 2rem;
+    background: transparent;
+    color: var(--text-main);
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid var(--border-light);
+}
+
+.cta-secondary:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateY(-2px);
+}
+
+/* Stats */
+.header-stats {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 1.5rem 2rem;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.stat-divider {
+    width: 1px;
+    height: 40px;
+    background: var(--border-light);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .home-header {
+        padding: 3rem 1.5rem 2rem;
+    }
+    
+    .home-header h2 {
+        font-size: 2.25rem;
+    }
+    
+    .header-badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.875rem;
+    }
+    
+    .home-header p {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .header-cta {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .cta-primary, .cta-secondary {
+        text-align: center;
+        padding: 0.875rem 1.5rem;
+    }
+    
+    .header-stats {
+        flex-direction: column;
+        gap: 1.5rem;
+        width: 100%;
+        padding: 1.5rem;
+    }
+    
+    .stat-divider {
+        width: 60px;
+        height: 1px;
+    }
+}
+
+@media (max-width: 480px) {
+    .home-header h2 {
+        font-size: 1.875rem;
+    }
+    
+    .stat-number {
+        font-size: 1.25rem;
+    }
 }
 
 /* Features Section - Improved layout */

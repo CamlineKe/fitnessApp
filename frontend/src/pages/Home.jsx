@@ -16,8 +16,36 @@ const Home = () => {
       </nav>
       
       <header className="home-header">
-        <h2>Transform Your Life with Smart Fitness Tracking</h2>
+        <div className="header-badge">
+          <span className="badge-dot"></span>
+          <span>AI-Powered Health Platform</span>
+        </div>
+        <h2>
+          <span className="gradient-text">Transform Your Life</span>
+          <br />
+          with Smart Fitness Tracking
+        </h2>
         <p>Experience a holistic approach to health and wellness. Track your fitness journey, nutrition habits, and mental wellbeing all in one intelligent platform.</p>
+        <div className="header-cta">
+          <Link to="/register" className="cta-primary">Start Your Journey</Link>
+          <Link to="/login" className="cta-secondary">View Demo</Link>
+        </div>
+        <div className="header-stats">
+          <div className="stat-item">
+            <span className="stat-number">50K+</span>
+            <span className="stat-label">Active Users</span>
+          </div>
+          <div className="stat-divider"></div>
+          <div className="stat-item">
+            <span className="stat-number">2M+</span>
+            <span className="stat-label">Workouts Logged</span>
+          </div>
+          <div className="stat-divider"></div>
+          <div className="stat-item">
+            <span className="stat-number">98%</span>
+            <span className="stat-label">Goal Success Rate</span>
+          </div>
+        </div>
       </header>
 
       <section className="home-features">
@@ -73,9 +101,9 @@ const Home = () => {
           <div className="footer-section">
             <h4>Connect</h4>
             <div className="social-links">
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
+              <a href="https://twitter.com " target="_blank" rel="noopener noreferrer">Twitter</a>
+              <a href="https://facebook.com " target="_blank" rel="noopener noreferrer">Facebook</a>
+              <a href="https://instagram.com " target="_blank" rel="noopener noreferrer">Instagram</a>
             </div>
           </div>
         </div>
