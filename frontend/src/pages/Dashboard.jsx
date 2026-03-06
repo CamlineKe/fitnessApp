@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { UserContext } from "../components/UserContext";
 import "./styles/Dashboard.css";
-import "font-awesome/css/font-awesome.min.css";
+import "@fortawesome/fontawesome-free/css/all.min.css"; // Updated import
 import { Link, useNavigate } from "react-router-dom";
 import { getNutritionData } from "../services/NutritionService";
 import { getMentalHealthData } from "../services/MentalHealthService";
@@ -208,7 +208,7 @@ const Dashboard = () => {
       <div className="dashboard-container">
         <div className="dashboard-header">
           <button onClick={handleLogout} className="logout-button">
-            <i className="fa fa-sign-out"></i> Logout
+            <i className="fas fa-sign-out-alt"></i> Logout {/* Updated icon */}
           </button>
           <h1>Welcome, {user?.name || user?.username || "User"} to Fitness Hub</h1>
           <p>Track your fitness journey and achieve your goals</p>
@@ -224,7 +224,7 @@ const Dashboard = () => {
                   className="quick-action-card"
                   onClick={action.action}
                 >
-                  <i className={`fa ${action.icon}`} style={{ color: action.color }}></i>
+                  <i className={`fas ${action.icon}`} style={{ color: action.color }}></i> {/* Updated to fas */}
                   <span>{action.label}</span>
                 </button>
               ))}
@@ -233,7 +233,7 @@ const Dashboard = () => {
           <section className="todays-progress">
             <div className="todays-progress-header">
               <h2>
-                <i className="fas fa-chart-line"></i>
+                <i className="fas fa-chart-line"></i> {/* Already correct */}
                 Today's Progress
               </h2>
               <p>Track your daily achievements and milestones</p>
@@ -242,7 +242,7 @@ const Dashboard = () => {
             <div className="stats-grid">
               <Link to="/nutrition" className="stat-card calories">
                 <div className="stat-header">
-                  <i className="fa fa-utensils"></i>
+                  <i className="fas fa-utensils"></i> {/* Updated to fas */}
                   <h3>Nutrition</h3>
                 </div>
                 <div className="stat-content">
@@ -255,13 +255,13 @@ const Dashboard = () => {
                   <span>Fat: {nutritionData?.macronutrients?.fats || 0}g</span>
                 </div>
                 <div className="stat-footer">
-                  View Nutrition <i className="fas fa-arrow-right"></i>
+                  View Nutrition <i className="fas fa-arrow-right"></i> {/* Already correct */}
                 </div>
               </Link>
 
               <Link to="/workout" className="stat-card workout">
                 <div className="stat-header">
-                  <i className="fa fa-dumbbell"></i>
+                  <i className="fas fa-dumbbell"></i> {/* Updated to fas */}
                   <h3>Workouts</h3>
                 </div>
                 <div className="stat-content">
@@ -277,7 +277,7 @@ const Dashboard = () => {
 
               <Link to="/mentalhealth" className="stat-card mental-health">
                 <div className="stat-header">
-                  <i className="fa fa-brain"></i>
+                  <i className="fas fa-brain"></i> {/* Updated to fas */}
                   <h3>Mental Health</h3>
                 </div>
                 <div className="stat-content">
@@ -297,7 +297,7 @@ const Dashboard = () => {
 
               <Link to="/gamification" className="stat-card gamification">
                 <div className="stat-header">
-                  <i className="fa fa-trophy"></i>
+                  <i className="fas fa-trophy"></i> {/* Updated to fas */}
                   <h3>Progress</h3>
                 </div>
                 <div className="stat-content">
@@ -321,7 +321,7 @@ const Dashboard = () => {
                   </div>
                 </div>
                 <div className="stat-footer">
-                  View Progress <i className="fas fa-arrow-right"></i>
+                  View Progress <i className="fas fa-arrow-right"></i> {/* Already correct */}
                 </div>
               </Link>
             </div>
@@ -329,7 +329,7 @@ const Dashboard = () => {
           <section className="todays-activity">
             <div className="activity-header">
               <h2>
-                <i className="fas fa-stream"></i>
+                <i className="fas fa-stream"></i> {/* Already correct */}
                 Today's Activities
               </h2>
               <p>{new Date().toLocaleDateString(undefined, {
@@ -342,17 +342,17 @@ const Dashboard = () => {
             <div className="activity-feed">
               {activityFeed.length === 0 ? (
                 <div className="no-activities">
-                  <i className="fa fa-calendar-plus"></i>
+                  <i className="fas fa-calendar-plus"></i> {/* Updated to fas */}
                   <p>No activities logged today. Start your wellness journey!</p>
                   <div className="quick-add-buttons">
                     <Link to="/workout" className="quick-add-btn workout">
-                      <i className="fa fa-dumbbell"></i> Log Workout
+                      <i className="fas fa-dumbbell"></i> Log Workout {/* Updated to fas */}
                     </Link>
                     <Link to="/nutrition" className="quick-add-btn nutrition">
-                      <i className="fa fa-utensils"></i> Log Meal
+                      <i className="fas fa-utensils"></i> Log Meal {/* Updated to fas */}
                     </Link>
                     <Link to="/mentalhealth" className="quick-add-btn mental">
-                      <i className="fa fa-brain"></i> Check-in
+                      <i className="fas fa-brain"></i> Check-in {/* Updated to fas */}
                     </Link>
                   </div>
                 </div>
@@ -361,7 +361,7 @@ const Dashboard = () => {
                   {activityFeed.map((activity, index) => (
                     <div key={index} className={`activity-item ${activity.type}`}>
                       <div className="activity-icon" style={{ backgroundColor: activity.color }}>
-                        <i className={`fa ${activity.icon}`}></i>
+                        <i className={`fas ${activity.icon}`}></i> {/* Updated to fas */}
                       </div>
                       <div className="activity-content">
                         <h3>{activity.title}</h3>
