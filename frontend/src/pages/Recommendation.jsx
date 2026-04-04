@@ -6,6 +6,7 @@ import { getMentalHealthData } from '../services/MentalHealthService';
 import { UserContext } from "../components/UserContext";
 import { EventEmitter } from '../utils/EventEmitter';
 import Logger from '../utils/logger';
+import { getCachedRecommendations, setCachedRecommendations, clearRecommendationsCache } from '../utils/recommendationsCache';
 import './styles/Recommendation.css';
 
 const Recommendation = () => {
@@ -21,13 +22,27 @@ const Recommendation = () => {
   });
   const [loading, setLoading] = useState(true);
 
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = async (skipCache = false) => {
     setLoading(true);
     setErrors({
       diet: null,
       stress: null,
       workout: null
     });
+
+    // ✅ Check cache first (unless skipCache is true - e.g., after meal update)
+    if (!skipCache) {
+      const cached = getCachedRecommendations();
+      if (cached) {
+        Logger.debug('Using cached recommendations');
+        setDietRecommendations(cached.diet);
+        setStressAnalysis(cached.stress);
+        setWorkoutRecommendations(cached.workout);
+        setMentalLogs(cached.mentalLogs || []);
+        setLoading(false);
+        return;
+      }
+    }
 
     try {
       // First fetch mental health logs
@@ -97,6 +112,14 @@ const Recommendation = () => {
           setErrors(prev => ({ ...prev, workout: 'Workout recommendation service is currently unavailable. Please try again later.' }));
           setWorkoutRecommendations({ recommendations: [], analysis: {} });
         }
+
+        // ✅ Cache the results for 5 minutes
+        setCachedRecommendations({
+          diet: dietData.status === 'fulfilled' ? dietData.value : { recommendations: [], analysis: {} },
+          stress: stressData.status === 'fulfilled' ? stressData.value : { recommendations: [], analysis: { current_state: {}, patterns: {} } },
+          workout: workoutData.status === 'fulfilled' ? workoutData.value : { recommendations: [], analysis: {} },
+          mentalLogs: logs
+        });
       }
     } catch (err) {
       Logger.error('Failed to fetch mental health logs:', err);
@@ -116,8 +139,9 @@ const Recommendation = () => {
 
     // Subscribe to meal update events
     const handleMealUpdated = () => {
-      Logger.debug("Meal updated, refreshing recommendations");
-      fetchRecommendations();
+      Logger.debug("Meal updated, refreshing recommendations (skipping cache)");
+      clearRecommendationsCache();
+      fetchRecommendations(true); // Skip cache on meal updates
     };
 
     EventEmitter.on(EventEmitter.Events.MEAL_ADDED, handleMealUpdated);
