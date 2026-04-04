@@ -34,6 +34,7 @@ const AppWithLayout = () => {
 
   const hideNavbarFooterRoutes = ['/', '/login', '/register', '/auth/callback', '/auth/fitbit/callback'];
   const shouldShowNavbarFooter = !hideNavbarFooterRoutes.includes(location.pathname) && user;
+  const shouldShowFooterOnPublic = hideNavbarFooterRoutes.includes(location.pathname) && !user;
 
   return (
     <div className="app-container">
