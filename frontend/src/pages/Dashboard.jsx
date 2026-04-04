@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { UserContext } from "../components/UserContext";
 import "./styles/Dashboard.css";
-import "@fortawesome/fontawesome-free/css/all.min.css"; // Updated import
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Link, useNavigate } from "react-router-dom";
 import { getNutritionData } from "../services/NutritionService";
 import { getMentalHealthData } from "../services/MentalHealthService";
@@ -12,15 +12,53 @@ import { EventEmitter } from '../utils/EventEmitter';
 import { FaFire } from 'react-icons/fa';
 import Logger from '../utils/logger';
 
+const CACHE_KEY = 'dashboard_cache';
+const CACHE_MAX_AGE = 5 * 60 * 1000; // 5 minutes
+
+// Helper to load cached data
+const loadCachedData = () => {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!cached) return null;
+    const { data, timestamp } = JSON.parse(cached);
+    if (Date.now() - timestamp > CACHE_MAX_AGE) {
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+};
+
+// Helper to save data to cache
+const saveCachedData = (data) => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+  } catch (error) {
+    Logger.error('Failed to cache dashboard data:', error);
+  }
+};
+
 const Dashboard = () => {
   const { user, logout } = useContext(UserContext);
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(true);
-  const [nutritionData, setNutritionData] = useState(null);
-  const [workoutData, setWorkoutData] = useState(null);
-  const [mentalHealthData, setMentalHealthData] = useState(null);
-  const [gamificationData, setGamificationData] = useState(null);
-  const [activityFeed, setActivityFeed] = useState([]);
+  
+  // Individual loading states per section instead of one global loader
+  const [loading, setLoading] = useState({
+    nutrition: false,
+    workout: false,
+    mentalHealth: false,
+    gamification: false
+  });
+
+  // Initialize state from cache or empty values
+  const cache = loadCachedData();
+  const [nutritionData, setNutritionData] = useState(cache?.nutritionData || null);
+  const [workoutData, setWorkoutData] = useState(cache?.workoutData || { activityType: 'No workout yet', duration: 0, caloriesBurned: 0 });
+  const [mentalHealthData, setMentalHealthData] = useState(cache?.mentalHealthData || null);
+  const [gamificationData, setGamificationData] = useState(cache?.gamificationData || null);
+  const [activityFeed, setActivityFeed] = useState(cache?.activityFeed || []);
 
   // Helper function to check if a date is today
   const isToday = (date) => {
@@ -35,125 +73,163 @@ const Dashboard = () => {
     return isNaN(parsed.getTime()) ? new Date() : parsed;
   };
 
-  const fetchDashboardData = async () => {
+  // Update activity feed from data
+  const updateActivityFeed = (nutrition, workouts, mentalHealth) => {
+    const allActivities = [
+      ...(nutrition?.mealLogs || [])
+        .filter(log => isToday(log.date))
+        .map(log => ({
+          type: 'nutrition',
+          icon: 'fa-utensils',
+          color: '#2196F3',
+          timestamp: parseDate(log.date),
+          title: `Logged ${log.foodItems?.join(", ") || "meal"}`,
+          details: `${log.calories} calories`,
+          category: log.mealType || 'Meal'
+        })),
+      ...(Array.isArray(workouts) ? workouts : [])
+        .filter(log => isToday(log.date))
+        .map(log => ({
+          type: 'workout',
+          icon: 'fa-dumbbell',
+          color: '#4CAF50',
+          timestamp: parseDate(log.date),
+          title: `Completed ${log.activityType}`,
+          details: `${log.duration} minutes, ${log.caloriesBurned} calories burned`,
+          category: 'Exercise'
+        })),
+      ...(Array.isArray(mentalHealth) ? mentalHealth : [])
+        .filter(log => isToday(log.date))
+        .map(log => ({
+          type: 'mental',
+          icon: 'fa-brain',
+          color: '#9C27B0',
+          timestamp: parseDate(log.date),
+          title: 'Mental Health Check-in',
+          details: `Mood: ${log.mood}, Stress Level: ${log.stressLevel}/10`,
+          category: 'Wellness'
+        }))
+    ];
+
+    const sortedActivities = allActivities.sort((a, b) => b.timestamp - a.timestamp);
+    setActivityFeed(sortedActivities);
+    return sortedActivities;
+  };
+
+  // Fetch nutrition data independently
+  const fetchNutritionData = async () => {
+    if (!user?._id) return;
+    setLoading(prev => ({ ...prev, nutrition: true }));
+    try {
+      const nutrition = await getNutritionData();
+      setNutritionData(nutrition);
+      updateActivityFeed(nutrition, workoutData, mentalHealthData);
+    } catch (error) {
+      Logger.error("Error fetching nutrition data:", error);
+    } finally {
+      setLoading(prev => ({ ...prev, nutrition: false }));
+    }
+  };
+
+  // Fetch workout data independently (only today's workout, not all history)
+  const fetchWorkoutData = async () => {
+    if (!user?._id) return;
+    setLoading(prev => ({ ...prev, workout: true }));
+    try {
+      const todayWorkout = await WorkoutService.getWorkoutData();
+      const workout = todayWorkout || { activityType: 'No workout yet', duration: 0, caloriesBurned: 0 };
+      setWorkoutData(workout);
+      updateActivityFeed(nutritionData, [workout], mentalHealthData);
+    } catch (error) {
+      Logger.error("Error fetching workout data:", error);
+    } finally {
+      setLoading(prev => ({ ...prev, workout: false }));
+    }
+  };
+
+  // Fetch mental health data independently
+  const fetchMentalHealthData = async () => {
+    if (!user?._id) return;
+    setLoading(prev => ({ ...prev, mentalHealth: true }));
+    try {
+      const mentalHealth = await getMentalHealthData(user._id);
+      setMentalHealthData(mentalHealth);
+      updateActivityFeed(nutritionData, workoutData, mentalHealth);
+    } catch (error) {
+      Logger.error("Error fetching mental health data:", error);
+    } finally {
+      setLoading(prev => ({ ...prev, mentalHealth: false }));
+    }
+  };
+
+  // Fetch gamification data independently
+  const fetchGamificationData = async () => {
+    if (!user?._id) return;
+    setLoading(prev => ({ ...prev, gamification: true }));
+    try {
+      const gamification = await GamificationService.getGamificationData();
+      setGamificationData(gamification);
+    } catch (error) {
+      Logger.error("Error fetching gamification data:", error);
+    } finally {
+      setLoading(prev => ({ ...prev, gamification: false }));
+    }
+  };
+
+  // Initial data load - fetch in background without blocking
+  useEffect(() => {
     if (!user?._id) {
       toast.error("Please log in to view your dashboard");
       return;
     }
 
-    try {
-      setIsLoading(true);
-      Logger.debug('Dashboard: Fetching fresh data...');
+    Logger.debug('Dashboard: Fetching all data in background...');
+    
+    // Fetch all sections independently in parallel (no blocking!)
+    Promise.all([
+      fetchNutritionData(),
+      fetchWorkoutData(),
+      fetchMentalHealthData(),
+      fetchGamificationData()
+    ]).then(() => {
+      // Cache all data after successful fetch
+      saveCachedData({
+        nutritionData,
+        workoutData,
+        mentalHealthData,
+        gamificationData,
+        activityFeed
+      });
+    });
 
-      const [nutrition, workouts, mentalHealth, gamification] = await Promise.all([
-        getNutritionData(),
-        WorkoutService.getWorkoutLogs(),
-        getMentalHealthData(user._id),
-        GamificationService.getGamificationData()
-      ]);
-
-      // Get today's workout from the workouts array
-      const today = new Date();
-      const todayWorkout = workouts?.find(workout =>
-        new Date(workout.date).toDateString() === today.toDateString()
-      ) || {
-        activityType: 'No workout yet',
-        duration: 0,
-        caloriesBurned: 0
-      };
-
-      // Combine all activities into a single feed
-      const allActivities = [
-        ...(nutrition?.mealLogs || [])
-          .filter(log => isToday(log.date))
-          .map(log => ({
-            type: 'nutrition',
-            icon: 'fa-utensils',
-            color: '#2196F3',
-            timestamp: parseDate(log.date),
-            title: `Logged ${log.foodItems?.join(", ") || "meal"}`,
-            details: `${log.calories} calories`,
-            category: log.mealType || 'Meal'
-          })),
-        ...(workouts || [])
-          .filter(log => isToday(log.date))
-          .map(log => ({
-            type: 'workout',
-            icon: 'fa-dumbbell',
-            color: '#4CAF50',
-            timestamp: parseDate(log.date),
-            title: `Completed ${log.activityType}`,
-            details: `${log.duration} minutes, ${log.caloriesBurned} calories burned`,
-            category: 'Exercise'
-          })),
-        ...(Array.isArray(mentalHealth) ? mentalHealth : [])
-          .filter(log => isToday(log.date))
-          .map(log => ({
-            type: 'mental',
-            icon: 'fa-brain',
-            color: '#9C27B0',
-            timestamp: parseDate(log.date),
-            title: 'Mental Health Check-in',
-            details: `Mood: ${log.mood}, Stress Level: ${log.stressLevel}/10`,
-            category: 'Wellness'
-          }))
-      ];
-
-      // Sort activities by timestamp (most recent first)
-      const sortedActivities = allActivities.sort((a, b) => b.timestamp - a.timestamp);
-      Logger.debug('Dashboard: Updated activity feed:', sortedActivities);
-
-      setActivityFeed(sortedActivities);
-      setNutritionData(nutrition);
-      setWorkoutData(todayWorkout);
-      setMentalHealthData(mentalHealth);
-      setGamificationData(gamification);
-    } catch (error) {
-      Logger.error("Error fetching dashboard data:", error);
-      toast.error("Failed to load some dashboard data");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
-
-    // Listen for workout and gamification updates using EventEmitter constants
+    // Listen for updates using EventEmitter
     const handleWorkoutUpdate = () => {
-      Logger.debug('Dashboard: Workout update detected, refreshing data...');
-      fetchDashboardData();
+      Logger.debug('Dashboard: Workout update detected, refreshing...');
+      fetchWorkoutData();
     };
 
     const handleGamificationUpdate = (data) => {
-      Logger.debug('Dashboard: Gamification update detected with data:', data);
-      
-      // If we received streak data, update it directly
+      Logger.debug('Dashboard: Gamification update detected:', data);
       if (data?.streaks) {
         setGamificationData(prevData => ({
           ...prevData,
-          streaks: {
-            ...prevData?.streaks,
-            ...data.streaks
-          }
+          streaks: { ...prevData?.streaks, ...data.streaks }
         }));
       } else {
-        // Otherwise refresh all data
-        fetchDashboardData();
+        fetchGamificationData();
       }
     };
 
     const handleNutritionUpdate = () => {
-      Logger.debug('Dashboard: Nutrition update detected, refreshing data...');
-      fetchDashboardData();
+      Logger.debug('Dashboard: Nutrition update detected, refreshing...');
+      fetchNutritionData();
     };
 
     const handleMentalHealthUpdate = () => {
-      Logger.debug('Dashboard: Mental health update detected, refreshing data...');
-      fetchDashboardData();
+      Logger.debug('Dashboard: Mental health update detected, refreshing...');
+      fetchMentalHealthData();
     };
 
-    // Use EventEmitter constants
     EventEmitter.on(EventEmitter.Events.WORKOUT_UPDATED, handleWorkoutUpdate);
     EventEmitter.on(EventEmitter.Events.GAMIFICATION_UPDATED, handleGamificationUpdate);
     EventEmitter.on(EventEmitter.Events.NUTRITION_UPDATED, handleNutritionUpdate);
@@ -165,85 +241,64 @@ const Dashboard = () => {
       EventEmitter.off(EventEmitter.Events.NUTRITION_UPDATED, handleNutritionUpdate);
       EventEmitter.off(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, handleMentalHealthUpdate);
     };
-  }, [user?._id]); // Only re-run if user ID changes
+  }, [user?._id]);
 
   const quickActions = [
-    {
-      icon: 'fa-plus-circle',
-      label: 'Log Workout',
-      action: () => navigate('/workout'),
-      color: '#4CAF50'
-    },
-    {
-      icon: 'fa-utensils',
-      label: 'Log Meal',
-      action: () => navigate('/nutrition'),
-      color: '#2196F3'
-    },
-    {
-      icon: 'fa-brain',
-      label: 'Daily Check-in',
-      action: () => navigate('/mentalhealth'),
-      color: '#9C27B0'
-    },
-    {
-      icon: 'fa-trophy',
-      label: 'Achievements',
-      action: () => navigate('/gamification'),
-      color: '#FF9800'
-    },
+    { icon: 'fa-plus-circle', label: 'Log Workout', action: () => navigate('/workout'), color: '#4CAF50' },
+    { icon: 'fa-utensils', label: 'Log Meal', action: () => navigate('/nutrition'), color: '#2196F3' },
+    { icon: 'fa-brain', label: 'Daily Check-in', action: () => navigate('/mentalhealth'), color: '#9C27B0' },
+    { icon: 'fa-trophy', label: 'Achievements', action: () => navigate('/gamification'), color: '#FF9800' },
   ];
 
   const handleLogout = () => {
     logout();
+    localStorage.removeItem(CACHE_KEY);
     navigate("/", { replace: true });
   };
 
-  if (isLoading) {
-    return <div className="dashboard-loading">Loading dashboard data...</div>;
-  }
+  // Loading spinner component for sections
+  const SectionLoader = () => (
+    <div className="section-loader">
+      <div className="loading-spinner-small"></div>
+    </div>
+  );
 
   return (
     <div className="page-container">
       <div className="dashboard-container">
         <div className="dashboard-header">
           <button onClick={handleLogout} className="logout-button">
-            <i className="fas fa-sign-out-alt"></i> Logout {/* Updated icon */}
+            <i className="fas fa-sign-out-alt"></i> Logout
           </button>
           <h1>Welcome, {user?.name || user?.username || "User"} to Fitness Hub</h1>
           <p>Track your fitness journey and achieve your goals</p>
         </div>
+        
         <div className="dashboard-content">
           <section className="quick-stats">
-            {/* Quick Actions Section */}
             <h2>Quick Actions</h2>
             <div className="quick-actions-grid">
               {quickActions.map((action, index) => (
-                <button
-                  key={index}
-                  className="quick-action-card"
-                  onClick={action.action}
-                >
-                  <i className={`fas ${action.icon}`} style={{ color: action.color }}></i> {/* Updated to fas */}
+                <button key={index} className="quick-action-card" onClick={action.action}>
+                  <i className={`fas ${action.icon}`} style={{ color: action.color }}></i>
                   <span>{action.label}</span>
                 </button>
               ))}
             </div>
           </section>
+
           <section className="todays-progress">
             <div className="todays-progress-header">
-              <h2>
-                <i className="fas fa-chart-line"></i> {/* Already correct */}
-                Today's Progress
-              </h2>
+              <h2><i className="fas fa-chart-line"></i> Today's Progress</h2>
               <p>Track your daily achievements and milestones</p>
             </div>
 
             <div className="stats-grid">
               <Link to="/nutrition" className="stat-card calories">
                 <div className="stat-header">
-                  <i className="fas fa-utensils"></i> {/* Updated to fas */}
+                  <i className="fas fa-utensils"></i>
                   <h3>Nutrition</h3>
+                  {loading.nutrition && <SectionLoader />}
                 </div>
                 <div className="stat-content">
                   <p className="stat-value">{nutritionData?.calories || 0}</p>
@@ -254,15 +309,14 @@ const Dashboard = () => {
                   <span>Carbs: {nutritionData?.macronutrients?.carbohydrates || 0}g</span>
                   <span>Fat: {nutritionData?.macronutrients?.fats || 0}g</span>
                 </div>
-                <div className="stat-footer">
-                  View Nutrition <i className="fas fa-arrow-right"></i> {/* Already correct */}
-                </div>
+                <div className="stat-footer">View Nutrition <i className="fas fa-arrow-right"></i></div>
               </Link>
 
               <Link to="/workout" className="stat-card workout">
                 <div className="stat-header">
-                  <i className="fas fa-dumbbell"></i> {/* Updated to fas */}
+                  <i className="fas fa-dumbbell"></i>
                   <h3>Workouts</h3>
+                  {loading.workout && <SectionLoader />}
                 </div>
                 <div className="stat-content">
                   <p className="stat-value">{workoutData?.duration || 0}</p>
@@ -277,14 +331,15 @@ const Dashboard = () => {
 
               <Link to="/mentalhealth" className="stat-card mental-health">
                 <div className="stat-header">
-                  <i className="fas fa-brain"></i> {/* Updated to fas */}
+                  <i className="fas fa-brain"></i>
                   <h3>Mental Health</h3>
+                  {loading.mentalHealth && <SectionLoader />}
                 </div>
                 <div className="stat-content">
                   <p className="stat-value">
-                    {mentalHealthData?.[0]?.mood ?
-                      mentalHealthData[0].mood.charAt(0).toUpperCase() + mentalHealthData[0].mood.slice(1) :
-                      'No check-in'}
+                    {mentalHealthData?.[0]?.mood 
+                      ? mentalHealthData[0].mood.charAt(0).toUpperCase() + mentalHealthData[0].mood.slice(1) 
+                      : 'No check-in'}
                   </p>
                   <p className="stat-label">today's mood</p>
                   <div className="stat-details">
@@ -297,8 +352,9 @@ const Dashboard = () => {
 
               <Link to="/gamification" className="stat-card gamification">
                 <div className="stat-header">
-                  <i className="fas fa-trophy"></i> {/* Updated to fas */}
+                  <i className="fas fa-trophy"></i>
                   <h3>Progress</h3>
+                  {loading.gamification && <SectionLoader />}
                 </div>
                 <div className="stat-content">
                   <div className="streak-info">
@@ -320,39 +376,31 @@ const Dashboard = () => {
                     }</span>
                   </div>
                 </div>
-                <div className="stat-footer">
-                  View Progress <i className="fas fa-arrow-right"></i> {/* Already correct */}
-                </div>
+                <div className="stat-footer">View Progress <i className="fas fa-arrow-right"></i></div>
               </Link>
             </div>
           </section>
+
           <section className="todays-activity">
             <div className="activity-header">
-              <h2>
-                <i className="fas fa-stream"></i> {/* Already correct */}
-                Today's Activities
-              </h2>
-              <p>{new Date().toLocaleDateString(undefined, {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric'
-              })}</p>
+              <h2><i className="fas fa-stream"></i> Today's Activities</h2>
+              <p>{new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
             </div>
 
             <div className="activity-feed">
               {activityFeed.length === 0 ? (
                 <div className="no-activities">
-                  <i className="fas fa-calendar-plus"></i> {/* Updated to fas */}
+                  <i className="fas fa-calendar-plus"></i>
                   <p>No activities logged today. Start your wellness journey!</p>
                   <div className="quick-add-buttons">
                     <Link to="/workout" className="quick-add-btn workout">
-                      <i className="fas fa-dumbbell"></i> Log Workout {/* Updated to fas */}
+                      <i className="fas fa-dumbbell"></i> Log Workout
                     </Link>
                     <Link to="/nutrition" className="quick-add-btn nutrition">
-                      <i className="fas fa-utensils"></i> Log Meal {/* Updated to fas */}
+                      <i className="fas fa-utensils"></i> Log Meal
                     </Link>
                     <Link to="/mentalhealth" className="quick-add-btn mental">
-                      <i className="fas fa-brain"></i> Check-in {/* Updated to fas */}
+                      <i className="fas fa-brain"></i> Check-in
                     </Link>
                   </div>
                 </div>
@@ -361,17 +409,14 @@ const Dashboard = () => {
                   {activityFeed.map((activity, index) => (
                     <div key={index} className={`activity-item ${activity.type}`}>
                       <div className="activity-icon" style={{ backgroundColor: activity.color }}>
-                        <i className={`fas ${activity.icon}`}></i> {/* Updated to fas */}
+                        <i className={`fas ${activity.icon}`}></i>
                       </div>
                       <div className="activity-content">
                         <h3>{activity.title}</h3>
                         <p>{activity.details}</p>
                         <span className="activity-category">{activity.category}</span>
                         <span className="activity-time">
-                          {activity.timestamp.toLocaleTimeString([], {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
+                          {activity.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                     </div>
