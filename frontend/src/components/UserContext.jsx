@@ -60,8 +60,7 @@ export const UserProvider = ({ children }) => {
     localStorage.setItem("token", token);
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
-
-    await fetchUser(); // 
+    // ✅ Removed redundant fetchUser() call - user data already available from login response
   };
 
   // 
@@ -90,13 +89,11 @@ export const UserProvider = ({ children }) => {
       // Update user data in localStorage and state
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
-
-      // Verify the update was successful by fetching fresh user data
-      await fetchUser();
+      // ✅ Removed redundant fetchUser() - userData is already fresh from API response
     } catch (error) {
       Logger.error("Error updating user context:", error);
-      // If there's an error, try to recover by fetching fresh user data
-      await fetchUser();
+      // ✅ Only logout on error, don't fetch again
+      logout();
     }
   };
 
