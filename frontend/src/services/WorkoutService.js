@@ -1,34 +1,22 @@
-import axios from "axios";
+import axios from "../axiosConfig";
 import Logger from '../utils/logger';
 
-const API_URL = `${import.meta.env.VITE_API_URL}/workouts`;
-
-// 🔹 Helper function to get authentication headers
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    throw new Error("❌ No authentication token found!");
-  }
-  return { Authorization: `Bearer ${token}` };
-};
+const API_URL = `/workouts`;
 
 // 🔹 Generalized API request handler with proper error handling
 const requestHandler = async (method, url, data = null) => {
   try {
-    const headers = getAuthHeaders();
     const requestData = data ? JSON.stringify(data) : undefined;
     Logger.debug(`Making ${method.toUpperCase()} request to ${url}`, {
       method,
       url,
-      data: requestData,
-      headers 
+      data: requestData
     });
 
     const config = {
       method,
       url,
       headers: {
-        ...headers,
         'Content-Type': 'application/json'
       },
       data: data ? JSON.stringify(data) : undefined

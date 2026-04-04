@@ -60,8 +60,9 @@ const Login = () => {
       setLoading(true);
       const response = await UserService.loginUser(formData);
 
-      if (response.token && response.user) {
-        await login(response.user, response.token);
+      if (response.user) {
+        // ✅ Token is now stored in httpOnly cookie by backend
+        await login(response.user);
 
         Toast.fire({
           icon: 'success',

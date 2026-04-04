@@ -1,45 +1,47 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import User from "../models/User.js"; // ✅ Import User model
+import User from "../models/User.js";
 import Logger from '../utils/logger.js';
 
 dotenv.config();
 
 const authMiddleware = async (req, res, next) => {
     try {
-        const authHeader = req.header("Authorization");
-        Logger.debug("Received Auth Header:", authHeader);
+        // ✅ Try to get token from httpOnly cookie first, then fallback to Authorization header
+        let token = req.cookies?.accessToken;
+        
+        if (!token) {
+            const authHeader = req.header("Authorization");
+            if (authHeader && authHeader.startsWith("Bearer ")) {
+                token = authHeader.split(" ")[1];
+            }
+        }
 
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        if (!token) {
             return res.status(401).json({ message: "No token provided." });
         }
 
-        const token = authHeader.split(" ")[1];
-        Logger.debug("Extracted Token:", token);
-
-        if (!token) {
-            return res.status(403).json({ message: "Invalid token format." });
-        }
-
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        Logger.debug("Decoded Token:", decoded);
 
-        if (!decoded.userId) { // ✅ JWT should store `userId`, not `id`
+        if (!decoded.userId) {
             return res.status(403).json({ message: "Invalid token payload." });
         }
 
-        const user = await User.findById(decoded.userId).select("-password"); // ✅ Fetch user without password
+        const user = await User.findById(decoded.userId).select("-password");
         if (!user) {
             return res.status(404).json({ message: "User not found." });
         }
 
-        req.user = user; // ✅ Attach full user object
+        req.user = user;
         next();
     } catch (error) {
         Logger.error("Authentication error:", error.message);
 
         if (error.name === "TokenExpiredError") {
-            return res.status(401).json({ message: "Session expired. Please log in again." });
+            return res.status(401).json({ 
+                message: "Access token expired",
+                code: "TOKEN_EXPIRED"
+            });
         }
 
         res.status(403).json({ message: "Invalid token. Access denied." });

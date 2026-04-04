@@ -1,9 +1,9 @@
 import React, { createContext, useState, useCallback } from "react";
-import axios from "axios";
+import axios from "../axiosConfig"; // ✅ Use configured axios instance
 import Logger from '../utils/logger';
 
 export const UserContext = createContext(null);
-const API_URL = `${import.meta.env.VITE_API_URL}/users/profile`; // 
+const API_URL = `/users/profile`;
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
@@ -16,33 +16,23 @@ export const UserProvider = ({ children }) => {
     }
   });
 
-  const [loading, setLoading] = useState(false); // 
+  const [loading, setLoading] = useState(false);
 
-  // 
+  // ✅ Fetch user profile using cookie-based auth
   const fetchUser = useCallback(async () => {
-    const token = localStorage.getItem("token");
-
-    if (!token) {
-      console.warn(" No authentication token found. User is not logged in.");
-      setUser(null);
-      return;
-    }
-
     try {
       setLoading(true);
-      const response = await axios.get(API_URL, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.get(API_URL);
 
       if (!response.data) throw new Error("No user data returned from server.");
 
       setUser(response.data);
-      localStorage.setItem("user", JSON.stringify(response.data)); // 
+      localStorage.setItem("user", JSON.stringify(response.data));
     } catch (error) {
       Logger.error("Authentication error:", error.response?.data || error.message);
 
       if (error.response?.status === 401) {
-        console.warn(" Token expired or invalid. Logging out...");
+        Logger.warn("Authentication failed. Logging out...");
         logout();
       }
     } finally {
@@ -50,49 +40,45 @@ export const UserProvider = ({ children }) => {
     }
   }, []);
 
-  // 
-  const login = async (userData, token) => {
-    if (!token || !userData) {
-      Logger.error("Login error: Missing token or user data.");
+  // ✅ Login with cookie-based auth
+  const login = async (userData) => {
+    if (!userData) {
+      Logger.error("Login error: Missing user data.");
       return;
     }
 
-    localStorage.setItem("token", token);
+    // ✅ Token is now stored in httpOnly cookie by backend
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
-    // ✅ Removed redundant fetchUser() call - user data already available from login response
   };
 
-  // 
-  const logout = useCallback(() => {
+  // ✅ Logout - clears cookies via backend call
+  const logout = useCallback(async () => {
     Logger.info("Logging out...");
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
+    try {
+      // Call logout endpoint to clear httpOnly cookies
+      await axios.post('/users/logout');
+    } catch (error) {
+      Logger.error("Logout error:", error);
+    } finally {
+      localStorage.removeItem("user");
+      setUser(null);
+    }
   }, []);
 
-  // 
-  const updateUser = async (userData, newToken) => {
+  // ✅ Update user - no token storage needed
+  const updateUser = async (userData) => {
     try {
       if (!userData) {
         Logger.error("Update failed: No user data provided");
         return;
       }
 
-      // Update token if provided
-      if (newToken) {
-        localStorage.setItem("token", newToken);
-        // Update axios default headers
-        axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-      }
-
-      // Update user data in localStorage and state
+      // Update user data in localStorage and state only
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
-      // ✅ Removed redundant fetchUser() - userData is already fresh from API response
     } catch (error) {
       Logger.error("Error updating user context:", error);
-      // ✅ Only logout on error, don't fetch again
       logout();
     }
   };

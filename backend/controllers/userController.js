@@ -2,21 +2,57 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import User from '../models/User.js';
-import Workout from '../models/Workout.js';  // Import Workout model
-import Nutrition from '../models/Nutrition.js';  // Import Nutrition model
-import MentalHealth from '../models/MentalHealth.js';  // Import MentalHealth model
-import Gamification from '../models/Gamification.js';  // Import Gamification model
+import Workout from '../models/Workout.js';
+import Nutrition from '../models/Nutrition.js';
+import MentalHealth from '../models/MentalHealth.js';
+import Gamification from '../models/Gamification.js';
 import Logger from '../utils/logger.js';
 
 dotenv.config();
 
-// Generate JWT Token Function
-const generateToken = (user) => {
+// Cookie configuration
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+};
+
+const REFRESH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+};
+
+// Generate Access Token (short-lived: 15 minutes)
+const generateAccessToken = (user) => {
   return jwt.sign(
     { userId: user._id, email: user.email, username: user.username },
     process.env.JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: '15m' }
   );
+};
+
+// Generate Refresh Token (long-lived: 30 days)
+const generateRefreshToken = (user) => {
+  return jwt.sign(
+    { userId: user._id, type: 'refresh' },
+    process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET,
+    { expiresIn: '30d' }
+  );
+};
+
+// Set auth cookies helper
+const setAuthCookies = (res, accessToken, refreshToken) => {
+  res.cookie('accessToken', accessToken, COOKIE_OPTIONS);
+  res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
+};
+
+// Clear auth cookies helper
+const clearAuthCookies = (res) => {
+  res.clearCookie('accessToken', COOKIE_OPTIONS);
+  res.clearCookie('refreshToken', REFRESH_COOKIE_OPTIONS);
 };
 
 // Register User (Now initializes default data)
@@ -53,12 +89,23 @@ export const registerUser = async (req, res) => {
     // Initialize default data for the user
     await initializeDefaultData(user._id);
 
-    // Generate JWT Token
-    const token = generateToken(user);
+    // Generate tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    // Store refresh token hash in database
+    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+    user.refreshToken = refreshTokenHash;
+    user.refreshTokenExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    await user.save();
+
+    // Set httpOnly cookies
+    setAuthCookies(res, accessToken, refreshToken);
+
+    Logger.info("User registered successfully:", user.username);
 
     res.status(201).json({
       message: 'User registered successfully',
-      token,
       user: { id: user._id, username, email, firstName, lastName, dateOfBirth, gender },
     });
 
@@ -216,7 +263,7 @@ const initializeDefaultData = async (userId) => {
 };
 
 
-// Login User
+// Login User (with httpOnly cookies and refresh tokens)
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
@@ -231,10 +278,21 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    const token = generateToken(user);
+    // Generate new tokens
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    // Store refresh token hash in database
+    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+    user.refreshToken = refreshTokenHash;
+    user.refreshTokenExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    await user.save();
+
+    // Set httpOnly cookies
+    setAuthCookies(res, accessToken, refreshToken);
+
     res.json({
       message: 'Login successful',
-      token,
       user: { 
         id: user._id, 
         email: user.email, 
@@ -249,6 +307,86 @@ export const loginUser = async (req, res) => {
 
   } catch (error) {
     Logger.error('Login error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Refresh Access Token
+export const refreshAccessToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: 'No refresh token provided' });
+    }
+
+    // Verify refresh token
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
+    
+    if (!decoded.userId || decoded.type !== 'refresh') {
+      return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+
+    // Find user and verify stored hash
+    const user = await User.findById(decoded.userId);
+    if (!user || !user.refreshToken) {
+      return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+
+    // Check if refresh token is expired in database
+    if (user.refreshTokenExpiresAt && new Date() > user.refreshTokenExpiresAt) {
+      return res.status(403).json({ message: 'Refresh token expired. Please log in again.' });
+    }
+
+    // Verify the refresh token hash matches
+    const isValid = await bcrypt.compare(refreshToken, user.refreshToken);
+    if (!isValid) {
+      return res.status(403).json({ message: 'Invalid refresh token' });
+    }
+
+    // Generate new access token
+    const newAccessToken = generateAccessToken(user);
+
+    // Set new access token cookie
+    res.cookie('accessToken', newAccessToken, COOKIE_OPTIONS);
+
+    res.json({ message: 'Token refreshed successfully' });
+
+  } catch (error) {
+    Logger.error('Token refresh error:', error);
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ message: 'Refresh token expired. Please log in again.' });
+    }
+    res.status(403).json({ message: 'Invalid refresh token' });
+  }
+};
+
+// Logout User (clear cookies and invalidate refresh token)
+export const logoutUser = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    
+    // Invalidate refresh token in database if exists
+    if (refreshToken) {
+      try {
+        const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId);
+        if (user) {
+          user.refreshToken = null;
+          user.refreshTokenExpiresAt = null;
+          await user.save();
+        }
+      } catch (e) {
+        // Token invalid, just clear cookies
+      }
+    }
+
+    // Clear cookies
+    clearAuthCookies(res);
+
+    res.json({ message: 'Logout successful' });
+  } catch (error) {
+    Logger.error('Logout error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

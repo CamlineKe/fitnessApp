@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import { createServer } from 'http';
@@ -48,8 +49,9 @@ const io = new Server(server, {
   }
 });
 
-// ✅ Allow JSON requests
+// ✅ Allow JSON requests and parse cookies
 app.use(express.json());
+app.use(cookieParser());
 
 // Middleware to enable Cross-Origin Resource Sharing (CORS)
 const allowedOrigins = [

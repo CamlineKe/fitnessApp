@@ -1,14 +1,12 @@
-import axios from 'axios';
+import axios from '../axiosConfig';
 import Logger from '../utils/logger';
 
-const API_URL = `${import.meta.env.VITE_API_URL}/users`;
+const API_URL = `/users`;
 
 // Register User Function
 const registerUser = async (userData) => {
     try {
-        const response = await axios.post(`${API_URL}/register`, userData, {
-            headers: { 'Content-Type': 'application/json' }
-        });
+        const response = await axios.post(`${API_URL}/register`, userData);
         return response.data;
     } catch (error) {
         Logger.error("Registration error:", error.response?.data || error.message);
@@ -24,12 +22,10 @@ const loginUser = async (userData) => {
             password: userData.password
         };
 
-        const response = await axios.post(`${API_URL}/login`, formattedUserData, {
-            headers: { 'Content-Type': 'application/json' }
-        });
+        const response = await axios.post(`${API_URL}/login`, formattedUserData);
 
-        if (!response.data.token || !response.data.user) {
-            throw new Error("Invalid response: Missing token or user data");
+        if (!response.data.user) {
+            throw new Error("Invalid response: Missing user data");
         }
 
         return response.data;
@@ -39,19 +35,10 @@ const loginUser = async (userData) => {
     }
 };
 
-// Get auth headers helper
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    if (!token) throw new Error('No authentication token found');
-    return { Authorization: `Bearer ${token}` };
-};
-
 // Get User Profile Function
 const getUserProfile = async () => {
     try {
-        const response = await axios.get(`${API_URL}/profile`, {
-            headers: getAuthHeaders()
-        });
+        const response = await axios.get(`${API_URL}/profile`);
         return response.data;
     } catch (error) {
         Logger.error('Profile fetch error:', error.response?.data || error.message);
@@ -62,17 +49,14 @@ const getUserProfile = async () => {
 // Update User Profile Function
 const updateUserProfile = async (userData) => {
     try {
-        const response = await axios.put(`${API_URL}/profile`, userData, {
-            headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' }
-        });
+        const response = await axios.put(`${API_URL}/profile`, userData);
 
         if (!response.data || !response.data.user) {
             throw new Error("Invalid response: No user data returned");
         }
 
         return {
-            user: response.data.user,
-            token: response.data.token
+            user: response.data.user
         };
     } catch (error) {
         Logger.error("Profile update error:", error.response?.data || error.message);
@@ -85,8 +69,7 @@ const changePassword = async ({ currentPassword, newPassword }) => {
     try {
         const response = await axios.put(
             `${API_URL}/change-password`,
-            { currentPassword, newPassword },
-            { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } }
+            { currentPassword, newPassword }
         );
 
         if (!response.data) {
@@ -100,10 +83,22 @@ const changePassword = async ({ currentPassword, newPassword }) => {
     }
 };
 
+// Logout Function
+const logoutUser = async () => {
+    try {
+        const response = await axios.post(`${API_URL}/logout`);
+        return response.data;
+    } catch (error) {
+        Logger.error("Logout error:", error.response?.data || error.message);
+        throw error;
+    }
+};
+
 export default {
     registerUser,
     loginUser,
     getUserProfile,
     updateUserProfile,
-    changePassword
+    changePassword,
+    logoutUser
 };

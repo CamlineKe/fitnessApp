@@ -2,26 +2,39 @@ import express from 'express';
 import {
   registerUser,
   loginUser,
+  logoutUser,
+  refreshAccessToken,
   getUserProfile,
   updateUserProfile,
   changeUserPassword,
   getAllUsers
 } from '../controllers/userController.js';
 import authMiddleware, { adminMiddleware } from '../middlewares/authMiddleware.js';
+import { authLimiter } from '../middlewares/rateLimiter.js';
 import { validate } from '../middlewares/validation.js';
 import { userValidation } from '../middlewares/validation.js';
 
 const router = express.Router();
 
-// Public Routes with validation
+// Public Routes with rate limiting and validation
 router.post('/register', 
+  authLimiter,
   validate(userValidation.register), 
   registerUser
 );
 
 router.post('/login', 
+  authLimiter,
   validate(userValidation.login), 
   loginUser
+);
+
+router.post('/refresh-token',
+  refreshAccessToken
+);
+
+router.post('/logout',
+  logoutUser
 );
 
 // Protected Routes with validation

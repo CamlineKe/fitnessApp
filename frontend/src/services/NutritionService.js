@@ -1,22 +1,12 @@
-import axios from "axios";
+import axios from "../axiosConfig";
 
 // Define the base API URL for nutrition-related requests
-const API_URL = `${import.meta.env.VITE_API_URL}/nutrition`;
-
-// Helper function to get the authentication token
-const getAuthHeaders = () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    console.warn("No authentication token found!");
-    return {}; // Ensures headers object is always returned to prevent crashes
-  }
-  return { Authorization: `Bearer ${token}` };
-};
+const API_URL = `/nutrition`;
 
 // Function to fetch nutrition data from the server
 export const getNutritionData = async () => {
   try {
-    const response = await axios.get(API_URL, { headers: getAuthHeaders() });
+    const response = await axios.get(API_URL);
     const logs = response.data;
 
     // Calculate daily totals from today's logs

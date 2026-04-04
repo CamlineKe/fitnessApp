@@ -1,35 +1,51 @@
-import axios from 'axios';
+import axios from '../axiosConfig';
 import Logger from '../utils/logger';
 
-const API_URL = `${import.meta.env.VITE_API_URL}/gamification`;
+const API_URL = `/gamification`;
 
-// Helper function to get auth headers
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('No authentication token found');
+// 🔹 Generalized API request handler with proper error handling
+const requestHandler = async (method, url, data = null, headers = null) => {
+  try {
+    const requestData = data ? JSON.stringify(data) : undefined;
+    Logger.debug(`Making ${method.toUpperCase()} request to ${url}`, {
+      method,
+      url,
+      data: requestData
+    });
+
+    const config = {
+      method,
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers
+      },
+      data: data ? JSON.stringify(data) : undefined
+    };
+
+    Logger.debug('Request config:', config);
+    const response = await axios(config);
+    Logger.info(`${method.toUpperCase()} request successful:`, response.data);
+    return response.data;
+  } catch (error) {
+    Logger.error(`Error making ${method.toUpperCase()} request:`, error);
+    throw error;
   }
-  return { Authorization: `Bearer ${token}` };
 };
 
 class GamificationService {
   static async getGamificationData() {
     try {
-      const headers = getAuthHeaders();
-      const response = await axios.get(`${API_URL}/data`, { headers });
-      return response.data;
+      const response = await requestHandler('get', `${API_URL}/data`);
+      return response;
     } catch (error) {
       Logger.error('Error fetching gamification data:', error);
-      if (!localStorage.getItem('token')) {
-        throw new Error('No authentication token found');
-      }
       throw error;
     }
   }
 
   static async updatePoints(activity, data) {
     try {
-      const headers = getAuthHeaders();
       Logger.debug('Attempting to update points:', { activity, data });
       
       // First ensure gamification data exists
@@ -39,13 +55,9 @@ class GamificationService {
         gamificationData = await this.initializeNewUserData();
       }
 
-      const response = await axios.post(
-        `${API_URL}/points`,
-        { activity, data },
-        { headers }
-      );
-      Logger.info('Points updated successfully:', response.data);
-      return response.data;
+      const response = await requestHandler('post', `${API_URL}/points`, { activity, data });
+      Logger.info('Points updated successfully:', response);
+      return response;
     } catch (error) {
       Logger.error('Error updating points:', {
         message: error.message,
@@ -60,8 +72,6 @@ class GamificationService {
 
   static async updateStreak(category) {
     try {
-      const headers = getAuthHeaders();
-      
       // First ensure gamification data exists
       let gamificationData = await this.getGamificationData();
       if (!gamificationData) {
@@ -69,12 +79,8 @@ class GamificationService {
         gamificationData = await this.initializeNewUserData();
       }
 
-      const response = await axios.post(
-        `${API_URL}/streak`,
-        { category },
-        { headers }
-      );
-      return response.data;
+      const response = await requestHandler('post', `${API_URL}/streak`, { category });
+      return response;
     } catch (error) {
       Logger.error('Error updating streak:', error);
       throw new Error(error.response?.data?.message || 'Failed to update streak. Please try again.');
@@ -83,13 +89,8 @@ class GamificationService {
 
   static async logMood(mood) {
     try {
-      const headers = getAuthHeaders();
-      const response = await axios.post(
-        `${API_URL}/mood`,
-        { mood },
-        { headers }
-      );
-      return response.data;
+      const response = await requestHandler('post', `${API_URL}/mood`, { mood });
+      return response;
     } catch (error) {
       Logger.error('Error logging mood:', error);
       throw error;
@@ -98,9 +99,8 @@ class GamificationService {
 
   static async checkAchievements() {
     try {
-      const headers = getAuthHeaders();
-      const response = await axios.get(`${API_URL}/achievements`, { headers });
-      return response.data;
+      const response = await requestHandler('get', `${API_URL}/achievements`);
+      return response;
     } catch (error) {
       Logger.error('Error checking achievements:', error);
       throw error;
@@ -109,9 +109,8 @@ class GamificationService {
 
   static async getLeaderboard() {
     try {
-      const headers = getAuthHeaders();
-      const response = await axios.get(`${API_URL}/leaderboard`, { headers });
-      return response.data;
+      const response = await requestHandler('get', `${API_URL}/leaderboard`);
+      return response;
     } catch (error) {
       Logger.error('Error fetching leaderboard:', error);
       throw error;
@@ -120,12 +119,7 @@ class GamificationService {
 
   static async initializeNewUserData() {
     try {
-      const headers = getAuthHeaders();
-      const response = await axios.post(
-        `${API_URL}/initialize`,
-        {},  // Empty object since backend will create default data
-        { headers }
-      );
+      const response = await axios.post(`${API_URL}/initialize`, {});
       Logger.info('Successfully initialized gamification data:', response.data);
       return response.data;
     } catch (error) {

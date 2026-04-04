@@ -12,6 +12,9 @@ const userSchema = new mongoose.Schema({
   gender: { type: String, enum: ['male', 'female', 'other'] },
   healthGoals: { type: String },
   isAdmin: { type: Boolean, default: false },
+  // ✅ Refresh token storage for secure token rotation
+  refreshToken: { type: String },
+  refreshTokenExpiresAt: { type: Date },
   devices: {
     googleFit: {
       connected: { type: Boolean, default: false },

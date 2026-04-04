@@ -1,37 +1,76 @@
 import axios from 'axios';
 import Logger from './utils/logger';
 
-// Configure axios defaults
+const API_URL = import.meta.env.VITE_API_URL;
+
+// Configure axios defaults for cookie-based auth
+axios.defaults.baseURL = API_URL;
+axios.defaults.withCredentials = true; // ✅ Essential for sending/receiving cookies
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
-// Request interceptor to add auth token automatically
-axios.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+let isRefreshing = false;
+let refreshSubscribers = [];
 
-// Response interceptor to handle auth errors globally
+const subscribeTokenRefresh = (callback) => {
+  refreshSubscribers.push(callback);
+};
+
+const onTokenRefreshed = () => {
+  refreshSubscribers.forEach((callback) => callback());
+  refreshSubscribers = [];
+};
+
+const refreshAccessToken = async () => {
+  try {
+    const response = await axios.post('/users/refresh-token');
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Response interceptor to handle token expiration and automatic refresh
 axios.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      Logger.warn('Unauthorized request - token may be expired');
-      // Clear auth data on 401
-      localStorage.removeItem('token');
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (error.response?.data?.code === 'TOKEN_EXPIRED') {
+        if (isRefreshing) {
+          return new Promise((resolve) => {
+            subscribeTokenRefresh(() => {
+              resolve(axios(originalRequest));
+            });
+          });
+        }
+
+        originalRequest._retry = true;
+        isRefreshing = true;
+
+        try {
+          await refreshAccessToken();
+          isRefreshing = false;
+          onTokenRefreshed();
+          return axios(originalRequest);
+        } catch (refreshError) {
+          isRefreshing = false;
+          Logger.error('Token refresh failed:', refreshError);
+          localStorage.removeItem('user');
+          if (!window.location.pathname.includes('/login')) {
+            window.location.href = '/login';
+          }
+          return Promise.reject(refreshError);
+        }
+      }
+
+      Logger.warn('Unauthorized request');
       localStorage.removeItem('user');
-      // Redirect to login if not already there
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
     }
+
     return Promise.reject(error);
   }
 );

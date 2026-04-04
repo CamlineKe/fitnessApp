@@ -120,7 +120,8 @@ const Register = () => {
       setLoading(true);
       const response = await UserService.registerUser(formData);
       
-      if (response.token && response.user) {
+      if (response.user) {
+        // ✅ Token is now stored in httpOnly cookie by backend
         Toast.fire({
           icon: 'success',
           title: 'Welcome to Fitness Tracker! Redirecting to login...'
