@@ -297,6 +297,13 @@ textarea.form-control {
     transition: all 0.3s ease;
 }
 
+.setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
 .change-password-button:hover {
     background: #2980b9;
     transform: translateY(-2px);
