@@ -2,14 +2,24 @@ import mongoose from 'mongoose';
 
 const mentalHealthSchema = new mongoose.Schema(
   {
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    date: { type: Date, default: Date.now, required: true }, // Default to current date
-    stressLevel: { type: Number, min: 0, max: 10, required: true }, // Ensure it's always provided
+    userId: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: 'User', 
+      required: true,
+      index: true
+    },
+    date: { 
+      type: Date, 
+      default: Date.now, 
+      required: true,
+      index: true
+    },
+    stressLevel: { type: Number, min: 0, max: 10, required: true },
     mood: { 
       type: String, 
       enum: ['happy', 'sad', 'anxious', 'neutral'], 
       required: true,
-      set: (value) => value.toLowerCase() // 🔥 Auto-convert to lowercase for consistency
+      set: (value) => value.toLowerCase()
     },
     sleepQuality: { type: Number, min: 0, max: 10, required: true },
     notes: { 
@@ -23,7 +33,10 @@ const mentalHealthSchema = new mongoose.Schema(
       }
     }
   },
-  { timestamps: true } // Automatically manages createdAt and updatedAt
+  { timestamps: true }
 );
+
+// Compound index for fast queries by user + date
+mentalHealthSchema.index({ userId: 1, date: -1 });
 
 export default mongoose.model('MentalHealth', mentalHealthSchema);

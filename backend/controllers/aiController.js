@@ -5,6 +5,14 @@ import Workout from '../models/Workout.js';
 import MentalHealth from '../models/MentalHealth.js';
 import Logger from '../utils/logger.js';
 
+// ✅ Configure axios instance with timeout and keep-alive for Flask AI
+const flaskAxios = axios.create({
+  timeout: 15000, // 15 second timeout
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
 const FLASK_API_URL = process.env.NODE_ENV === 'production' 
   ? 'https://fitness-ai-service.onrender.com/api'
   : 'http://localhost:5001/api';
@@ -39,13 +47,13 @@ export const getDietRecommendations = async (req, res) => {
       }))
     };
 
-    const response = await axios.post(`${FLASK_API_URL}/diet`, requestData);
+    const response = await flaskAxios.post(`${FLASK_API_URL}/diet`, requestData);
     
     // Send back both recommendations and analysis
     res.json(response.data);
   } catch (error) {
-    Logger.error('Diet AI Error:', error);
-    res.status(500).send('Server error');
+    Logger.error('Diet AI Error:', error.message);
+    res.status(500).json({ error: 'AI service unavailable', details: error.message });
   }
 };
 
@@ -75,11 +83,11 @@ export const getWorkoutRecommendations = async (req, res) => {
       } : {}
     };
 
-    const response = await axios.post(`${FLASK_API_URL}/workout`, requestData);
+    const response = await flaskAxios.post(`${FLASK_API_URL}/workout`, requestData);
     res.json(response.data);
   } catch (error) {
-    Logger.error('Workout AI Error:', error);
-    res.status(500).send('Server error');
+    Logger.error('Workout AI Error:', error.message);
+    res.status(500).json({ error: 'AI service unavailable', details: error.message });
   }
 };
 
@@ -109,10 +117,10 @@ export const getStressAnalysis = async (req, res) => {
       } : null
     };
 
-    const response = await axios.post(`${FLASK_API_URL}/stress`, requestData);
+    const response = await flaskAxios.post(`${FLASK_API_URL}/stress`, requestData);
     res.json(response.data);
   } catch (error) {
-    Logger.error('Stress Analysis Error:', error);
-    res.status(500).send('Server error');
+    Logger.error('Stress Analysis Error:', error.message);
+    res.status(500).json({ error: 'AI service unavailable', details: error.message });
   }
 };

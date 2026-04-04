@@ -5,16 +5,18 @@ const nutritionSchema = new mongoose.Schema(
     userId: { 
       type: mongoose.Schema.Types.ObjectId, 
       ref: "User", 
-      required: true 
+      required: true,
+      index: true
     },
     date: { 
       type: Date, 
-      default: Date.now 
+      default: Date.now,
+      index: true
     },
     mealType: { 
       type: String, 
       required: true, 
-      enum: ["breakfast", "lunch", "dinner", "snack"] 
+      enum: ["breakfast", "lunch", "dinner", "snack"]
     },
     foodItems: [{ 
       type: String, 
@@ -41,5 +43,8 @@ const nutritionSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// ✅ Compound index for fast queries by user + date
+nutritionSchema.index({ userId: 1, date: -1 });
 
 export default mongoose.model("Nutrition", nutritionSchema);

@@ -52,25 +52,31 @@ const Recommendation = () => {
         const validLogs = dataArray.filter(log => log && log.mood && log.date && log._id);
         const sortedLogs = validLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        // Fetch recommendations for each service separately to handle errors individually
-        try {
-          const dietData = await DietRecommendationService.getDietRecommendations();
-          Logger.debug("Diet recommendations:", dietData);
-          setDietRecommendations(dietData || { recommendations: [], analysis: {} });
-          EventEmitter.emit(EventEmitter.Events.DIET_RECOMMENDATIONS_UPDATED, dietData);
-        } catch (err) {
-          Logger.error('Failed to fetch diet recommendations:', err);
+        // Fetch all recommendations in PARALLEL for faster loading
+        const [dietData, stressData, workoutData] = await Promise.allSettled([
+          DietRecommendationService.getDietRecommendations(),
+          StressAnalysisService.getStressAnalysis(sortedLogs),
+          WorkoutRecommenderService.getWorkoutRecommendations()
+        ]);
+
+        // Process diet results
+        if (dietData.status === 'fulfilled') {
+          Logger.debug("Diet recommendations:", dietData.value);
+          setDietRecommendations(dietData.value || { recommendations: [], analysis: {} });
+          EventEmitter.emit(EventEmitter.Events.DIET_RECOMMENDATIONS_UPDATED, dietData.value);
+        } else {
+          Logger.error('Failed to fetch diet recommendations:', dietData.reason);
           setErrors(prev => ({ ...prev, diet: 'Diet recommendation service is currently unavailable. Please try again later.' }));
           setDietRecommendations({ recommendations: [], analysis: {} });
         }
 
-        try {
-          const stressData = await StressAnalysisService.getStressAnalysis(sortedLogs);
-          Logger.debug("Stress analysis:", stressData);
-          setStressAnalysis(stressData);
-          EventEmitter.emit(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, stressData);
-        } catch (err) {
-          Logger.error('Failed to fetch stress analysis:', err);
+        // Process stress results
+        if (stressData.status === 'fulfilled') {
+          Logger.debug("Stress analysis:", stressData.value);
+          setStressAnalysis(stressData.value);
+          EventEmitter.emit(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, stressData.value);
+        } else {
+          Logger.error('Failed to fetch stress analysis:', stressData.reason);
           setErrors(prev => ({ ...prev, stress: 'Stress analysis service is currently unavailable. Please try again later.' }));
           setStressAnalysis({
             recommendations: [],
@@ -81,13 +87,13 @@ const Recommendation = () => {
           });
         }
 
-        try {
-          const workoutData = await WorkoutRecommenderService.getWorkoutRecommendations();
-          Logger.debug("Workout recommendations:", workoutData);
-          setWorkoutRecommendations(workoutData || { recommendations: [], analysis: {} });
-          EventEmitter.emit(EventEmitter.Events.WORKOUT_RECOMMENDATIONS_UPDATED, workoutData);
-        } catch (err) {
-          Logger.error('Failed to fetch workout recommendations:', err);
+        // Process workout results
+        if (workoutData.status === 'fulfilled') {
+          Logger.debug("Workout recommendations:", workoutData.value);
+          setWorkoutRecommendations(workoutData.value || { recommendations: [], analysis: {} });
+          EventEmitter.emit(EventEmitter.Events.WORKOUT_RECOMMENDATIONS_UPDATED, workoutData.value);
+        } else {
+          Logger.error('Failed to fetch workout recommendations:', workoutData.reason);
           setErrors(prev => ({ ...prev, workout: 'Workout recommendation service is currently unavailable. Please try again later.' }));
           setWorkoutRecommendations({ recommendations: [], analysis: {} });
         }
