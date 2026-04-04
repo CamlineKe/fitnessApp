@@ -97,8 +97,8 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-content">
+    <div className="page-container">
+      <div className="login-container">
         <div className="login-header">
           <Link to="/" className="back-link">
             <i className="fas fa-arrow-left"></i>
@@ -108,78 +108,80 @@ const Login = () => {
           <p>Sign in to continue your fitness journey</p>
         </div>
 
-        <div className="login-form">
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="email">
-                <i className="fas fa-envelope"></i>
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="Enter your email"
-                required
-                className="form-input"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="password">
-                <i className="fas fa-lock"></i>
-                Password
-              </label>
-              <div className="password-input-container">
+        <div className="login-content">
+          <div className="login-form-card">
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="email">
+                  <i className="fas fa-envelope"></i>
+                  Email
+                </label>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  name="password"
-                  value={formData.password}
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="Enter your password"
+                  placeholder="Enter your email"
                   required
                   className="form-input"
                 />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">
+                  <i className="fas fa-lock"></i>
+                  Password
+                </label>
+                <div className="password-input-container">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    placeholder="Enter your password"
+                    required
+                    className="form-input"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-footer">
+                <button type="submit" className="submit-button" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i>
+                      <span>Signing in...</span>
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-sign-in-alt"></i>
+                      <span>Sign In</span>
+                    </>
+                  )}
                 </button>
               </div>
-            </div>
+            </form>
 
-            <div className="form-footer">
-              <button type="submit" className="submit-button" disabled={loading}>
-                {loading ? (
-                  <>
-                    <i className="fas fa-spinner fa-spin"></i>
-                    <span>Signing in...</span>
-                  </>
-                ) : (
-                  <>
-                    <i className="fas fa-sign-in-alt"></i>
-                    <span>Sign In</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-
-          <div className="auth-links">
-            <Link to="/forgot-password" className="forgot-password">
-              Forgot your password?
-            </Link>
-            <div className="register-prompt">
-              Don't have an account?
-              <Link to="/register" className="register-link">
-                Sign Up
+            <div className="auth-links">
+              <Link to="/forgot-password" className="forgot-password">
+                Forgot your password?
               </Link>
+              <div className="register-prompt">
+                Don't have an account?
+                <Link to="/register" className="register-link">
+                  Sign Up
+                </Link>
+              </div>
             </div>
           </div>
         </div>

@@ -154,8 +154,8 @@ const Register = () => {
   };
 
   return (
-    <div className="register-container">
-      <div className="register-content">
+    <div className="page-container">
+      <div className="register-container">
         <div className="register-header">
           <Link to="/" className="back-link">
             <i className="fas fa-arrow-left"></i>
@@ -165,130 +165,132 @@ const Register = () => {
           <p>Join us on your fitness journey</p>
         </div>
 
-        <div className="register-form">
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="username">
-                <i className="fas fa-user"></i>
-                Username
-              </label>
-              <input
-                type="text"
-                id="username"
-                name="username"
-                value={formData.username}
-                onChange={handleInputChange}
-                placeholder="Choose a username"
-                required
-                className="form-input"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="email">
-                <i className="fas fa-envelope"></i>
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="Enter your email"
-                required
-                className="form-input"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="password">
-                <i className="fas fa-lock"></i>
-                Password
-              </label>
-              <div className="password-input-container">
+        <div className="register-content">
+          <div className="register-form-card">
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="username">
+                  <i className="fas fa-user"></i>
+                  Username
+                </label>
                 <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  name="password"
-                  value={formData.password}
+                  type="text"
+                  id="username"
+                  name="username"
+                  value={formData.username}
                   onChange={handleInputChange}
-                  placeholder="Create a password"
+                  placeholder="Choose a username"
                   required
                   className="form-input"
                 />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowPassword(!showPassword)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                >
-                  <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
-                </button>
               </div>
-            </div>
 
-            <div className="form-group">
-              <label htmlFor="confirmPassword">
-                <i className="fas fa-shield-alt"></i>
-                Confirm Password
-              </label>
-              <div className="password-input-container">
+              <div className="form-group">
+                <label htmlFor="email">
+                  <i className="fas fa-envelope"></i>
+                  Email
+                </label>
                 <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
                   onChange={handleInputChange}
-                  placeholder="Confirm your password"
+                  placeholder="Enter your email"
                   required
                   className="form-input"
                 />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-                >
-                  <i className={`fas ${showConfirmPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">
+                  <i className="fas fa-lock"></i>
+                  Password
+                </label>
+                <div className="password-input-container">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleInputChange}
+                    placeholder="Create a password"
+                    required
+                    className="form-input"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    <i className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="confirmPassword">
+                  <i className="fas fa-shield-alt"></i>
+                  Confirm Password
+                </label>
+                <div className="password-input-container">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleInputChange}
+                    placeholder="Confirm your password"
+                    required
+                    className="form-input"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  >
+                    <i className={`fas ${showConfirmPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
+                  </button>
+                </div>
+              </div>
+
+              <div className="password-requirements">
+                <p>Password must contain:</p>
+                <ul>
+                  <li><i className="fas fa-check-circle"></i> At least 8 characters</li>
+                  <li><i className="fas fa-check-circle"></i> One uppercase letter</li>
+                  <li><i className="fas fa-check-circle"></i> One lowercase letter</li>
+                  <li><i className="fas fa-check-circle"></i> One number</li>
+                  <li><i className="fas fa-check-circle"></i> One special character (!@#$%^&*)</li>
+                </ul>
+              </div>
+
+              <div className="form-footer">
+                <button type="submit" className="submit-button" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <i className="fas fa-spinner fa-spin"></i>
+                      <span>Creating Account...</span>
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-user-plus"></i>
+                      <span>Create Account</span>
+                    </>
+                  )}
                 </button>
               </div>
-            </div>
+            </form>
 
-            <div className="password-requirements">
-              <p>Password must contain:</p>
-              <ul>
-                <li><i className="fas fa-check-circle"></i> At least 8 characters</li>
-                <li><i className="fas fa-check-circle"></i> One uppercase letter</li>
-                <li><i className="fas fa-check-circle"></i> One lowercase letter</li>
-                <li><i className="fas fa-check-circle"></i> One number</li>
-                <li><i className="fas fa-check-circle"></i> One special character (!@#$%^&*)</li>
-              </ul>
-            </div>
-
-            <div className="form-footer">
-              <button type="submit" className="submit-button" disabled={loading}>
-                {loading ? (
-                  <>
-                    <i className="fas fa-spinner fa-spin"></i>
-                    <span>Creating Account...</span>
-                  </>
-                ) : (
-                  <>
-                    <i className="fas fa-user-plus"></i>
-                    <span>Create Account</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-
-          <div className="auth-links">
-            <div className="login-prompt">
-              Already have an account? 
-              <Link to="/login" className="login-link">
-                Sign In
-              </Link>
+            <div className="auth-links">
+              <div className="login-prompt">
+                Already have an account? 
+                <Link to="/login" className="login-link">
+                  Sign In
+                </Link>
+              </div>
             </div>
           </div>
         </div>
