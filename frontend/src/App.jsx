@@ -59,7 +59,7 @@ const AppWithLayout = () => {
           </Route>
         </Routes>
       </main>
-      {shouldShowNavbarFooter && <Footer />}
+      {shouldShowFooterOnPublic && <Footer />}
     </div>
   );
 };
