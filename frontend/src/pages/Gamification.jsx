@@ -45,7 +45,6 @@ const getMoodColor = (mood) => {
 
 const Gamification = () => {
   const { user, isAuthLoading } = useContext(UserContext);
-  const [activeTab, setActiveTab] = useState('workout');
   const [gamificationData, setGamificationData] = useState({
     points: { workout: 0, mental: 0, nutrition: 0 },
     streaks: {
@@ -180,8 +179,12 @@ const Gamification = () => {
     );
   };
 
-  const renderWorkoutTab = () => (
-    <div className="tab-content-section">
+  const renderWorkoutSection = () => (
+    <div className="section-content">
+      <div className="section-header-row">
+        <FaRunning className="section-icon" />
+        <h2>Workouts</h2>
+      </div>
       {renderStreakCard('workout')}
       <div className="stats-row">
         <div className="stat-card">
@@ -231,8 +234,12 @@ const Gamification = () => {
     </div>
   );
 
-  const renderMentalTab = () => (
-    <div className="tab-content-section">
+  const renderMentalSection = () => (
+    <div className="section-content">
+      <div className="section-header-row">
+        <FaBrain className="section-icon" />
+        <h2>Mental Health</h2>
+      </div>
       {renderStreakCard('mental')}
       <div className="stats-row">
         <div className="stat-card">
@@ -276,8 +283,12 @@ const Gamification = () => {
     </div>
   );
 
-  const renderNutritionTab = () => (
-    <div className="tab-content-section">
+  const renderNutritionSection = () => (
+    <div className="section-content">
+      <div className="section-header-row">
+        <FaAppleAlt className="section-icon" />
+        <h2>Nutrition</h2>
+      </div>
       {renderStreakCard('nutrition')}
       <div className="stats-row">
         <div className="stat-card">
@@ -362,22 +373,10 @@ const Gamification = () => {
               </div>
             </div>
           </div>
-          <div className="tabs-wrapper">
-            <Tabs
-              activeKey={activeTab}
-              onSelect={(k) => setActiveTab(k)}
-              className="gamification-tabs"
-            >
-              <Tab eventKey="workout" title={<><FaRunning /> Workouts</>}>
-                {renderWorkoutTab()}
-              </Tab>
-              <Tab eventKey="mental" title={<><FaBrain /> Mental Health</>}>
-                {renderMentalTab()}
-              </Tab>
-              <Tab eventKey="nutrition" title={<><FaAppleAlt /> Nutrition</>}>
-                {renderNutritionTab()}
-              </Tab>
-            </Tabs>
+          <div className="content-wrapper">
+            {renderWorkoutSection()}
+            {renderMentalSection()}
+            {renderNutritionSection()}
           </div>
         </div>
       )}
