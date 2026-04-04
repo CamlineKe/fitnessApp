@@ -14,30 +14,38 @@ logger = logging.getLogger(__name__)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, 'stress_model.pkl')
 
-# Load model at module level
+# Load model at module level - LAZY LOADING: model is NOT loaded at import time
 _model_data = None
 _model = None
 _feature_names = None
+_model_loaded = False
 
 def load_model():
-    """Load the trained stress model"""
-    global _model_data, _model, _feature_names
+    """Load the trained stress model - Returns model data dict or None"""
+    global _model_data, _model, _feature_names, _model_loaded
+    
+    # Return already loaded model data
+    if _model_loaded and _model_data is not None:
+        return _model_data
+    
     try:
         if os.path.exists(MODEL_PATH):
+            logger.info(f"🔄 Loading stress model from {MODEL_PATH}...")
             _model_data = joblib.load(MODEL_PATH)
             _model = _model_data["pipeline"]
             _feature_names = _model_data["feature_names"]
-            logger.info(f"✅ Stress model loaded from {MODEL_PATH}")
-            return True
+            _model_loaded = True
+            logger.info(f"✅ Stress model loaded successfully")
+            return _model_data
         else:
             logger.warning(f"Stress model not found at {MODEL_PATH}, using rule-based fallback")
-            return False
+            return None
     except Exception as e:
         logger.error(f"Error loading stress model: {e}")
-        return False
+        return None
 
-# Try to load model on import
-load_model()
+# NOTE: Removed automatic model loading at import time for Render free tier compatibility
+# load_model()  # <-- This was causing timeout issues on Render
 
 def calculate_age(date_of_birth):
     """Calculate age from date of birth"""

@@ -3,15 +3,15 @@ services:
     name: fitness-ai-service
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn -c gunicorn.conf.py app:app
     envVars:
       - key: PYTHON_VERSION
-        value: 3.12.0  # Updated to match development version
+        value: 3.12.0
       - key: PORT
         value: 10000
       - key: FLASK_ENV
         value: production
       - key: CORS_ORIGIN
-        fromEnv: FRONTEND_URL  # To be set in Render dashboard
+        fromEnv: FRONTEND_URL
     healthCheckPath: /api/health
     autoDeploy: true

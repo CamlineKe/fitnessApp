@@ -2,16 +2,23 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
 import logging
+import sys
 
 # ✅ Configure logging FIRST (before any logger usage)
 env = os.getenv('FLASK_ENV', 'development')
 logging.basicConfig(
     level=logging.DEBUG if env == 'development' else logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)  # Ensure logs go to stdout for Render
+    ]
 )
 logger = logging.getLogger(__name__)
 
-# ✅ Import models after logging is configured
+# ✅ Import model manager for lazy loading
+from models.model_manager import get_model, get_model_status
+
+# ✅ Import recommendation functions (models load lazily on first use)
 from models.diet_recommender import get_diet_recommendations
 from models.stress_analysis import analyze_stress
 from models.workout_recommender import get_workout_recommendations
@@ -58,14 +65,13 @@ def validate_request(req):
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
+    status = get_model_status()
     return jsonify({
         'status': 'healthy',
         'environment': env,
-        'models_loaded': {
-            'diet': 'get_diet_recommendations' in dir(),
-            'stress': 'analyze_stress' in dir(),
-            'workout': 'get_workout_recommendations' in dir()
-        }
+        'models': status,
+        'lazy_loading': True,
+        'note': 'Models load on first request to prevent Render free tier timeout'
     }), 200
 
 @app.route('/api/diet', methods=['POST'])
@@ -112,5 +118,7 @@ def workout_recommendations():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
-    logger.info(f"Starting Flask AI server on port {port} in {env} mode")
+    logger.info(f"🚀 Starting Flask AI server on port {port} in {env} mode")
+    logger.info(f"📊 Using lazy model loading for Render free tier compatibility")
+    logger.info(f"⏱️ Models will load on first API request")
     app.run(host='0.0.0.0', port=port, debug=env=='development')
