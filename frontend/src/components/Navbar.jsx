@@ -11,19 +11,15 @@ const Navbar = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.innerWidth <= 768;
+      const mobile = window.innerWidth <= 1024;
       setIsMobile(mobile);
+      if (!mobile) setIsMenuOpen(false);
     };
 
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
-
-  // Debug logging
-  useEffect(() => {
-    console.log('Navbar state:', { isMobile, isMenuOpen, user: !!user, loading });
-  }, [isMobile, isMenuOpen, user, loading]);
 
   return (
     <nav className="navbar">
@@ -38,10 +34,7 @@ const Navbar = () => {
         {isMobile && (
           <button 
             className={`mobile-menu-button ${isMenuOpen ? 'active' : ''}`}
-            onClick={() => {
-              console.log('Menu button clicked, current state:', isMenuOpen);
-              setIsMenuOpen(!isMenuOpen);
-            }}
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
             type="button"
           >
