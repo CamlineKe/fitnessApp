@@ -3,15 +3,15 @@ import Logger from '../utils/logger';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/ai/workout`;
 
-const getWorkoutRecommendations = async () => {
+const getWorkoutRecommendations = async (userId) => {
   const token = localStorage.getItem('token');
   if (!token) {
     throw new Error('Unauthorized: No token found.');
   }
 
   try {
-    // The backend will fetch user data and workout history automatically
-    const response = await axios.post(API_URL, {}, {
+    // Send user_id for caching - backend will fetch user data and workout history
+    const response = await axios.post(API_URL, { user_id: userId }, {
       headers: { 
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'

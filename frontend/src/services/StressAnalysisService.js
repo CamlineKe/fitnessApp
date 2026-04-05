@@ -3,7 +3,7 @@ import Logger from '../utils/logger';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/ai/stress`;
 
-const getStressAnalysis = async (mentalLogs = []) => {
+const getStressAnalysis = async (mentalLogs = [], userId) => {
   Logger.debug("StressAnalysisService - Received mental logs:", mentalLogs);
   
   const token = localStorage.getItem('token');
@@ -18,6 +18,7 @@ const getStressAnalysis = async (mentalLogs = []) => {
 
     // Prepare the request data - backend will use this to fetch additional data
     const requestData = {
+      user_id: userId,
       user_data: {
         dateOfBirth: userData.dateOfBirth,
         gender: userData.gender

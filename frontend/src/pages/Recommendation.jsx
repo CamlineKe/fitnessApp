@@ -68,10 +68,11 @@ const Recommendation = () => {
         const sortedLogs = validLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
 
         // Fetch all recommendations in PARALLEL for faster loading
+        const userId = user?._id || user?.id;
         const [dietData, stressData, workoutData] = await Promise.allSettled([
-          DietRecommendationService.getDietRecommendations(),
-          StressAnalysisService.getStressAnalysis(sortedLogs),
-          WorkoutRecommenderService.getWorkoutRecommendations()
+          DietRecommendationService.getDietRecommendations(userId),
+          StressAnalysisService.getStressAnalysis(sortedLogs, userId),
+          WorkoutRecommenderService.getWorkoutRecommendations(userId)
         ]);
 
         // Process diet results

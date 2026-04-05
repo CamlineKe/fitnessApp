@@ -3,15 +3,15 @@ import Logger from '../utils/logger';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/ai/diet`;
 
-const getDietRecommendations = async () => {
+const getDietRecommendations = async (userId) => {
   const token = localStorage.getItem('token');
   if (!token) {
     throw new Error('Unauthorized: No token found.');
   }
 
   try {
-    // Send empty object as body - backend will fetch user data and nutrition logs
-    const response = await axios.post(API_URL, {}, {
+    // Send user_id for caching - backend will fetch user data and nutrition logs
+    const response = await axios.post(API_URL, { user_id: userId }, {
       headers: { 
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
