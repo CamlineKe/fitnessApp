@@ -99,14 +99,6 @@ const MentalHealth = () => {
       setIsLoading(true);
       setError(null);
 
-      // Check if token exists
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setError("Please log in to view your mental health data.");
-        handleError("Please log in to view your mental health data.");
-        return;
-      }
-
       Logger.debug("Fetching data for user:", userId);
       const data = await getMentalHealthData(userId);
       Logger.debug("Received data:", data);
