@@ -31,6 +31,9 @@ if (!validateEnv()) {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy - required for express-rate-limit to work correctly behind Render's proxy
+app.set('trust proxy', 1);
+
 // Create HTTP server
 const server = createServer(app);
 
