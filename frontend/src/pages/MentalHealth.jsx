@@ -20,6 +20,7 @@ const moodMapping = {
 const MentalHealth = () => {
   const { user } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [mentalHealthData, setMentalHealthData] = useState([]);
   const [mentalLogs, setMentalLogs] = useState([]);
@@ -198,7 +199,7 @@ const MentalHealth = () => {
     }
 
     try {
-      setIsLoading(true);
+      setIsSubmitting(true);
       Logger.debug("Submitting check-in:", { ...dailyCheckInData, userId: user?._id || user?.id });
       const newLog = await logDailyCheckIn({ ...dailyCheckInData, userId: user?._id || user?.id });
       Logger.info("New log created:", newLog);
@@ -235,7 +236,7 @@ const MentalHealth = () => {
       Logger.error("Failed to submit daily check-in:", error);
       handleError(error.message || "Failed to submit check-in. Please try again.");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -467,8 +468,8 @@ const MentalHealth = () => {
                   />
                 </div>
 
-                <button type="submit" className="submit-button" disabled={isLoading}>
-                  {isLoading ? 'Submitting...' : 'Submit Check-In'}
+                <button type="submit" className="submit-button" disabled={isSubmitting}>
+                  {isSubmitting ? 'Submitting...' : 'Submit Check-In'}
                 </button>
               </form>
             </div>
