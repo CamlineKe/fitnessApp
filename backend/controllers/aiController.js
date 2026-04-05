@@ -8,7 +8,7 @@ import { dietCache, workoutCache, stressCache } from '../utils/aiCache.js';
 
 // ✅ Configure axios instance with timeout and keep-alive for Flask AI
 const flaskAxios = axios.create({
-  timeout: 15000, // 15 second timeout
+  timeout: 120000, // 120 second timeout for model loading
   headers: {
     'Content-Type': 'application/json'
   }

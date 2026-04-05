@@ -19,8 +19,8 @@ keepalive = 2
 max_requests = 1000
 max_requests_jitter = 50
 
-# Preload app to share memory between workers (though we only use 1 worker)
-preload_app = False  # Set to False to prevent double loading on startup
+# Preload app to load ML models at startup (not on first request)
+preload_app = True  # Changed to True - models now load at startup
 
 # Logging - Explicit configuration for Render logs
 accesslog = "-"  # Log to stdout
