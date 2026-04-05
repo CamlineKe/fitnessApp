@@ -154,7 +154,7 @@ const MentalHealth = () => {
   // Single useEffect for initial data fetch
   useEffect(() => {
     // Check for user with either _id or id property
-    const userId = user?._id || user?.id;
+    const userId = user?.id || user?._id;
     if (!userId) {
       // User not loaded yet or not logged in - don't set error, just return
       setIsLoading(false);
@@ -176,7 +176,7 @@ const MentalHealth = () => {
     return () => {
       EventEmitter.off(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, handleMentalHealthUpdate);
     };
-  }, [user?._id, user?.id]); // Only re-run if user ID changes
+  }, [user?.id || user?._id]); // Only re-run if user ID changes
 
   const handleDailyCheckInChange = (e) => {
     const { name, value, type } = e.target;
@@ -188,7 +188,7 @@ const MentalHealth = () => {
 
   const handleDailyCheckInSubmit = async (e) => {
     e.preventDefault();
-    if (!user?._id && !user?.id) {
+    if (!(user?.id || user?._id)) {
       handleError("Please log in to submit a daily check-in.");
       return;
     }
@@ -200,8 +200,8 @@ const MentalHealth = () => {
 
     try {
       setIsSubmitting(true);
-      Logger.debug("Submitting check-in:", { ...dailyCheckInData, userId: user?._id || user?.id });
-      const newLog = await logDailyCheckIn({ ...dailyCheckInData, userId: user?._id || user?.id });
+      Logger.debug("Submitting check-in:", { ...dailyCheckInData, userId: user?.id || user?._id });
+      const newLog = await logDailyCheckIn({ ...dailyCheckInData, userId: user?.id || user?._id });
       Logger.info("New log created:", newLog);
 
       if (newLog) {
@@ -216,7 +216,7 @@ const MentalHealth = () => {
           await GamificationService.checkAchievements();
 
           // Refresh data - this will trigger a new stress analysis and emit the event
-          await fetchMentalHealthData(user?._id || user?.id);
+          await fetchMentalHealthData(user?.id || user?._id);
           
           // Reset form
           setDailyCheckInData({

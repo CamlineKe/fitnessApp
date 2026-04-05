@@ -31,7 +31,8 @@ const requiredEnvVars = {
 // Optional environment variables with default values
 const optionalEnvVars = {
   PORT: '5000',
-  NODE_ENV: 'development'
+  NODE_ENV: 'development',
+  FLASK_URL: 'http://localhost:5001'
 };
 
 export const validateEnv = () => {

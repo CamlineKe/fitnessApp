@@ -25,7 +25,7 @@ const syncGoogleFitData = async (userId) => {
 
 export const syncData = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user._id;
     await syncFitbitData(userId);
     await syncGoogleFitData(userId);
     res.json({ message: 'Data synchronization complete' });
@@ -37,7 +37,7 @@ export const syncData = async (req, res) => {
 
 export const getCalories = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const user = await User.findById(userId);
 
     let caloriesData = {
@@ -85,7 +85,7 @@ export const getCalories = async (req, res) => {
 
 export const getHealthData = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
     const user = await User.findById(userId);
 
     let healthData = {
@@ -136,7 +136,7 @@ export const getHealthData = async (req, res) => {
 
 export const getDeviceStatus = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user._id;
 
     const [googleFitStatus, fitbitStatus] = await Promise.all([
       GoogleFitService.getConnectionStatus(userId),
@@ -183,7 +183,7 @@ export const connectDevice = async (req, res) => {
   try {
     const { device } = req.params;
     const { code } = req.body;
-    const userId = req.user.id;
+    const userId = req.user._id;
 
     let tokens;
     switch (device) {
@@ -226,7 +226,7 @@ export const connectDevice = async (req, res) => {
 export const disconnectDevice = async (req, res) => {
   try {
     const { device } = req.params;
-    const userId = req.user.id;
+    const userId = req.user._id;
 
     switch (device) {
       case 'google-fit':
@@ -249,7 +249,7 @@ export const disconnectDevice = async (req, res) => {
 export const testDeviceConnection = async (req, res) => {
   try {
     const { device } = req.params;
-    const userId = req.user.id;
+    const userId = req.user._id;
     const user = await User.findById(userId);
 
     if (!user) {

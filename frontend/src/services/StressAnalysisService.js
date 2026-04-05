@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../axiosConfig';
 import Logger from '../utils/logger';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/ai/stress`;

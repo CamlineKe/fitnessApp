@@ -394,11 +394,22 @@ export const logoutUser = async (req, res) => {
 // Get User Profile (Unchanged)
 export const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('-password');
+    const user = await User.findById(req.user._id).select('-password');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    res.json(user);
+    // Return consistent format with login/register
+    res.json({
+      id: user._id,
+      username: user.username,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      dateOfBirth: user.dateOfBirth,
+      gender: user.gender,
+      healthGoals: user.healthGoals,
+      isAdmin: user.isAdmin
+    });
   } catch (error) {
     Logger.error('Error fetching user profile:', error);
     res.status(500).json({ message: 'Internal Server Error' });
@@ -418,7 +429,7 @@ export const updateUserProfile = async (req, res) => {
     if (healthGoals !== undefined) updateFields.healthGoals = healthGoals;
 
     const user = await User.findByIdAndUpdate(
-      req.user.id, 
+      req.user._id, 
       { $set: updateFields },  
       { new: true, runValidators: true }
     );
@@ -461,7 +472,7 @@ export const changeUserPassword = async (req, res) => {
       return res.status(400).json({ message: 'New password must be at least 6 characters long' });
     }
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }

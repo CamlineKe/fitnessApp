@@ -118,7 +118,7 @@ const Dashboard = () => {
 
   // Fetch nutrition data independently
   const fetchNutritionData = async () => {
-    if (!user?._id) return;
+    if (!(user?.id || user?._id)) return;
     setLoading(prev => ({ ...prev, nutrition: true }));
     try {
       const nutrition = await getNutritionData();
@@ -133,7 +133,7 @@ const Dashboard = () => {
 
   // Fetch workout data independently (only today's workout, not all history)
   const fetchWorkoutData = async () => {
-    if (!user?._id) return;
+    if (!(user?.id || user?._id)) return;
     setLoading(prev => ({ ...prev, workout: true }));
     try {
       const todayWorkout = await WorkoutService.getWorkoutData();
@@ -149,10 +149,10 @@ const Dashboard = () => {
 
   // Fetch mental health data independently
   const fetchMentalHealthData = async () => {
-    if (!user?._id) return;
+    if (!(user?.id || user?._id)) return;
     setLoading(prev => ({ ...prev, mentalHealth: true }));
     try {
-      const mentalHealth = await getMentalHealthData(user._id);
+      const mentalHealth = await getMentalHealthData(user?.id || user?._id);
       setMentalHealthData(mentalHealth);
       updateActivityFeed(nutritionData, workoutData, mentalHealth);
     } catch (error) {
@@ -164,7 +164,7 @@ const Dashboard = () => {
 
   // Fetch gamification data independently
   const fetchGamificationData = async () => {
-    if (!user?._id) return;
+    if (!(user?.id || user?._id)) return;
     setLoading(prev => ({ ...prev, gamification: true }));
     try {
       const gamification = await GamificationService.getGamificationData();
@@ -178,7 +178,7 @@ const Dashboard = () => {
 
   // Initial data load - fetch in background without blocking
   useEffect(() => {
-    if (!user?._id) {
+    if (!(user?.id || user?._id)) {
       toast.error("Please log in to view your dashboard");
       return;
     }
@@ -241,7 +241,7 @@ const Dashboard = () => {
       EventEmitter.off(EventEmitter.Events.NUTRITION_UPDATED, handleNutritionUpdate);
       EventEmitter.off(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, handleMentalHealthUpdate);
     };
-  }, [user?._id]);
+  }, [user?.id || user?._id]);
 
   const quickActions = [
     { icon: 'fa-plus-circle', label: 'Log Workout', action: () => navigate('/workout'), color: '#4CAF50' },

@@ -23,6 +23,7 @@ const Recommendation = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchRecommendations = async (skipCache = false) => {
+    console.log('[Recommendation] Starting fetch, user:', user?._id);
     setLoading(true);
     setErrors({
       diet: null,
@@ -46,8 +47,9 @@ const Recommendation = () => {
 
     try {
       // First fetch mental health logs
-      Logger.debug("Fetching mental health logs for user:", user?._id);
-      const logs = await getMentalHealthData(user?._id);
+      const userId = user?.id || user?._id;
+      console.log('[Recommendation] Fetching mental health logs for userId:', userId);
+      const logs = await getMentalHealthData(userId);
       Logger.debug("Received mental health logs:", logs);
       setMentalLogs(logs);
 
@@ -61,19 +63,21 @@ const Recommendation = () => {
             patterns: {}
           }
         });
-      } else {
-        // Ensure data is an array and sort by date (newest first)
-        const dataArray = Array.isArray(logs) ? logs : [logs];
-        const validLogs = dataArray.filter(log => log && log.mood && log.date && log._id);
-        const sortedLogs = validLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+      }
+      
+      // Ensure data is an array and sort by date (newest first)
+      const dataArray = Array.isArray(logs) ? logs : [logs];
+      const validLogs = dataArray.filter(log => log && log.mood && log.date && log._id);
+      const sortedLogs = validLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        // Fetch all recommendations in PARALLEL for faster loading
-        const userId = user?._id || user?.id;
-        const [dietData, stressData, workoutData] = await Promise.allSettled([
-          DietRecommendationService.getDietRecommendations(userId),
-          StressAnalysisService.getStressAnalysis(sortedLogs, userId),
-          WorkoutRecommenderService.getWorkoutRecommendations(userId)
-        ]);
+      // Fetch all recommendations in PARALLEL for faster loading
+      console.log('[Recommendation] Calling APIs with userId:', userId);
+      const [dietData, stressData, workoutData] = await Promise.allSettled([
+        DietRecommendationService.getDietRecommendations(userId),
+        StressAnalysisService.getStressAnalysis(sortedLogs, userId),
+        WorkoutRecommenderService.getWorkoutRecommendations(userId)
+      ]);
+      console.log('[Recommendation] API results:', { dietData, stressData, workoutData });
 
         // Process diet results
         if (dietData.status === 'fulfilled') {
@@ -121,7 +125,6 @@ const Recommendation = () => {
           workout: workoutData.status === 'fulfilled' ? workoutData.value : { recommendations: [], analysis: {} },
           mentalLogs: logs
         });
-      }
     } catch (err) {
       Logger.error('Failed to fetch mental health logs:', err);
       setErrors(prev => ({ ...prev, stress: 'Unable to load mental health data. Please try again later.' }));
@@ -131,8 +134,10 @@ const Recommendation = () => {
   };
 
   useEffect(() => {
-    if (!user || !user._id) {
-      Logger.warn("User not authenticated, skipping fetch.");
+    const userId = user?.id || user?._id;
+    if (!user || !userId) {
+      Logger.warn("User not authenticated, skipping fetch. User object:", user);
+      setLoading(false);
       return;
     }
 

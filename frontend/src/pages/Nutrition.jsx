@@ -85,12 +85,12 @@ const Nutrition = () => {
 
   // ✅ Fetch nutrition data and diet recommendations on component mount or when the user changes
   useEffect(() => {
-    if (!user || !user._id) return;
+    if (!user || !(user?.id || user?._id)) return;
 
     const fetchInitialData = async () => {
       try {
         // Fetch nutrition data
-        const data = await getNutritionData(user._id);
+        const data = await getNutritionData(user?.id || user?._id);
         setNutritionData(data);
         setMealLogs(data.mealLogs || []);
         setError(null); // Clear any previous errors
@@ -235,7 +235,7 @@ const Nutrition = () => {
   const handleMealSubmit = async (mealData) => {
     try {
       const response = await createNutritionLog({
-        userId: user._id,
+        userId: user?.id || user?._id,
         date: new Date(),
         mealType: mealData.type,
         foodItems: [mealData.meal],

@@ -131,14 +131,14 @@ const Workout = () => {
   };
 
   useEffect(() => {
-    if (!user || !user._id) {
+    if (!user || !(user?.id || user?._id)) {
       Logger.warn("User not authenticated, skipping fetch.");
       return;
     }
 
     // Fetch workout logs independently (only last 30 for display)
     const fetchWorkoutLogs = async () => {
-      if (!user?._id) return;
+      if (!(user?.id || user?._id)) return;
       setLoading(prev => ({ ...prev, logs: true }));
       try {
         const logs = await WorkoutService.getWorkoutLogs();
@@ -169,7 +169,7 @@ const Workout = () => {
 
     // Fetch recommendations independently (non-blocking)
     const fetchRecommendations = async () => {
-      if (!user?._id) return;
+      if (!(user?.id || user?._id)) return;
       setLoading(prev => ({ ...prev, recommendations: true }));
       try {
         const recommendations = await WorkoutRecommenderService.getWorkoutRecommendations();
