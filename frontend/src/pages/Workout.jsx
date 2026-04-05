@@ -54,7 +54,8 @@ const saveCachedData = (data) => {
 };
 
 const Workout = () => {
-  const { user, logout } = useContext(UserContext);
+  const { user, logout, getUserId, isAuthenticated } = useContext(UserContext);
+  const userId = getUserId();
   Logger.debug("User from Context:", user);
 
   const [error, setError] = useState(null);
@@ -131,14 +132,11 @@ const Workout = () => {
   };
 
   useEffect(() => {
-    if (!user || !(user?.id || user?._id)) {
-      Logger.warn("User not authenticated, skipping fetch.");
-      return;
-    }
+    if (!isAuthenticated || !userId) return;
 
     // Fetch workout logs independently (only last 30 for display)
     const fetchWorkoutLogs = async () => {
-      if (!(user?.id || user?._id)) return;
+      if (!userId) return;
       setLoading(prev => ({ ...prev, logs: true }));
       try {
         const logs = await WorkoutService.getWorkoutLogs();
@@ -169,7 +167,7 @@ const Workout = () => {
 
     // Fetch recommendations independently (non-blocking)
     const fetchRecommendations = async () => {
-      if (!(user?.id || user?._id)) return;
+      if (!userId) return;
       setLoading(prev => ({ ...prev, recommendations: true }));
       try {
         const recommendations = await WorkoutRecommenderService.getWorkoutRecommendations();
@@ -198,7 +196,7 @@ const Workout = () => {
     return () => {
       EventEmitter.off(EventEmitter.Events.WORKOUT_RECOMMENDATIONS_UPDATED, handleWorkoutUpdate);
     };
-  }, [user, logout]);
+  }, [isAuthenticated, userId, logout]);
 
   // Cache data when it changes
   useEffect(() => {

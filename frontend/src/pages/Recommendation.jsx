@@ -10,7 +10,7 @@ import { getCachedRecommendations, setCachedRecommendations, clearRecommendation
 import './styles/Recommendation.css';
 
 const Recommendation = () => {
-  const { user } = useContext(UserContext);
+  const { user, getUserId, isAuthenticated } = useContext(UserContext);
   const [dietRecommendations, setDietRecommendations] = useState(null);
   const [stressAnalysis, setStressAnalysis] = useState(null);
   const [workoutRecommendations, setWorkoutRecommendations] = useState(null);
@@ -23,7 +23,15 @@ const Recommendation = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchRecommendations = async (skipCache = false) => {
-    console.log('[Recommendation] Starting fetch, user:', user?._id);
+    const userId = getUserId();
+    console.log('[Recommendation] Starting fetch, userId:', userId);
+    
+    if (!userId) {
+      Logger.warn("No user ID available, skipping recommendations fetch");
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
     setErrors({
       diet: null,
@@ -47,8 +55,6 @@ const Recommendation = () => {
 
     try {
       // First fetch mental health logs
-      const userId = user?.id || user?._id;
-      console.log('[Recommendation] Fetching mental health logs for userId:', userId);
       const logs = await getMentalHealthData(userId);
       Logger.debug("Received mental health logs:", logs);
       setMentalLogs(logs);
@@ -134,16 +140,11 @@ const Recommendation = () => {
   };
 
   useEffect(() => {
-    const userId = user?.id || user?._id;
-    if (!user || !userId) {
-      Logger.warn("User not authenticated, skipping fetch. User object:", user);
-      setLoading(false);
-      return;
-    }
-
+    if (!isAuthenticated) return;
     fetchRecommendations();
+  }, [isAuthenticated]);
 
-    // Subscribe to meal update events
+  useEffect(() => {
     const handleMealUpdated = () => {
       Logger.debug("Meal updated, refreshing recommendations (skipping cache)");
       clearRecommendationsCache();

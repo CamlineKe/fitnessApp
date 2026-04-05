@@ -1,4 +1,4 @@
-import React, { createContext, useState, useCallback } from "react";
+import React, { createContext, useState, useCallback, useEffect } from "react";
 import axios from "../axiosConfig"; // ✅ Use configured axios instance
 import Logger from '../utils/logger';
 
@@ -16,7 +16,8 @@ export const UserProvider = ({ children }) => {
     }
   });
 
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start true for initial auth check
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // ✅ Fetch user profile using cookie-based auth
   const fetchUser = useCallback(async () => {
@@ -27,18 +28,26 @@ export const UserProvider = ({ children }) => {
       if (!response.data) throw new Error("No user data returned from server.");
 
       setUser(response.data);
+      setIsAuthenticated(true);
       localStorage.setItem("user", JSON.stringify(response.data));
     } catch (error) {
       Logger.error("Authentication error:", error.response?.data || error.message);
+      setUser(null);
+      setIsAuthenticated(false);
+      localStorage.removeItem("user");
 
       if (error.response?.status === 401) {
-        Logger.warn("Authentication failed. Logging out...");
-        logout();
+        Logger.warn("Authentication failed. User not logged in.");
       }
     } finally {
       setLoading(false);
     }
   }, []);
+
+  // ✅ Auto-check auth on mount
+  useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
 
   // ✅ Login with cookie-based auth
   const login = async (userData) => {
@@ -50,6 +59,7 @@ export const UserProvider = ({ children }) => {
     // ✅ Token is now stored in httpOnly cookie by backend
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
+    setIsAuthenticated(true);
   };
 
   // ✅ Logout - clears cookies via backend call
@@ -63,6 +73,7 @@ export const UserProvider = ({ children }) => {
     } finally {
       localStorage.removeItem("user");
       setUser(null);
+      setIsAuthenticated(false);
     }
   }, []);
 
@@ -83,8 +94,23 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  // ✅ Helper to get user ID (handles both id and _id)
+  const getUserId = useCallback(() => {
+    return user?.id || user?._id || null;
+  }, [user]);
+
   return (
-    <UserContext.Provider value={{ user, setUser, login, logout, updateUser, fetchUser, loading }}>
+    <UserContext.Provider value={{ 
+      user, 
+      setUser, 
+      login, 
+      logout, 
+      updateUser, 
+      fetchUser, 
+      loading,
+      isAuthenticated,
+      getUserId
+    }}>
       {children}
     </UserContext.Provider>
   );

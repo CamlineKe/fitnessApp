@@ -17,7 +17,8 @@ import Logger from '../utils/logger';
 
 const Nutrition = () => {
   // ✅ Get the authenticated user from UserContext
-  const { user } = useContext(UserContext);
+  const { user, getUserId, isAuthenticated } = useContext(UserContext);
+  const userId = getUserId();
   Logger.debug("User from Context:", user);
 
   // ✅ State for storing nutrition data (calories, macronutrients, meal logs)
@@ -85,12 +86,12 @@ const Nutrition = () => {
 
   // ✅ Fetch nutrition data and diet recommendations on component mount or when the user changes
   useEffect(() => {
-    if (!user || !(user?.id || user?._id)) return;
+    if (!isAuthenticated || !userId) return;
 
     const fetchInitialData = async () => {
       try {
         // Fetch nutrition data
-        const data = await getNutritionData(user?.id || user?._id);
+        const data = await getNutritionData(userId);
         setNutritionData(data);
         setMealLogs(data.mealLogs || []);
         setError(null); // Clear any previous errors
@@ -123,7 +124,7 @@ const Nutrition = () => {
     return () => {
       EventEmitter.off(EventEmitter.Events.DIET_RECOMMENDATIONS_UPDATED, handleDietUpdate);
     };
-  }, [user]);
+  }, [isAuthenticated, userId]);
 
   // ✅ Add click outside handler to close suggestions dropdown
   useEffect(() => {
@@ -235,7 +236,7 @@ const Nutrition = () => {
   const handleMealSubmit = async (mealData) => {
     try {
       const response = await createNutritionLog({
-        userId: user?.id || user?._id,
+        userId: userId,
         date: new Date(),
         mealType: mealData.type,
         foodItems: [mealData.meal],
