@@ -163,9 +163,8 @@ const MentalHealth = () => {
     // Check for user with either _id or id property
     const userId = user?._id || user?.id;
     if (!userId) {
-      setError("Please log in to view your mental health data.");
+      // User not loaded yet or not logged in - don't set error, just return
       setIsLoading(false);
-      handleError("Please log in to view your mental health data.");
       return;
     }
 
