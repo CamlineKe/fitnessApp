@@ -632,7 +632,6 @@ const Workout = () => {
                   <p>No workout logs available.</p>
                 )}
               </div>
-            </div>
           </div>
         </div>
       </div>
