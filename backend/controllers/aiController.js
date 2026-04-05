@@ -14,9 +14,11 @@ const flaskAxios = axios.create({
   }
 });
 
-const FLASK_API_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://fitness-ai-service.onrender.com/api'
-  : 'http://localhost:5001/api';
+const FLASK_API_URL = process.env.FLASK_URL 
+  ? `${process.env.FLASK_URL}/api`
+  : (process.env.NODE_ENV === 'production' 
+    ? 'https://fitness-ai-service.onrender.com/api'
+    : 'http://localhost:5001/api');
 
 export const getDietRecommendations = async (req, res) => {
   try {
