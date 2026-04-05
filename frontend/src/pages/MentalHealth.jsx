@@ -160,14 +160,16 @@ const MentalHealth = () => {
 
   // Single useEffect for initial data fetch
   useEffect(() => {
-    if (!user?._id) {
+    // Check for user with either _id or id property
+    const userId = user?._id || user?.id;
+    if (!userId) {
       setError("Please log in to view your mental health data.");
       setIsLoading(false);
       handleError("Please log in to view your mental health data.");
       return;
     }
 
-    fetchMentalHealthData(user._id);
+    fetchMentalHealthData(userId);
 
     // Subscribe to mental health recommendation updates using the correct event name
     const handleMentalHealthUpdate = (newAnalysis) => {
@@ -182,7 +184,7 @@ const MentalHealth = () => {
     return () => {
       EventEmitter.off(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, handleMentalHealthUpdate);
     };
-  }, [user?._id]); // Only re-run if user ID changes
+  }, [user?._id, user?.id]); // Only re-run if user ID changes
 
   const handleDailyCheckInChange = (e) => {
     const { name, value, type } = e.target;
@@ -194,7 +196,7 @@ const MentalHealth = () => {
 
   const handleDailyCheckInSubmit = async (e) => {
     e.preventDefault();
-    if (!user?._id) {
+    if (!user?._id && !user?.id) {
       handleError("Please log in to submit a daily check-in.");
       return;
     }
@@ -206,8 +208,8 @@ const MentalHealth = () => {
 
     try {
       setIsLoading(true);
-      Logger.debug("Submitting check-in:", { ...dailyCheckInData, userId: user._id });
-      const newLog = await logDailyCheckIn({ ...dailyCheckInData, userId: user._id });
+      Logger.debug("Submitting check-in:", { ...dailyCheckInData, userId: user?._id || user?.id });
+      const newLog = await logDailyCheckIn({ ...dailyCheckInData, userId: user?._id || user?.id });
       Logger.info("New log created:", newLog);
 
       if (newLog) {
@@ -222,7 +224,7 @@ const MentalHealth = () => {
           await GamificationService.checkAchievements();
 
           // Refresh data - this will trigger a new stress analysis and emit the event
-          await fetchMentalHealthData(user._id);
+          await fetchMentalHealthData(user?._id || user?.id);
           
           // Reset form
           setDailyCheckInData({
