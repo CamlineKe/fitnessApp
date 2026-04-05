@@ -5,19 +5,25 @@ import { MdDashboard, MdPerson, MdRestaurant, MdFitnessCenter, MdMood, MdEmojiEv
 import './Navbar.css';
 
 const Navbar = () => {
-  const { user } = useContext(UserContext);
+  const { user, loading } = useContext(UserContext);
   const [isMobile, setIsMobile] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
     };
 
-    handleResize(); // Initial check
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('Navbar state:', { isMobile, isMenuOpen, user: !!user, loading });
+  }, [isMobile, isMenuOpen, user, loading]);
 
   return (
     <nav className="navbar">
@@ -32,7 +38,12 @@ const Navbar = () => {
         {isMobile && (
           <button 
             className={`mobile-menu-button ${isMenuOpen ? 'active' : ''}`}
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            onClick={() => {
+              console.log('Menu button clicked, current state:', isMenuOpen);
+              setIsMenuOpen(!isMenuOpen);
+            }}
+            aria-label="Toggle menu"
+            type="button"
           >
             <span></span>
             <span></span>
@@ -41,7 +52,9 @@ const Navbar = () => {
         )}
 
         <div className={`navbar-links ${isMobile ? 'mobile' : ''} ${isMenuOpen ? 'open' : ''}`} style={{ marginRight: isMobile ? '0' : '10px' }}>
-          {user && (
+          {loading ? (
+            <span className="nav-loading">Loading...</span>
+          ) : user ? (
             <>
               <Link to="/dashboard" className="navbar-link" onClick={() => setIsMenuOpen(false)}>
                 <MdDashboard className="nav-icon" />
@@ -72,6 +85,10 @@ const Navbar = () => {
                 <span>Recommendations</span>
               </Link>
             </>
+          ) : (
+            <Link to="/" className="navbar-link" onClick={() => setIsMenuOpen(false)}>
+              <span>Login</span>
+            </Link>
           )}
         </div>
       </div>
