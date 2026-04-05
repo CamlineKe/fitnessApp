@@ -9,22 +9,11 @@ export const getMentalHealthData = async (userId) => {
     throw new Error("User ID is required to fetch mental health data");
   }
 
-  const token = localStorage.getItem("token");
-  if (!token) {
-    throw new Error("Please log in to view your mental health data");
-  }
-
   try {
     Logger.debug("API URL being called:", API_URL);
     Logger.debug("User ID:", userId);
-    Logger.debug("Token:", token ? "Present" : "Missing");
     
-    const response = await axios.get(API_URL, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-    });
+    const response = await axios.get(API_URL);
 
     Logger.info("Response from server:", response.data);
 
@@ -52,7 +41,6 @@ export const getMentalHealthData = async (userId) => {
     });
 
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
       throw new Error("Your session has expired. Please log in again");
     }
     if (error.response?.status === 404) {
@@ -65,11 +53,6 @@ export const getMentalHealthData = async (userId) => {
 
 // Log daily check-in (POST request)
 export const logDailyCheckIn = async (checkInData) => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    throw new Error("Please log in to submit your check-in");
-  }
-
   if (!checkInData || Object.keys(checkInData).length === 0) {
     throw new Error("Invalid check-in data provided");
   }
@@ -100,12 +83,7 @@ export const logDailyCheckIn = async (checkInData) => {
     
     const { userId, ...dataToSend } = checkInData;
     
-    const response = await axios.post(API_URL, dataToSend, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-    });
+    const response = await axios.post(API_URL, dataToSend);
     
     Logger.info("Check-in response:", response.data);
     return response.data;
@@ -122,7 +100,6 @@ export const logDailyCheckIn = async (checkInData) => {
     });
 
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
       throw new Error("Your session has expired. Please log in again");
     }
     throw new Error(error.response?.data?.message || "Failed to submit check-in");
