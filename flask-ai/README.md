@@ -244,16 +244,11 @@ Workout Model:  Accuracy 0.91 - Features: 10
 git clone <repository-url>
 cd flask-ai
 
-# Create a virtual environment with uv (recommended)
-uv venv
-source .venv/bin/activate  # On macOS/Linux
+# Create a virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
 
 # Install dependencies
-uv pip install -r requirements.txt
-
-# Or with traditional pip
-python -m venv venv
-source venv/bin/activate
 pip install -r requirements.txt
 ```
 

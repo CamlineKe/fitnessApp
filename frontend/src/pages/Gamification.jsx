@@ -66,7 +66,12 @@ const Gamification = () => {
     moodLog: []
   });
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState({
+    data: true,
+    workout: true,
+    mental: true,
+    nutrition: true
+  });
 
   useEffect(() => {
     if (isAuthLoading) return;
@@ -79,7 +84,7 @@ const Gamification = () => {
 
     const fetchGamificationData = async () => {
       try {
-        setLoading(true);
+        setLoading(prev => ({ ...prev, data: true }));
         setError(null);
         const data = await GamificationService.getGamificationData();
         if (data) {
@@ -95,7 +100,7 @@ const Gamification = () => {
         setError('Failed to load data. Please try again.');
         toast.error('Error loading gamification data');
       } finally {
-        setLoading(false);
+        setLoading(prev => ({ ...prev, data: false, workout: false, mental: false, nutrition: false }));
       }
     };
 
@@ -339,6 +344,26 @@ const Gamification = () => {
     (gamificationData?.points?.mental || 0) + 
     (gamificationData?.points?.nutrition || 0);
 
+  const renderSkeletonCard = () => (
+    <div className="stat-card skeleton-card">
+      <div className="skeleton-icon"></div>
+      <div className="skeleton-text"></div>
+      <div className="skeleton-value"></div>
+    </div>
+  );
+
+  const renderSkeletonSection = () => (
+    <div className="section-content skeleton-section">
+      <div className="skeleton-header"></div>
+      <div className="skeleton-streak"></div>
+      <div className="stats-row">
+        {renderSkeletonCard()}
+        {renderSkeletonCard()}
+        {renderSkeletonCard()}
+      </div>
+    </div>
+  );
+
   return (
     <div className="page-container">
       {error ? (
@@ -347,11 +372,6 @@ const Gamification = () => {
           <button onClick={() => window.location.reload()} className="retry-button">
             Try Again
           </button>
-        </div>
-      ) : loading ? (
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading your gamification data...</p>
         </div>
       ) : (
         <div className="gamification-container">
@@ -374,9 +394,9 @@ const Gamification = () => {
             </div>
           </div>
           <div className="content-wrapper">
-            {renderWorkoutSection()}
-            {renderMentalSection()}
-            {renderNutritionSection()}
+            {loading.workout ? renderSkeletonSection() : renderWorkoutSection()}
+            {loading.mental ? renderSkeletonSection() : renderMentalSection()}
+            {loading.nutrition ? renderSkeletonSection() : renderNutritionSection()}
           </div>
         </div>
       )}
