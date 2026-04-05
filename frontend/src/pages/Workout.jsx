@@ -25,26 +25,58 @@ const activityTypes = [
   "Other"
 ];
 
+const CACHE_KEY = 'workout_cache';
+const CACHE_MAX_AGE = 5 * 60 * 1000; // 5 minutes
+
+// Helper to load cached data
+const loadCachedData = () => {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!cached) return null;
+    const { data, timestamp } = JSON.parse(cached);
+    if (Date.now() - timestamp > CACHE_MAX_AGE) {
+      localStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+    return data;
+  } catch {
+    return null;
+  }
+};
+
+// Helper to save data to cache
+const saveCachedData = (data) => {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, timestamp: Date.now() }));
+  } catch (error) {
+    Logger.error('Failed to cache workout data:', error);
+  }
+};
+
 const Workout = () => {
   const { user, logout } = useContext(UserContext);
   Logger.debug("User from Context:", user);
 
-  // Add error state
   const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Individual loading states per section instead of one global loader
+  const [loading, setLoading] = useState({
+    logs: false,
+    recommendations: false,
+    submitting: false
+  });
   const [formErrors, setFormErrors] = useState({});
   const [workoutRecommendations, setWorkoutRecommendations] = useState(null);
 
-  // Default states to prevent errors
-  const [workoutData, setWorkoutData] = useState({
-    activityType: "N/A",
+  // Initialize from cache
+  const cache = loadCachedData();
+  const [workoutData, setWorkoutData] = useState(cache?.workoutData || {
+    activityType: "No workout logged yet",
     duration: 0,
     caloriesBurned: 0,
     heartRate: 0,
-    feedback: "No feedback yet",
+    feedback: "Log your first workout for today!",
   });
-
-  const [workoutLogs, setWorkoutLogs] = useState([]);
+  const [workoutLogs, setWorkoutLogs] = useState(cache?.workoutLogs || []);
   const [newLog, setNewLog] = useState({
     date: new Date(),
     activityType: "",
@@ -104,19 +136,19 @@ const Workout = () => {
       return;
     }
 
-    const fetchInitialData = async () => {
+    // Fetch workout logs independently (only last 30 for display)
+    const fetchWorkoutLogs = async () => {
+      if (!user?._id) return;
+      setLoading(prev => ({ ...prev, logs: true }));
       try {
-        setLoading(true);
-        
-        // Fetch workout logs first (service handles auth internally)
         const logs = await WorkoutService.getWorkoutLogs();
         Logger.debug('Fetched workout logs:', logs);
-        setWorkoutLogs(logs || []);
-
+        // Only keep last 30 logs for UI display to reduce memory/processing
+        const recentLogs = (logs || []).slice(-30);
+        setWorkoutLogs(recentLogs);
+        
         // Find today's workout from logs
-        const todayWorkout = logs?.find(log => isToday(log.date));
-
-        // Set workout data with either today's workout or default values
+        const todayWorkout = recentLogs.find(log => isToday(log.date));
         setWorkoutData(todayWorkout || {
           activityType: "No workout logged yet",
           duration: 0,
@@ -124,29 +156,35 @@ const Workout = () => {
           heartRate: 0,
           feedback: "Log your first workout for today!",
         });
-
-        // Try to get recommendations, but don't fail if they're not available
-        try {
-          const recommendations = await WorkoutRecommenderService.getWorkoutRecommendations();
-          Logger.debug('Fetched workout recommendations:', recommendations);
-          setWorkoutRecommendations(recommendations);
-        } catch (recError) {
-          Logger.warn('Could not fetch workout recommendations:', recError);
-          setWorkoutRecommendations(null);
-        }
       } catch (err) {
-        Logger.error('Error fetching workout data:', err);
-        setError('Failed to load workout data');
+        Logger.error('Error fetching workout logs:', err);
         if (err.message?.includes("No authentication token found") || err.response?.status === 401) {
           handleError("Session expired. Please log in again");
           logout();
         }
       } finally {
-        setLoading(false);
+        setLoading(prev => ({ ...prev, logs: false }));
       }
     };
 
-    fetchInitialData();
+    // Fetch recommendations independently (non-blocking)
+    const fetchRecommendations = async () => {
+      if (!user?._id) return;
+      setLoading(prev => ({ ...prev, recommendations: true }));
+      try {
+        const recommendations = await WorkoutRecommenderService.getWorkoutRecommendations();
+        Logger.debug('Fetched workout recommendations:', recommendations);
+        setWorkoutRecommendations(recommendations);
+      } catch (recError) {
+        Logger.warn('Could not fetch workout recommendations:', recError);
+        setWorkoutRecommendations(null);
+      } finally {
+        setLoading(prev => ({ ...prev, recommendations: false }));
+      }
+    };
+
+    // Fetch data in parallel without blocking UI
+    Promise.all([fetchWorkoutLogs(), fetchRecommendations()]);
 
     // Subscribe to workout recommendation updates
     const handleWorkoutUpdate = (newRecommendations) => {
@@ -161,6 +199,13 @@ const Workout = () => {
       EventEmitter.off(EventEmitter.Events.WORKOUT_RECOMMENDATIONS_UPDATED, handleWorkoutUpdate);
     };
   }, [user, logout]);
+
+  // Cache data when it changes
+  useEffect(() => {
+    if (workoutLogs.length > 0 || workoutData.activityType !== "No workout logged yet") {
+      saveCachedData({ workoutData, workoutLogs });
+    }
+  }, [workoutData, workoutLogs]);
 
   const handleNewLogChange = (e) => {
     const { name, value } = e.target;
@@ -205,7 +250,7 @@ const Workout = () => {
     e.preventDefault();
     if (!validateForm()) return;
     
-    setLoading(true);
+    setLoading(prev => ({ ...prev, submitting: true }));
     setError(null);
 
     try {
@@ -274,7 +319,7 @@ const Workout = () => {
       setError("Failed to add workout log. Please try again.");
       handleError("Failed to add workout log. Please try again");
     } finally {
-      setLoading(false);
+      setLoading(prev => ({ ...prev, submitting: false }));
     }
   };
 
@@ -396,15 +441,11 @@ const Workout = () => {
         </div>
 
         <div className="workout-content">
-          {loading ? (
-            <div className="loading">Loading workout data...</div>
-          ) : error ? (
-            <div className="error-message">{error}</div>
-          ) : (
-            <>
-              {/* Today's Workout Section */}
-              <div className="todays-workout">
-                <h2>Today's Workout</h2>
+          {error && <div className="error-message">{error}</div>}
+          
+          {/* Today's Workout Section */}
+          <div className="todays-workout">
+            <h2>Today's Workout {loading.logs && <SectionLoader />}</h2>
                 {workoutData ? (
                   <div className="workout-stats">
                     <div className="stat-item">
@@ -524,15 +565,15 @@ const Workout = () => {
                     </div>
                   </div>
 
-                  <button type="submit" className="add-log-button" disabled={loading}>
-                    <FaPlus /> {loading ? 'Adding...' : 'Add Workout Log'}
+                  <button type="submit" className="add-log-button" disabled={loading.submitting}>
+                    <FaPlus /> {loading.submitting ? 'Adding...' : 'Add Workout Log'}
                   </button>
                 </form>
               </div>
 
               {/* Recommendations Section */}
               <div className="recommendations">
-                <h2>Recommendations</h2>
+                <h2>Recommendations {loading.recommendations && <SectionLoader />}</h2>
                 <p>Based on your recent workout data, here are some personalized recommendations:</p>
                 {workoutRecommendations?.recommendations?.length > 0 ? (
                   <ul>
@@ -565,9 +606,9 @@ const Workout = () => {
                 </div>
               </div>
 
-              {/* Workout Logs Section - At the end */}
+              {/* Workout Logs Section */}
               <div className="workout-logs">
-                <h2>Recent Workout Logs</h2>
+                <h2>Recent Workout Logs {loading.logs && <SectionLoader />}</h2>
                 {workoutLogs.length > 0 ? (
                   <div className="logs-grid">
                     {workoutLogs.slice(0, 10).map((log, index) => (
@@ -591,8 +632,8 @@ const Workout = () => {
                   <p>No workout logs available.</p>
                 )}
               </div>
-            </>
-          )}
+            </div>
+          </div>
         </div>
       </div>
     </div>
