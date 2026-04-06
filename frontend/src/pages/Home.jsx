@@ -83,37 +83,6 @@ const Home = () => {
           <p>Stay motivated with our engaging rewards system and personal milestone tracking.</p>
         </div>
       </section>
-
-      <footer className="footer">
-        <div className="footer-content">
-          <div className="footer-section">
-            <h4>Quick Links</h4>
-            <Link to="/about">About</Link>
-            <Link to="/contact">Contact</Link>
-            <Link to="/privacy">Privacy</Link>
-          </div>
-          
-          <div className="footer-section">
-            <h4>Features</h4>
-            <Link to="/login">Workouts</Link>
-            <Link to="/login">Nutrition</Link>
-            <Link to="/login">Wellness</Link>
-          </div>
-          
-          <div className="footer-section">
-            <h4>Connect</h4>
-            <div className="social-links">
-              <a href="https://twitter.com " target="_blank" rel="noopener noreferrer">Twitter</a>
-              <a href="https://facebook.com " target="_blank" rel="noopener noreferrer">Facebook</a>
-              <a href="https://instagram.com " target="_blank" rel="noopener noreferrer">Instagram</a>
-            </div>
-          </div>
-        </div>
-        
-        <div className="footer-bottom">
-          <p>&copy; {new Date().getFullYear()} Fitness Tracker. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 };
