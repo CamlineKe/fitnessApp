@@ -1,7 +1,7 @@
 .notification-container {
   position: fixed;
-  top: 20px;
-  left: 20px;
+  top: 80px;
+  right: 20px;
   width: 300px;
   max-width: 100%;
   z-index: 9999;
@@ -16,7 +16,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   padding: 15px;
   margin-bottom: 10px;
-  animation: slide-in-left 0.3s ease-out;
+  animation: slide-in-right 0.3s ease-out;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   border-left: 5px solid #3498db;
@@ -91,10 +91,10 @@
   font-size: 18px;
 }
 
-/* Updated animation for left side entry */
-@keyframes slide-in-left {
+/* Updated animation for right side entry */
+@keyframes slide-in-right {
   from {
-    transform: translateX(-100%);
+    transform: translateX(100%);
     opacity: 0;
   }
   to {
