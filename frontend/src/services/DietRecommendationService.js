@@ -5,10 +5,14 @@ const API_URL = `${import.meta.env.VITE_API_URL}/ai/diet`;
 
 const getDietRecommendations = async (userId) => {
   try {
+    console.log('[DietService] Starting request with userId:', userId);
+    console.log('[DietService] API_URL:', API_URL);
+    
     // Send user_id for caching - backend will fetch user data and nutrition logs
     const response = await axios.post(API_URL, { user_id: userId });
     // axiosConfig handles auth cookies automatically
 
+    console.log('[DietService] Response received:', response.status, response.data);
     Logger.debug('Diet recommendations response:', response.data);
 
     // Ensure we have a consistent response format
@@ -38,6 +42,12 @@ const getDietRecommendations = async (userId) => {
       profile_complete: data.profile_complete || false
     };
   } catch (error) {
+    console.error('[DietService] ERROR:', error.message);
+    console.error('[DietService] Error config:', error.config);
+    if (error.response) {
+      console.error('[DietService] Error response status:', error.response.status);
+      console.error('[DietService] Error response data:', error.response.data);
+    }
     Logger.error('Error fetching diet recommendations:', error);
     if (error.response) {
       Logger.error('Error response data:', error.response.data);
