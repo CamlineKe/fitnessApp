@@ -17,16 +17,17 @@ This backend service provides the API infrastructure for a comprehensive health 
 - 🎮 Gamification features
 
 ## Technical Stack
-- **Runtime:** Node.js
-- **Framework:** Express.js 4.21
+- **Runtime:** Node.js 18+
+- **Framework:** Express.js 4.21.2
 - **Database:** MongoDB with Mongoose 8.10
+- **Authentication:** JWT (jsonwebtoken 9.0) + bcryptjs 3.0
 - **Real-time:** Socket.IO 4.8
-- **Authentication:** JWT + OAuth2
+- **Validation:** express-validator 7.3
+- **Rate Limiting:** express-rate-limit 7.5
+- **Security:** cors, cookie-parser, dotenv
 - **HTTP Client:** Axios 1.7
-- **Security:** bcryptjs 3.0
-- **Environment:** dotenv 16.4
-- **CORS:** cors 2.8
 - **Development:** nodemon 3.1
+- **External AI:** Flask Python service (diet/stress/workout ML)
 
 ## API Architecture
 
@@ -81,12 +82,15 @@ router.post('/fitbit', authMiddleware, syncController.syncFitbit);
 router.get('/status', authMiddleware, syncController.getSyncStatus);
 ```
 
-#### AI Recommendations
+#### AI Recommendations (Flask AI Service Proxy)
 ```javascript
-// AI routes
-router.post('/analyze', authMiddleware, aiController.analyzeData);
-router.get('/recommendations', authMiddleware, aiController.getRecommendations);
+// AI routes - proxied to Python Flask ML service
+router.post('/diet', authMiddleware, aiController.getDietRecommendations);
+router.post('/stress', authMiddleware, aiController.analyzeStress);
+router.post('/workout', authMiddleware, aiController.getWorkoutRecommendations);
 ```
+
+The backend acts as a proxy to the Flask AI service running on port 5001.
 
 ## Real-time Implementation
 
@@ -97,20 +101,13 @@ const io = new Server(server, {
   cors: {
     origin: [
       'http://localhost:3000',
-      'http://localhost:5000',
-      process.env.FRONTEND_URL,
-      'https://fitness-3doakdbyh-camlinekes-projects.vercel.app'
+      process.env.FRONTEND_URL
     ].filter(Boolean),
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
     transports: ['websocket', 'polling']
   }
-});
-
-// Socket authentication
-socket.on('authenticate', async (token) => {
-  // Token validation and user room joining
 });
 ```
 
@@ -133,38 +130,73 @@ npm start
 
 ### Environment Variables
 ```env
-# Required environment variables
+# Required - Database
+MONGO_URI=mongodb+srv://username:password@cluster.mongodb.net/fitnessApp
 PORT=5000
-MONGODB_URI=your_mongodb_uri
-JWT_SECRET=your_jwt_secret
-FRONTEND_URL=your_frontend_url
+JWT_SECRET=your_jwt_secret_key
+JWT_REFRESH_SECRET=your_refresh_secret_key
 
-# OAuth Configuration
+# Required - Frontend CORS
+FRONTEND_URL=http://localhost:3000
+
+# OAuth - Google Fit
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:3000/auth/callback
+
+# OAuth - Fitbit  
 FITBIT_CLIENT_ID=your_fitbit_client_id
 FITBIT_CLIENT_SECRET=your_fitbit_client_secret
+FITBIT_REDIRECT_URI=http://localhost:3000/auth/fitbit/callback
 
-# OAuth Scopes
-GOOGLE_FIT_SCOPES=https://www.googleapis.com/auth/fitness.activity.read https://www.googleapis.com/auth/fitness.heart_rate.read https://www.googleapis.com/auth/fitness.body.read
-FITBIT_SCOPES=activity heartrate profile
+# Flask AI Service
+FLASK_AI_URL=http://localhost:5001
 ```
 
 ## Project Structure
 ```
 backend/
-├── config/         # Configuration files
-├── controllers/    # Route controllers
-├── middlewares/    # Custom middlewares
-├── models/        # Database models
-├── routes/        # API routes
-├── services/      # Business logic
-├── utils/         # Utility functions
-├── .env          # Environment variables
-├── .env.example  # Example environment variables
-├── .env.production # Production environment variables
-├── server.js     # Application entry point
-└── package.json  # Project dependencies
+├── config/
+│   ├── db.js              # MongoDB connection
+│   └── validation.js      # Environment variable validation
+├── controllers/           # 7 route controllers
+│   ├── aiController.js           # Flask AI proxy
+│   ├── gamificationController.js
+│   ├── mentalHealthController.js
+│   ├── nutritionController.js
+│   ├── syncController.js         # OAuth + platform sync
+│   ├── userController.js
+│   └── workoutController.js
+├── middlewares/
+│   ├── authMiddleware.js   # JWT verification
+│   ├── rateLimiter.js     # Express rate limiting
+│   └── validation.js      # Request validators
+├── models/                # 5 Mongoose models
+│   ├── Gamification.js
+│   ├── MentalHealth.js
+│   ├── Nutrition.js
+│   ├── User.js
+│   └── Workout.js
+├── routes/                # 8 API route modules
+│   ├── aiRoutes.js
+│   ├── gamificationRoutes.js
+│   ├── legalRoutes.js      # Privacy/terms
+│   ├── mentalHealthRoutes.js
+│   ├── nutritionRoutes.js
+│   ├── syncRoutes.js
+│   ├── userRoutes.js
+│   └── workoutRoutes.js
+├── services/              # External platform integrations
+│   ├── fitbitService.js
+│   └── googleFitService.js
+├── utils/
+│   ├── aiCache.js         # AI response caching
+│   └── logger.js          # Winston logging utility
+├── .env                   # Environment variables
+├── .env.example           # Example env file
+├── render.yaml            # Render deployment config
+├── package.json
+└── server.js              # Entry point with Socket.IO
 ```
 
 ## Security Implementations
@@ -195,34 +227,52 @@ process.on('uncaughtException', (error) => {
 });
 ```
 
-## Deployment
-The application is configured for deployment on Render with the following features:
-- Environment-specific configuration
-- Health check endpoint
-- CORS configuration for production
-- WebSocket support in production
-- Error logging and monitoring
+## Deployment (Render)
 
-## Contributing Guidelines
+The backend includes `render.yaml` for zero-config deployment:
+
+```yaml
+services:
+  - type: web
+    name: fitness-app-backend
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5000"
+      - key: JWT_SECRET
+        generateValue: true
+    healthCheckPath: /api/health
+    autoDeploy: true
+```
+
+### Pre-Deployment Checklist
+- [ ] Set `MONGO_URI` in Render environment variables
+- [ ] Set `FRONTEND_URL` to your Vercel frontend URL
+- [ ] Configure OAuth credentials (Google Fit, Fitbit)
+- [ ] Deploy Flask AI service separately and set `FLASK_AI_URL`
+- [ ] Ensure CORS origins include your frontend domain
+
+## Contributing
 1. Fork the repository
-2. Create feature branch
-3. Follow coding standards
-4. Write tests
-5. Submit pull request
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes with descriptive messages
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Create a Pull Request
 
 ## License
-[Your License Information]
+MIT License
 
 ## Version History
-- v1.0.0 - Initial Release
-  - Basic API implementation
-  - Platform integrations
-  - Real-time updates
-  - User authentication
-  - Workout tracking
-  - Nutrition monitoring
-  - Mental health assessment
-  - Gamification features
-
-## Contact
-[Your Contact Information]
+- **v1.0.0** - Initial Release
+  - Express.js REST API with MongoDB
+  - JWT authentication with refresh tokens
+  - Socket.IO real-time notifications
+  - Google Fit & Fitbit OAuth integration
+  - 7 controllers: user, workout, nutrition, mental health, gamification, sync, AI proxy
+  - Rate limiting and request validation
+  - Winston logging utility
+  - AI service proxy to Flask backend
