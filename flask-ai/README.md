@@ -11,15 +11,16 @@ This AI service provides machine learning-powered recommendations for diet, work
 - 🤖 **ML-Powered**: Trained models with confidence scoring and graceful fallback
 - 🔄 **Auto-Refresh**: Models can be retrained with `retrain_models.py`
 - 📊 **Feature Engineering**: One-hot encoding for categorical data (moods, activity types)
-- 🔌 **RESTful API**: Well-defined endpoints with input validation
+- � **Response Caching**: 5-minute TTL cache for improved performance
+- �🔌 **RESTful API**: Well-defined endpoints with input validation
 - 🔒 **CORS-Enabled**: Secure cross-origin request handling
 
 ## Technical Stack
 - **Framework:** Flask 2.0.1
 - **ML Libraries:** 
-  - scikit-learn 1.2.2 (RandomForest models)
-  - pandas 1.5.3 (data manipulation)
-  - numpy 1.24.3 (numerical operations)
+  - scikit-learn 1.4.0 (RandomForest models)
+  - pandas 2.2.0 (data manipulation)
+  - numpy 1.26.4 (numerical operations)
   - joblib (model persistence)
 - **Database:** pymongo 3.12.0 (MongoDB integration)
 - **Deployment:** gunicorn 20.1.0 (production server)
@@ -39,11 +40,25 @@ Returns the health status of the service and loaded models.
 {
   "status": "healthy",
   "environment": "development",
-  "models_loaded": {
-    "diet": true,
-    "stress": true,
-    "workout": true
-  }
+  "models": {
+    "loaded_models": ["diet", "stress", "workout"],
+    "model_status": {
+      "diet": "loaded",
+      "stress": "loaded",
+      "workout": "loaded"
+    },
+    "load_times": {
+      "diet": 0.45,
+      "stress": 0.38,
+      "workout": 0.52
+    }
+  },
+  "cache": {
+    "cached_entries": 3,
+    "cache_ttl_minutes": 5
+  },
+  "lazy_loading": false,
+  "note": "Models pre-loaded on startup, responses cached for 5 minutes"
 }
 ```
 
@@ -281,11 +296,12 @@ flask-ai/
 │   ├── workout_model.pkl      # Workout recommendation model
 │   ├── diet_recommender.py    # Diet logic with ML integration
 │   ├── stress_analysis.py     # Stress logic with ML integration
-│   └── workout_recommender.py # Workout logic with ML integration
+│   ├── workout_recommender.py # Workout logic with ML integration
+│   └── model_manager.py       # Lazy loading and model management
 ├── app.py                     # Main Flask application
 ├── retrain_models.py          # Model training script
 ├── requirements.txt           # Python dependencies
-├── .env.example               # Example environment variables
+├── gunicorn.conf.py           # Gunicorn configuration
 ├── render.yaml                # Render deployment config
 └── README.md                  # This file
 ```
@@ -300,12 +316,18 @@ services:
     name: fitness-ai-service
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn -c gunicorn.conf.py app:app
     envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: PORT
+        value: 10000
       - key: FLASK_ENV
         value: production
       - key: CORS_ORIGIN
         fromEnv: FRONTEND_URL
+    healthCheckPath: /api/health
+    autoDeploy: true
 ```
 
 ## Error Handling
@@ -325,7 +347,8 @@ The service includes comprehensive error handling:
 - Models loaded once at startup (not per request)
 - Feature names cached for consistent inference
 - Graceful degradation when models unavailable
-- Optimized for quick response times (<100ms)
+- Response caching (5-minute TTL) to reduce compute
+- Optimized for quick response times (<100ms for cached, <500ms for fresh)
 
 ## Contributing
 1. Fork the repository
@@ -341,7 +364,8 @@ MIT License - see LICENSE file for details
 - **v1.1.0** (Current)
   - ML model integration with confidence scoring
   - Automatic fallback to rule-based logic
-  - Enhanced health check endpoint
+  - Enhanced health check endpoint with model status
+  - Response caching for improved performance
   - Improved error handling and logging
   - One-hot encoding for categorical features
 - **v1.0.0** (Initial)
