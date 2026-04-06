@@ -54,31 +54,31 @@ const Home = () => {
         <h2 className="features-heading">Powerful Features for Your Wellness Journey</h2>
         
         <div className="feature-item">
-          <img src="./images/health.jpg" alt="Unified Health Monitoring" className="feature-image" />
+          <img src="./images/health.jpg" alt="Unified Health Monitoring" className="feature-image" loading="lazy" />
           <h3>Unified Health Monitoring</h3>
           <p>Get a complete picture of your health with our integrated tracking system that combines physical, nutritional, and mental wellness metrics.</p>
         </div>
 
         <div className="feature-item">
-          <img src="./images/recommendation.jpg" alt="Personalized Recommendations" className="feature-image" />
+          <img src="./images/recommendation.jpg" alt="Personalized Recommendations" className="feature-image" loading="lazy" />
           <h3>Smart Recommendations</h3>
           <p>Receive AI-powered insights and personalized workout plans tailored to your goals and progress.</p>
         </div>
 
         <div className="feature-item">
-          <img src="./images/feedback.jpg" alt="Real-Time Analytics" className="feature-image" />
+          <img src="./images/feedback.jpg" alt="Real-Time Analytics" className="feature-image" loading="lazy" />
           <h3>Real-Time Analytics</h3>
           <p>Get instant feedback on your form and performance with advanced progress tracking technology.</p>
         </div>
 
         <div className="feature-item">
-          <img src="./images/wellness.jpg" alt="Mental Health Integration" className="feature-image" />
+          <img src="./images/wellness.jpg" alt="Mental Health Integration" className="feature-image" loading="lazy" />
           <h3>Mindfulness & Wellness</h3>
           <p>Track your mental wellness journey with mood tracking and stress management tools.</p>
         </div>
 
         <div className="feature-item">
-          <img src="./images/gamification.jpg" alt="Gamification" className="feature-image" />
+          <img src="./images/gamification.jpg" alt="Gamification" className="feature-image" loading="lazy" />
           <h3>Achievement System</h3>
           <p>Stay motivated with our engaging rewards system and personal milestone tracking.</p>
         </div>

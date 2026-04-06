@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.5.1",
+    "@react-three/fiber": "^8.15.16",
     "apexcharts": "^4.0.0",
     "axios": "^1.6.7",
     "canvas-confetti": "^1.9.2",
@@ -26,11 +27,11 @@
     "react-datepicker": "^4.25.0",
     "react-dom": "^18.3.1",
     "react-icons": "^5.0.1",
+    "react-lazy-load-image-component": "^1.6.3",
     "react-router-dom": "^6.22.1",
     "react-toastify": "^10.0.4",
     "socket.io-client": "^4.7.4",
-    "sweetalert2": "^11.10.5",
-    "@react-three/fiber": "^8.15.16"
+    "sweetalert2": "^11.10.5"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
