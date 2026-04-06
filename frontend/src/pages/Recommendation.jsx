@@ -22,6 +22,10 @@ const Recommendation = () => {
   });
   const [loading, setLoading] = useState(true);
 
+  // Log component mount and auth state
+  console.log('[Recommendation] Component rendering, isAuthenticated:', isAuthenticated);
+  console.log('[Recommendation] User:', user?._id || user?.id);
+
   const fetchRecommendations = async (skipCache = false) => {
     const userId = getUserId();
     console.log('[Recommendation] Starting fetch, userId:', userId);
@@ -140,7 +144,12 @@ const Recommendation = () => {
   };
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    console.log('[Recommendation] useEffect triggered, isAuthenticated:', isAuthenticated);
+    if (!isAuthenticated) {
+      console.log('[Recommendation] Not authenticated, skipping fetch');
+      return;
+    }
+    console.log('[Recommendation] Calling fetchRecommendations');
     fetchRecommendations();
   }, [isAuthenticated]);
 
