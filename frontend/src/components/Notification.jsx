@@ -16,14 +16,18 @@ const Notification = () => {
   const recentNotifications = useRef(new Set());
 
   useEffect(() => {
+    // Only initialize if we have a valid userId
+    if (!userId) {
+      Logger.debug('Notification: No userId available, skipping socket initialization');
+      return;
+    }
+
     // Initialize notification service
     notificationService.initialize();
 
     // Join user room when user is available
-    if (userId) {
-      notificationService.joinUserRoom(userId);
-      Logger.debug('Notification: Joined user room for', userId);
-    }
+    notificationService.joinUserRoom(userId);
+    Logger.debug('Notification: Joined user room for', userId);
 
     // Register event listeners
     const unsubscribePointsUpdated = notificationService.onPointsUpdated((data) => {

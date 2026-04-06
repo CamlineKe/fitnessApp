@@ -47,9 +47,9 @@ const io = new Server(server, {
     ].filter(Boolean),
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-    transports: ['websocket', 'polling']
-  }
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
+  },
+  transports: ['websocket', 'polling']
 });
 
 // ✅ Allow JSON requests and parse cookies

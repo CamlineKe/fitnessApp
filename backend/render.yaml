@@ -13,6 +13,12 @@ services:
         value: "5000"
       - key: JWT_SECRET
         generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        fromEnv: FRONTEND_URL
+      - key: FLASK_URL
+        fromEnv: FLASK_URL
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET

@@ -8,10 +8,12 @@ import { dietCache, workoutCache, stressCache } from '../utils/aiCache.js';
 
 // ✅ Configure axios instance with timeout and keep-alive for Flask AI
 const flaskAxios = axios.create({
-  timeout: 120000, // 120 second timeout for model loading
+  timeout: 180000, // 180 second timeout for model loading on cold start
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  // Add retry configuration
+  validateStatus: (status) => status < 500 // Don't reject on 4xx errors
 });
 
 const FLASK_API_URL = process.env.FLASK_URL 
@@ -68,6 +70,13 @@ export const getDietRecommendations = async (req, res) => {
     res.json(response.data);
   } catch (error) {
     Logger.error('Diet AI Error:', error.message);
+    if (error.response) {
+      Logger.error('Flask response status:', error.response.status);
+      Logger.error('Flask response data:', error.response.data);
+    }
+    if (error.code === 'ECONNABORTED') {
+      return res.status(504).json({ error: 'AI service timeout', details: 'The AI service took too long to respond' });
+    }
     res.status(500).json({ error: 'AI service unavailable', details: error.message });
   }
 };
@@ -115,6 +124,13 @@ export const getWorkoutRecommendations = async (req, res) => {
     res.json(response.data);
   } catch (error) {
     Logger.error('Workout AI Error:', error.message);
+    if (error.response) {
+      Logger.error('Flask response status:', error.response.status);
+      Logger.error('Flask response data:', error.response.data);
+    }
+    if (error.code === 'ECONNABORTED') {
+      return res.status(504).json({ error: 'AI service timeout', details: 'The AI service took too long to respond' });
+    }
     res.status(500).json({ error: 'AI service unavailable', details: error.message });
   }
 };
@@ -162,6 +178,13 @@ export const getStressAnalysis = async (req, res) => {
     res.json(response.data);
   } catch (error) {
     Logger.error('Stress Analysis Error:', error.message);
+    if (error.response) {
+      Logger.error('Flask response status:', error.response.status);
+      Logger.error('Flask response data:', error.response.data);
+    }
+    if (error.code === 'ECONNABORTED') {
+      return res.status(504).json({ error: 'AI service timeout', details: 'The AI service took too long to respond' });
+    }
     res.status(500).json({ error: 'AI service unavailable', details: error.message });
   }
 };
