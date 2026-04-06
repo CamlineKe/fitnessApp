@@ -1,21 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import notificationService from '../services/NotificationService';
+import { UserContext } from './UserContext';
+import { EventEmitter } from '../utils/EventEmitter';
 import '../components/Notification.css';
 import Logger from '../utils/logger';
 
 const Notification = () => {
   const [notifications, setNotifications] = useState([]);
   const navigate = useNavigate();
+  const { user, getUserId } = useContext(UserContext);
+  const userId = getUserId();
+  
+  // Track recent notification hashes to prevent duplicates
+  const recentNotifications = useRef(new Set());
 
   useEffect(() => {
     // Initialize notification service
     notificationService.initialize();
 
-    // Get user data from localStorage
-    const userData = JSON.parse(localStorage.getItem('user') || '{}');
-    if (userData._id) {
-      notificationService.joinUserRoom(userData._id);
+    // Join user room when user is available
+    if (userId) {
+      notificationService.joinUserRoom(userId);
+      Logger.debug('Notification: Joined user room for', userId);
     }
 
     // Register event listeners
@@ -64,6 +71,50 @@ const Notification = () => {
       });
     });
 
+    // Listen for local events from pages (Workout, Nutrition, MentalHealth)
+    const handleLocalPointsUpdated = (data) => {
+      Logger.debug('Notification: Local points update received:', data);
+      addNotification({
+        type: 'points',
+        title: 'Points Earned!',
+        message: `You earned ${data.points || 0} points for your activity.`,
+        data
+      });
+    };
+
+    const handleLocalStreakUpdated = (data) => {
+      Logger.debug('Notification: Local streak update received:', data);
+      addNotification({
+        type: 'streak',
+        title: 'Streak Updated!',
+        message: `You're on a ${data.days || 1} day streak! 🔥`,
+        data
+      });
+    };
+
+    const handleLocalAchievementUnlocked = (data) => {
+      Logger.debug('Notification: Local achievement received:', data);
+      addNotification({
+        type: 'achievement',
+        title: 'Achievement Unlocked!',
+        message: `You've unlocked the "${data.name || 'New Achievement'}" achievement!`,
+        data
+      });
+    };
+
+    const handleLocalLevelUp = (data) => {
+      Logger.debug('Notification: Local level up received:', data);
+      addNotification({
+        type: 'level',
+        title: 'Level Up!',
+        message: `Congratulations! You've reached level ${data.newLevel || 1}.`,
+        data
+      });
+    };
+
+    EventEmitter.on(EventEmitter.Events.GAMIFICATION_UPDATED, handleLocalPointsUpdated);
+    EventEmitter.on(EventEmitter.Events.WORKOUT_UPDATED, handleLocalStreakUpdated);
+
     // Clean up event listeners on unmount
     return () => {
       unsubscribePointsUpdated();
@@ -72,11 +123,29 @@ const Notification = () => {
       unsubscribeStreakUpdated();
       unsubscribeChallengeCompleted();
       notificationService.disconnect();
+      
+      EventEmitter.off(EventEmitter.Events.GAMIFICATION_UPDATED, handleLocalPointsUpdated);
+      EventEmitter.off(EventEmitter.Events.WORKOUT_UPDATED, handleLocalStreakUpdated);
     };
-  }, []);
+  }, [userId]); // Re-run when userId changes
 
-  // Add a new notification
+  // Add a new notification with deduplication
   const addNotification = (notification) => {
+    // Create a hash of the notification content
+    const hash = `${notification.type}-${notification.title}-${notification.message}`;
+    
+    // Check if we recently showed this exact notification
+    if (recentNotifications.current.has(hash)) {
+      Logger.debug('Duplicate notification prevented:', hash);
+      return;
+    }
+    
+    // Add to recent set and schedule removal
+    recentNotifications.current.add(hash);
+    setTimeout(() => {
+      recentNotifications.current.delete(hash);
+    }, 2000); // 2 second deduplication window
+    
     const id = Date.now();
     const newNotification = {
       id,
