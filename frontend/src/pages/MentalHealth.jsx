@@ -216,6 +216,9 @@ const MentalHealth = () => {
           // Refresh data - this will trigger a new stress analysis and emit the event
           await fetchMentalHealthData(userId);
           
+          // Emit event to notify Dashboard to refresh activity feed
+          EventEmitter.emit(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, { type: 'mental' });
+          
           // Reset form
           setDailyCheckInData({
             mood: "",

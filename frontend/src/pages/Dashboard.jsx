@@ -124,7 +124,7 @@ const Dashboard = () => {
     try {
       const nutrition = await getNutritionData();
       setNutritionData(nutrition);
-      updateActivityFeed(nutrition, workoutData, mentalHealthData);
+      updateActivityFeed(nutrition, [workoutData], mentalHealthData);
     } catch (error) {
       Logger.error("Error fetching nutrition data:", error);
     } finally {
@@ -155,7 +155,7 @@ const Dashboard = () => {
     try {
       const mentalHealth = await getMentalHealthData(userId);
       setMentalHealthData(mentalHealth);
-      updateActivityFeed(nutritionData, workoutData, mentalHealth);
+      updateActivityFeed(nutritionData, [workoutData], mentalHealth);
     } catch (error) {
       Logger.error("Error fetching mental health data:", error);
     } finally {
