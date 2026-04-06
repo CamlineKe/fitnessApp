@@ -49,10 +49,15 @@ const setAuthCookies = (res, accessToken, refreshToken) => {
   res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
 };
 
-// Clear auth cookies helper
+// Clear auth cookies helper - don't include maxAge for clearCookie (Express v5 deprecation fix)
 const clearAuthCookies = (res) => {
-  res.clearCookie('accessToken', COOKIE_OPTIONS);
-  res.clearCookie('refreshToken', REFRESH_COOKIE_OPTIONS);
+  const clearOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+  };
+  res.clearCookie('accessToken', clearOptions);
+  res.clearCookie('refreshToken', clearOptions);
 };
 
 // Register User (Now initializes default data)

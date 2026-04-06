@@ -13,6 +13,16 @@ const getCurrentLogLevel = () => {
 };
 
 const sanitizeData = (data) => {
+  // Handle Error objects specially - extract their properties before sanitization
+  if (data instanceof Error) {
+    return {
+      message: data.message,
+      stack: data.stack,
+      code: data.code,
+      name: data.name
+    };
+  }
+  
   if (!data) return data;
   
   // Deep clone the data to avoid modifying the original
