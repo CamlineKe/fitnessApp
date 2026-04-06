@@ -11,7 +11,7 @@ import {
 import { GiMeditation } from 'react-icons/gi';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Logger from '../utils/logger';
+import { EventEmitter } from '../utils/EventEmitter';
 
 const getMoodEmoji = (mood) => {
   switch (mood?.toLowerCase()) {
@@ -105,6 +105,18 @@ const Gamification = () => {
     };
 
     fetchGamificationData();
+
+    // Listen for gamification updates from other components
+    const handleGamificationUpdate = (data) => {
+      Logger.debug('Gamification update received:', data);
+      fetchGamificationData();
+    };
+
+    EventEmitter.on(EventEmitter.Events.GAMIFICATION_UPDATED, handleGamificationUpdate);
+
+    return () => {
+      EventEmitter.off(EventEmitter.Events.GAMIFICATION_UPDATED, handleGamificationUpdate);
+    };
   }, [user, isAuthLoading]);
 
   const renderStreakCard = (category) => {
