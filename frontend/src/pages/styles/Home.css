@@ -234,11 +234,11 @@
     align-items: center;
     gap: 2rem;
     padding: 1.5rem 2rem;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(99, 102, 241, 0.25);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(165, 180, 252, 0.4);
     border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .stat-item {
@@ -249,15 +249,16 @@
 }
 
 .stat-number {
-    font-size: 1.5rem;
+    font-size: 2rem;
     font-weight: 800;
     color: #ffffff;
     line-height: 1;
+    text-shadow: 0 2px 10px rgba(99, 102, 241, 0.5);
 }
 
 .stat-label {
     font-size: 0.875rem;
-    color: #a5b4fc;
+    color: #c7d2fe;
     font-weight: 500;
 }
 
