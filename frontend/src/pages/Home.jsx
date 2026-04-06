@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import SceneBackground from '../components/3D/SceneBackground';
 import './styles/Home.css';
 
 const Home = () => {
   return (
     <div className="home-container">
+      <SceneBackground />
       <nav className="navbar">
         <div className="navbar-title">
           <h1>Fitness Tracker</h1>
