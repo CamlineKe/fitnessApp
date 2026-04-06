@@ -1,12 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import SceneBackground from '../components/3D/SceneBackground';
+import SceneHero from '../components/3D/SceneHero';
 import './styles/Home.css';
 
 const Home = () => {
   return (
     <div className="home-container">
-      <SceneBackground />
       <nav className="navbar">
         <div className="navbar-title">
           <h1>Fitness Tracker</h1>
@@ -18,7 +17,9 @@ const Home = () => {
       </nav>
       
       <header className="home-header">
-        <div className="header-badge">
+        <SceneHero />
+        <div className="hero-content">
+          <div className="header-badge">
           <span className="badge-dot"></span>
           <span>AI-Powered Health Platform</span>
         </div>
@@ -47,6 +48,7 @@ const Home = () => {
             <span className="stat-number">98%</span>
             <span className="stat-label">Goal Success Rate</span>
           </div>
+        </div>
         </div>
       </header>
 
