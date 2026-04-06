@@ -134,7 +134,15 @@ class NotificationService {
   // Disconnect the socket
   disconnect() {
     if (this.socket) {
-      this.socket.disconnect();
+      try {
+        // Only disconnect if connected to avoid race condition errors
+        if (this.connected) {
+          this.socket.disconnect();
+        }
+      } catch (error) {
+        // Silently ignore disconnect errors (race conditions)
+        Logger.debug('Socket disconnect error (ignored):', error.message);
+      }
       this.socket = null;
       this.connected = false;
     }
