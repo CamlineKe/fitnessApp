@@ -48,7 +48,7 @@ export const getNutritionData = async () => {
 // Function to create a new nutrition log
 export const createNutritionLog = async (nutritionLog) => {
   try {
-    const response = await axios.post(API_URL, nutritionLog, { headers: getAuthHeaders() });
+    const response = await axios.post(API_URL, nutritionLog);
     return response.data;
   } catch (error) {
     console.error(
@@ -62,7 +62,7 @@ export const createNutritionLog = async (nutritionLog) => {
 // Function to update an existing nutrition log by ID
 export const updateNutritionLog = async (id, updatedNutritionLog) => {
   try {
-    const response = await axios.put(`${API_URL}/${id}`, updatedNutritionLog, { headers: getAuthHeaders() });
+    const response = await axios.put(`${API_URL}/${id}`, updatedNutritionLog);
     return response.data;
   } catch (error) {
     console.error(
@@ -76,7 +76,7 @@ export const updateNutritionLog = async (id, updatedNutritionLog) => {
 // Function to delete a nutrition log by ID
 export const deleteNutritionLog = async (id) => {
   try {
-    const response = await axios.delete(`${API_URL}/${id}`, { headers: getAuthHeaders() });
+    const response = await axios.delete(`${API_URL}/${id}`);
     return response.data;
   } catch (error) {
     console.error(
