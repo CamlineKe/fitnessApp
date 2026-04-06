@@ -84,9 +84,10 @@ fitnessApp/
 │   ├── routes/              # API routes
 │   ├── services/            # External service integrations
 │   │   ├── fitbitService.js
-│   │   ├── googleFitService.js
-│   │   └── appleHealthService.js
-│   ├── utils/               # Logger and utilities
+│   │   └── googleFitService.js
+│   ├── utils/
+│   │   ├── aiCache.js       # AI response caching
+│   │   └── logger.js        # Winston logging
 │   └── server.js             # Main application entry
 │
 ├── frontend/                 # React frontend application
@@ -109,16 +110,20 @@ fitnessApp/
 │   │   │   ├── Recommendation.jsx
 │   │   │   ├── Profile.jsx
 │   │   │   └── AuthCallback.jsx
-│   │   ├── services/         # API service layer
+│   │   ├── services/         # API service layer (12 services)
 │   │   │   ├── UserService.js
 │   │   │   ├── WorkoutService.js
 │   │   │   ├── NutritionService.js
 │   │   │   ├── MentalHealthService.js
 │   │   │   ├── GamificationService.js
 │   │   │   ├── NotificationService.js
-│   │   │   └── *RecommenderService.js
-│   │   ├── utils/            # EventEmitter and Logger
-│   │   └── data/             # Kenyan meals database
+│   │   │   ├── GoogleFitService.js
+│   │   │   ├── FitbitService.js
+│   │   │   ├── DietRecommendationService.js
+│   │   │   ├── StressAnalysisService.js
+│   │   │   └── WorkoutRecommenderService.js
+│   │   ├── utils/            # Helper functions
+│   │   └── axiosConfig.js    # Axios interceptors
 │   └── vite.config.js         # Vite configuration
 │
 ├── flask-ai/                  # Python AI service
@@ -126,12 +131,14 @@ fitnessApp/
 │   │   ├── diet_recommender.py
 │   │   ├── stress_analysis.py
 │   │   ├── workout_recommender.py
+│   │   ├── model_manager.py   # Lazy loading for ML models
 │   │   ├── diet_model.pkl
 │   │   ├── stress_model.pkl
 │   │   └── workout_model.pkl
 │   ├── app.py                  # Flask application
 │   ├── retrain_models.py       # Model training script
-│   └── requirements.txt        # Python dependencies
+│   ├── requirements.txt        # Python dependencies
+│   └── gunicorn.conf.py       # Production server config
 │
 └── README.md
 ```
@@ -178,42 +185,50 @@ fitnessApp/
    npm run dev
    ```
 
-3. **Frontend Setup**
+3. **Frontend Setup** (Terminal 2)
    ```bash
-   # Open new terminal
    cd frontend
 
    # Install dependencies
    npm install
 
-   # Copy environment example file
-   cp .env.example .env.local
+   # Create environment file
+   echo "VITE_API_URL=http://localhost:5000/api" > .env
+   echo "VITE_SOCKET_URL=http://localhost:5000" >> .env
 
-   # Edit .env.local with your configuration
    # Start the frontend server
    npm run dev
    ```
 
-4. **AI Service Setup**
+4. **AI Service Setup** (Terminal 3)
    ```bash
-   # Open new terminal
    cd flask-ai
 
    # Create and activate virtual environment
-   python -m venv venv
-   # Windows: venv\Scripts\activate
-   # macOS/Linux: source venv/bin/activate
+   python -m venv .venv
+   
+   # Windows:
+   .venv\Scripts\activate
+   
+   # macOS/Linux:
+   source .venv/bin/activate
 
    # Install dependencies
    pip install -r requirements.txt
-   # Or with uv (faster): uv pip install -r requirements.txt
 
-   # Copy environment example file
-   cp .env.example .env
+   # Create environment file
+   echo "PORT=5001" > .env
+   echo "CORS_ORIGIN=http://localhost:3000" >> .env
+   echo "FLASK_ENV=development" >> .env
 
    # Start the AI service
    python app.py
    ```
+
+#### ⚠️ IMPORTANT: All 3 services must be running simultaneously:
+- Backend (Node) on port 5000
+- Frontend (Vite) on port 3000  
+- AI Service (Flask) on port 5001
 
 #### Option 2: From Git Repository
 ```bash
@@ -239,6 +254,7 @@ MONGO_URI=mongodb://localhost:27017/fitnessApp
 
 # JWT Configuration
 JWT_SECRET=your-super-secret-jwt-key-min-32-chars
+JWT_REFRESH_SECRET=your-refresh-secret-key
 
 # OAuth Credentials
 GOOGLE_CLIENT_ID=your_google_client_id
@@ -251,6 +267,9 @@ FITBIT_REDIRECT_URI=http://localhost:3000/auth/fitbit/callback
 
 # Frontend URL for CORS
 FRONTEND_URL=http://localhost:3000
+
+# Flask AI Service URL
+FLASK_AI_URL=http://localhost:5001
 ```
 
 #### Frontend (.env.local)
@@ -268,10 +287,12 @@ CORS_ORIGIN=http://localhost:3000
 
 ### Access the Application
 
+Once all 3 services are running:
+
 - **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:5000/api
-- **AI Service**: http://localhost:5001/api
-- **API Documentation**: http://localhost:5000/api-docs
+- **Backend API**: http://localhost:5000
+- **AI Service**: http://localhost:5001
+- **Health Check**: http://localhost:5000/api/health
 
 ## 🎮 Usage Guide
 
@@ -416,23 +437,31 @@ python -m pytest
 ## 🚀 Deployment
 
 ### Frontend (Vercel)
+The frontend includes `vercel.json` for zero-config deployment:
+
 1. Connect GitHub repository to Vercel
-2. Add environment variables in Vercel dashboard
+2. Add environment variables:
+   - `VITE_API_URL`: Your Render backend URL
+   - `VITE_SOCKET_URL`: Your Render backend URL
 3. Deploy automatically on push
 
 ### Backend (Render)
+The backend includes `render.yaml` for deployment:
+
 1. Create new Web Service on Render
 2. Connect repository
 3. Set build command: `npm install`
 4. Set start command: `node server.js`
-5. Add environment variables
+5. Add environment variables (see Environment Configuration section)
 6. Deploy
 
 ### AI Service (Render)
+The AI service includes `render.yaml` with gunicorn configuration:
+
 1. Create new Web Service
-2. Set environment: Python 3
+2. Set environment: Python 3.12
 3. Build command: `pip install -r requirements.txt`
-4. Start command: `gunicorn app:app`
+4. Start command: `gunicorn -c gunicorn.conf.py app:app`
 5. Add environment variables
 6. Deploy
 
@@ -517,11 +546,43 @@ Check client ID and secret are correct
 Ensure scopes are properly configured
 ```
 
-**AI Service Not Responding**
+**Backend Server Not Starting**
+```bash
+# Check if MongoDB is running
+mongod
+
+# Verify all required env vars are set
+cat backend/.env
+
+# Check for port conflicts
+lsof -i :5000
 ```
-Check if Flask server is running on port 5001
-Verify Python dependencies are installed
-Check model files exist in models directory
+
+**AI Service Not Responding**
+```bash
+# Check if Flask server is running on port 5001
+curl http://localhost:5001/api/health
+
+# Verify Python virtual environment is activated
+which python
+
+# Check model files exist
+ls flask-ai/models/*.pkl
+
+# Reinstall dependencies
+pip install -r requirements.txt
+```
+
+**Frontend Can't Connect to Backend**
+```bash
+# Verify backend is running
+curl http://localhost:5000/api/health
+
+# Check frontend .env has correct URL
+cat frontend/.env
+
+# Ensure VITE_API_URL ends with /api
+# Should be: http://localhost:5000/api
 ```
 
 ## 📄 License
