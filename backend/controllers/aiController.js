@@ -24,8 +24,14 @@ const FLASK_API_URL = process.env.FLASK_URL
 
 export const getDietRecommendations = async (req, res) => {
   try {
+    Logger.info('[AI] Diet recommendations request received for user:', req.user?._id);
+    Logger.info('[AI] FLASK_API_URL:', FLASK_API_URL);
+    
     const user = await User.findById(req.user._id);
+    Logger.info('[AI] User found:', user?._id, 'DOB:', user?.dateOfBirth, 'Gender:', user?.gender);
+    
     const nutritionLogs = await Nutrition.find({ userId: req.user._id }).sort({ date: -1 }).limit(7);
+    Logger.info('[AI] Nutrition logs count:', nutritionLogs.length);
 
     // Get the most recent nutrition log for current daily intake
     const currentDayLog = nutritionLogs[0] || {};
@@ -60,7 +66,13 @@ export const getDietRecommendations = async (req, res) => {
       return res.json(cached);
     }
 
+    Logger.info('[AI] Calling Flask API at:', `${FLASK_API_URL}/diet`);
+    Logger.info('[AI] Request data:', JSON.stringify(requestData, null, 2));
+
     const response = await flaskAxios.post(`${FLASK_API_URL}/diet`, requestData);
+    
+    Logger.info('[AI] Flask response status:', response.status);
+    Logger.info('[AI] Flask response data:', JSON.stringify(response.data, null, 2).substring(0, 500));
     
     // ✅ Cache the response
     dietCache.set(cacheKey, response.data);
@@ -83,8 +95,13 @@ export const getDietRecommendations = async (req, res) => {
 
 export const getWorkoutRecommendations = async (req, res) => {
   try {
+    Logger.info('[AI] Workout recommendations request received for user:', req.user?._id);
+    
     const user = await User.findById(req.user._id);
+    Logger.info('[AI] User found:', user?._id);
+    
     const workoutLogs = await Workout.find({ userId: req.user._id }).sort({ date: -1 }).limit(7);
+    Logger.info('[AI] Workout logs count:', workoutLogs.length);
 
     // Format the data to match Flask API expectations
     const requestData = {
@@ -115,7 +132,9 @@ export const getWorkoutRecommendations = async (req, res) => {
       return res.json(cached);
     }
 
+    Logger.info('[AI] Calling Flask API at:', `${FLASK_API_URL}/workout`);
     const response = await flaskAxios.post(`${FLASK_API_URL}/workout`, requestData);
+    Logger.info('[AI] Workout Flask response status:', response.status);
     
     // ✅ Cache the response
     workoutCache.set(cacheKey, response.data);
@@ -137,8 +156,13 @@ export const getWorkoutRecommendations = async (req, res) => {
 
 export const getStressAnalysis = async (req, res) => {
   try {
+    Logger.info('[AI] Stress analysis request received for user:', req.user?._id);
+    
     const user = await User.findById(req.user._id);
+    Logger.info('[AI] User found:', user?._id);
+    
     const mentalHealthLogs = await MentalHealth.find({ userId: req.user._id }).sort({ date: -1 }).limit(7);
+    Logger.info('[AI] Mental health logs count:', mentalHealthLogs.length);
 
     // Format the data to match what the Flask API expects
     const requestData = {
@@ -169,7 +193,9 @@ export const getStressAnalysis = async (req, res) => {
       return res.json(cached);
     }
 
+    Logger.info('[AI] Calling Flask API at:', `${FLASK_API_URL}/stress`);
     const response = await flaskAxios.post(`${FLASK_API_URL}/stress`, requestData);
+    Logger.info('[AI] Stress Flask response status:', response.status);
     
     // ✅ Cache the response
     stressCache.set(cacheKey, response.data);
