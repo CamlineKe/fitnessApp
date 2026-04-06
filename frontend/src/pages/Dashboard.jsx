@@ -228,24 +228,40 @@ const Dashboard = () => {
       fetchMentalHealthData();
     };
 
+    // Refresh data when user returns to dashboard tab/window
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        Logger.debug('Dashboard: Tab became visible, refreshing data...');
+        localStorage.removeItem(CACHE_KEY); // Clear stale cache
+        Promise.all([
+          fetchNutritionData(),
+          fetchWorkoutData(),
+          fetchMentalHealthData(),
+          fetchGamificationData()
+        ]);
+      }
+    };
+
     EventEmitter.on(EventEmitter.Events.WORKOUT_UPDATED, handleWorkoutUpdate);
     EventEmitter.on(EventEmitter.Events.GAMIFICATION_UPDATED, handleGamificationUpdate);
     EventEmitter.on(EventEmitter.Events.NUTRITION_UPDATED, handleNutritionUpdate);
     EventEmitter.on(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, handleMentalHealthUpdate);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       EventEmitter.off(EventEmitter.Events.WORKOUT_UPDATED, handleWorkoutUpdate);
       EventEmitter.off(EventEmitter.Events.GAMIFICATION_UPDATED, handleGamificationUpdate);
       EventEmitter.off(EventEmitter.Events.NUTRITION_UPDATED, handleNutritionUpdate);
       EventEmitter.off(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, handleMentalHealthUpdate);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [isAuthenticated, userId]);
 
   const quickActions = [
-    { icon: 'fa-plus-circle', label: 'Log Workout', action: () => navigate('/workout'), color: '#4CAF50' },
-    { icon: 'fa-utensils', label: 'Log Meal', action: () => navigate('/nutrition'), color: '#2196F3' },
-    { icon: 'fa-brain', label: 'Daily Check-in', action: () => navigate('/mentalhealth'), color: '#9C27B0' },
-    { icon: 'fa-trophy', label: 'Achievements', action: () => navigate('/gamification'), color: '#FF9800' },
+    { icon: 'fa-plus-circle', label: 'Log Workout', action: () => { localStorage.removeItem(CACHE_KEY); navigate('/workout'); }, color: '#4CAF50' },
+    { icon: 'fa-utensils', label: 'Log Meal', action: () => { localStorage.removeItem(CACHE_KEY); navigate('/nutrition'); }, color: '#2196F3' },
+    { icon: 'fa-brain', label: 'Daily Check-in', action: () => { localStorage.removeItem(CACHE_KEY); navigate('/mentalhealth'); }, color: '#9C27B0' },
+    { icon: 'fa-trophy', label: 'Achievements', action: () => { localStorage.removeItem(CACHE_KEY); navigate('/gamification'); }, color: '#FF9800' },
   ];
 
   const handleLogout = () => {

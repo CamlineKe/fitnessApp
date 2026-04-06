@@ -6,11 +6,6 @@ const API_URL = `${import.meta.env.VITE_API_URL}/ai/stress`;
 const getStressAnalysis = async (mentalLogs = [], userId) => {
   Logger.debug("StressAnalysisService - Received mental logs:", mentalLogs);
   
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('Unauthorized: No token found.');
-  }
-
   try {
     // Get user data from localStorage
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -29,12 +24,8 @@ const getStressAnalysis = async (mentalLogs = [], userId) => {
 
     Logger.debug("StressAnalysisService - Sending request data:", requestData);
 
-    const response = await axios.post(API_URL, requestData, {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-    });
+    const response = await axios.post(API_URL, requestData);
+    // axiosConfig handles auth cookies automatically
 
     Logger.debug("StressAnalysisService - Received response:", response.data);
     
