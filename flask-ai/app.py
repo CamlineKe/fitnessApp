@@ -123,9 +123,14 @@ def validate_request(req):
         return {'error': 'Invalid request: No data provided'}, 400
     return None
 
+@app.route('/api/ping', methods=['GET', 'HEAD'])
+def ping():
+    """Lightweight endpoint for keep-alive pings - no model loading"""
+    return jsonify({'status': 'alive', 'time': datetime.now().isoformat()}), 200
+
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    status = get_model_status()
+    # Don't trigger model loading during health check - just report status
     cache_info = {
         'cached_entries': len(_cache),
         'cache_ttl_minutes': CACHE_TTL_MINUTES
@@ -133,10 +138,10 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'environment': env,
-        'models': status,
+        'models': get_model_status(),  # This shows loaded status without triggering load
         'cache': cache_info,
-        'lazy_loading': False,
-        'note': 'Models pre-loaded on startup, responses cached for 5 minutes'
+        'lazy_loading': True,
+        'note': 'Models load on first request to save memory (free tier optimized)'
     }), 200
 
 @app.route('/api/diet', methods=['POST'])

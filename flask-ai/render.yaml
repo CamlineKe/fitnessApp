@@ -14,4 +14,6 @@ services:
       - key: CORS_ORIGIN
         fromEnv: FRONTEND_URL
     healthCheckPath: /api/health
+    # Give 60s for ML models to lazy-load before health checks start
+    healthCheckTimeout: 60
     autoDeploy: true

@@ -19,8 +19,8 @@ keepalive = 2
 max_requests = 1000
 max_requests_jitter = 50
 
-# Preload app to load ML models at startup (not on first request)
-preload_app = True  # Changed to True - models now load at startup
+# Preload app disabled for free tier - lazy load models on first request to save memory
+preload_app = False
 
 # Logging - Explicit configuration for Render logs
 accesslog = "-"  # Log to stdout
