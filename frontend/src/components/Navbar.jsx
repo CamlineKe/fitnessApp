@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { UserContext } from './UserContext';
 import { MdDashboard, MdPerson, MdRestaurant, MdFitnessCenter, MdMood, MdEmojiEvents, MdRecommend } from 'react-icons/md';
 import './Navbar.css';
@@ -25,10 +25,10 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <div className="navbar-title">
-          <Link to="/dashboard" className="navbar-link">
+          <NavLink to="/dashboard" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}>
             <MdFitnessCenter className="nav-icon title-icon" />
             {!isMobile && "Fitness Tracker"}
-          </Link>
+          </NavLink>
         </div>
 
         {isMobile && (
@@ -49,39 +49,39 @@ const Navbar = () => {
             <span className="nav-loading">Loading...</span>
           ) : user ? (
             <>
-              <Link to="/dashboard" className="navbar-link" onClick={() => setIsMenuOpen(false)}>
+              <NavLink to="/dashboard" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => setIsMenuOpen(false)}>
                 <MdDashboard className="nav-icon" />
                 <span>Dashboard</span>
-              </Link>
-              <Link to="/profile" className="navbar-link" onClick={() => setIsMenuOpen(false)}>
+              </NavLink>
+              <NavLink to="/profile" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => setIsMenuOpen(false)}>
                 <MdPerson className="nav-icon" />
                 <span>Profile</span>
-              </Link>
-              <Link to="/nutrition" className="navbar-link" onClick={() => setIsMenuOpen(false)}>
+              </NavLink>
+              <NavLink to="/nutrition" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => setIsMenuOpen(false)}>
                 <MdRestaurant className="nav-icon" />
                 <span>Nutrition</span>
-              </Link>
-              <Link to="/workout" className="navbar-link" onClick={() => setIsMenuOpen(false)}>
+              </NavLink>
+              <NavLink to="/workout" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => setIsMenuOpen(false)}>
                 <MdFitnessCenter className="nav-icon" />
                 <span>Workout</span>
-              </Link>
-              <Link to="/mentalhealth" className="navbar-link" onClick={() => setIsMenuOpen(false)}>
+              </NavLink>
+              <NavLink to="/mentalhealth" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => setIsMenuOpen(false)}>
                 <MdMood className="nav-icon" />
                 <span>Mental Health</span>
-              </Link>
-              <Link to="/gamification" className="navbar-link" onClick={() => setIsMenuOpen(false)}>
+              </NavLink>
+              <NavLink to="/gamification" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => setIsMenuOpen(false)}>
                 <MdEmojiEvents className="nav-icon" />
                 <span>Gamification</span>
-              </Link>
-              <Link to="/recommendation" className="navbar-link" onClick={() => setIsMenuOpen(false)}>
+              </NavLink>
+              <NavLink to="/recommendation" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => setIsMenuOpen(false)}>
                 <MdRecommend className="nav-icon" />
                 <span>Recommendations</span>
-              </Link>
+              </NavLink>
             </>
           ) : (
-            <Link to="/" className="navbar-link" onClick={() => setIsMenuOpen(false)}>
+            <NavLink to="/" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`} onClick={() => setIsMenuOpen(false)}>
               <span>Login</span>
-            </Link>
+            </NavLink>
           )}
         </div>
       </div>
