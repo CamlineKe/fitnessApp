@@ -443,11 +443,11 @@ export const updateUserProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const token = generateToken(user);
+    const accessToken = generateAccessToken(user);
 
     res.json({ 
       message: "Profile updated successfully", 
-      token,
+      token: accessToken,
       user: { 
         id: user._id, 
         username: user.username, 
@@ -493,11 +493,11 @@ export const changeUserPassword = async (req, res) => {
     await user.save();
 
     // Generate new token since credentials changed
-    const token = generateToken(user);
+    const accessToken = generateAccessToken(user);
 
     res.json({ 
       message: 'Password changed successfully',
-      token
+      token: accessToken
     });
   } catch (error) {
     Logger.error('Password change error:', error);
