@@ -6,11 +6,10 @@ const API_URL = `/gamification`;
 // 🔹 Generalized API request handler with proper error handling
 const requestHandler = async (method, url, data = null, headers = null) => {
   try {
-    const requestData = data ? JSON.stringify(data) : undefined;
     Logger.debug(`Making ${method.toUpperCase()} request to ${url}`, {
       method,
       url,
-      data: requestData
+      data
     });
 
     const config = {
@@ -20,7 +19,7 @@ const requestHandler = async (method, url, data = null, headers = null) => {
         'Content-Type': 'application/json',
         ...headers
       },
-      data: data ? JSON.stringify(data) : undefined
+      data: data || undefined
     };
 
     Logger.debug('Request config:', config);
