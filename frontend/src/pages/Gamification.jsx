@@ -12,6 +12,7 @@ import { GiMeditation } from 'react-icons/gi';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { EventEmitter } from '../utils/EventEmitter';
+import Logger from '../utils/logger';
 
 const getMoodEmoji = (mood) => {
   switch (mood?.toLowerCase()) {

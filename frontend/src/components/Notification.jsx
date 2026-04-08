@@ -76,16 +76,7 @@ const Notification = () => {
     });
 
     // Listen for local events from pages (Workout, Nutrition, MentalHealth)
-    const handleLocalPointsUpdated = (data) => {
-      Logger.debug('Notification: Local points update received:', data);
-      addNotification({
-        type: 'points',
-        title: 'Points Earned!',
-        message: `You earned ${data.points || 0} points for your activity.`,
-        data
-      });
-    };
-
+    // Note: Points notifications come via Socket.IO, not local events
     const handleLocalStreakUpdated = (data) => {
       Logger.debug('Notification: Local streak update received:', data);
       addNotification({
@@ -116,8 +107,11 @@ const Notification = () => {
       });
     };
 
-    EventEmitter.on(EventEmitter.Events.GAMIFICATION_UPDATED, handleLocalPointsUpdated);
+    // Note: GAMIFICATION_UPDATED is for dashboard stats refresh only
+    // Points notifications come via Socket.IO (notificationService)
     EventEmitter.on(EventEmitter.Events.WORKOUT_UPDATED, handleLocalStreakUpdated);
+    EventEmitter.on(EventEmitter.Events.MENTAL_HEALTH_UPDATED, handleLocalStreakUpdated);
+    EventEmitter.on(EventEmitter.Events.NUTRITION_UPDATED, handleLocalStreakUpdated);
 
     // Clean up event listeners on unmount
     return () => {
@@ -128,8 +122,9 @@ const Notification = () => {
       unsubscribeChallengeCompleted();
       notificationService.disconnect();
       
-      EventEmitter.off(EventEmitter.Events.GAMIFICATION_UPDATED, handleLocalPointsUpdated);
       EventEmitter.off(EventEmitter.Events.WORKOUT_UPDATED, handleLocalStreakUpdated);
+      EventEmitter.off(EventEmitter.Events.MENTAL_HEALTH_UPDATED, handleLocalStreakUpdated);
+      EventEmitter.off(EventEmitter.Events.NUTRITION_UPDATED, handleLocalStreakUpdated);
     };
   }, [userId]); // Re-run when userId changes
 

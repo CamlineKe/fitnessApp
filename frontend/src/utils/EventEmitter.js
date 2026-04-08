@@ -11,6 +11,7 @@ class EventEmitter {
     MEAL_DELETED: 'mealDeleted',
     NUTRITION_UPDATED: 'nutritionUpdated',
     WORKOUT_UPDATED: 'workoutUpdated',
+    MENTAL_HEALTH_UPDATED: 'mentalHealthUpdated',
     GAMIFICATION_UPDATED: 'gamificationUpdated'
   };
 
