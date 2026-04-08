@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import { createServer } from 'http';
@@ -56,6 +57,12 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(cookieParser());
 
+// Enable gzip compression for responses
+app.use(compression({
+  level: 6, // Balance between compression ratio and CPU usage
+  threshold: 1024 // Only compress responses > 1KB
+}));
+
 // Middleware to enable Cross-Origin Resource Sharing (CORS)
 const allowedOrigins = [
   'http://localhost:3000',
@@ -72,15 +79,11 @@ app.use(cors({
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // Debug: Log the incoming origin
-    Logger.info('🔍 CORS check - Request origin:', origin);
-    
     if (allowedOrigins.indexOf(origin) === -1) {
       Logger.error('❌ CORS rejected - Origin not in allowed list:', origin);
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       return callback(new Error(msg), false);
     }
-    Logger.info('✅ CORS accepted for origin:', origin);
     return callback(null, true);
   },
   credentials: true,

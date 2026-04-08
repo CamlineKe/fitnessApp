@@ -9,6 +9,10 @@ const connectDB = async () => {
     const options = {
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
+      maxPoolSize: 5, // Limit connections for free tier (default is 100)
+      minPoolSize: 1,  // Keep at least 1 connection ready
+      maxIdleTimeMS: 30000, // Close idle connections after 30s
+      waitQueueTimeoutMS: 3000, // Fail fast if pool exhausted
       // MongoDB driver 4.0+ automatically handles these settings
       // Removed deprecated options: useNewUrlParser and useUnifiedTopology
     };

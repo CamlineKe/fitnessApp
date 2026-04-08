@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import dotenv from 'dotenv';
 import User from '../models/User.js';
 import Workout from '../models/Workout.js';
@@ -98,8 +99,8 @@ export const registerUser = async (req, res) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    // Store refresh token hash in database
-    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+    // Store refresh token hash using SHA256 (fast, sufficient for token integrity)
+    const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
     user.refreshToken = refreshTokenHash;
     user.refreshTokenExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     await user.save();
@@ -273,7 +274,7 @@ export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password username email firstName lastName dateOfBirth gender healthGoals');
     if (!user) {
       return res.status(400).json({ message: 'Invalid email or password' });
     }
@@ -343,8 +344,9 @@ export const refreshAccessToken = async (req, res) => {
       return res.status(403).json({ message: 'Refresh token expired. Please log in again.' });
     }
 
-    // Verify the refresh token hash matches
-    const isValid = await bcrypt.compare(refreshToken, user.refreshToken);
+    // Verify the refresh token hash matches using SHA256
+    const providedHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    const isValid = providedHash === user.refreshToken;
     if (!isValid) {
       return res.status(403).json({ message: 'Invalid refresh token' });
     }
