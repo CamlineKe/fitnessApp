@@ -133,6 +133,15 @@
   color: var(--primary);
 }
 
+/* Fix: Ensure content is visible when hovering on active page */
+.navbar-link.active:hover {
+  color: white;
+}
+
+.navbar-link.active:hover .nav-icon {
+  color: white;
+}
+
 /* Focus States for Accessibility */
 .navbar-link:focus-visible,
 .navbar-brand:focus-visible,
