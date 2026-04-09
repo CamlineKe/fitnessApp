@@ -35,15 +35,16 @@ const authMiddleware = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
-        Logger.error("Authentication error:", error.message);
-
+        // Only log unexpected auth errors - expired/missing tokens are normal on public pages
         if (error.name === "TokenExpiredError") {
+            Logger.debug("Token expired (expected for unauthenticated users)");
             return res.status(401).json({ 
                 message: "Access token expired",
                 code: "TOKEN_EXPIRED"
             });
         }
 
+        Logger.error("Authentication error:", error.message);
         res.status(403).json({ message: "Invalid token. Access denied." });
     }
 };
