@@ -309,15 +309,22 @@
 /* No Recommendations */
 .no-recommendations {
     text-align: center;
-    padding: 2rem;
-    background: #f8fafc;
+    padding: 2.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
     border-radius: 12px;
-    color: var(--text-muted);
+    border: 2px dashed #cbd5e1;
+    color: #64748b;
 }
 
 .no-recommendations p {
     margin: 0.5rem 0;
-    font-size: 0.95rem;
+    font-size: 1rem;
+}
+
+.no-recommendations .recommendation-note {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin-top: 0.5rem;
 }
 
 /* Recommendation Items */

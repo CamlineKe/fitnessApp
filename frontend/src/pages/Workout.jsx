@@ -592,14 +592,28 @@ const Workout = () => {
                 <div className="workout-chart-section">
                   <h2>Workout Progress</h2>
                   <div className="workout-line-chart">
-                    <Line data={workoutMetricsData} options={lineChartOptions} />
+                    {workoutLogs.length > 0 ? (
+                      <Line data={workoutMetricsData} options={lineChartOptions} />
+                    ) : (
+                      <div className="chart-empty-state">
+                        <i className="fas fa-chart-line"></i>
+                        <p>Log workouts to track your progress over time</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 <div className="workout-chart-section">
                   <h2>Activity Distribution</h2>
                   <div className="workout-pie-chart">
-                    <Pie data={workoutTypeData} options={pieChartOptions} />
+                    {workoutLogs.length > 0 ? (
+                      <Pie data={workoutTypeData} options={pieChartOptions} />
+                    ) : (
+                      <div className="chart-empty-state">
+                        <i className="fas fa-chart-pie"></i>
+                        <p>Start logging different activities to see your distribution</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -627,7 +641,9 @@ const Workout = () => {
                     ))}
                   </div>
                 ) : (
-                  <p>No workout logs available.</p>
+                  <div className="no-logs">
+                    <p>No workout logs yet. Start by logging your first workout above!</p>
+                  </div>
                 )}
               </div>
           </div>

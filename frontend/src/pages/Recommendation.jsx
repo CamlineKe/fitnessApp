@@ -257,7 +257,10 @@ const Recommendation = () => {
                           ))}
                         </ul>
                       ) : (
-                        <p>No diet recommendations available at the moment.</p>
+                        <div className="no-recommendations">
+                          <p>No diet recommendations available at the moment.</p>
+                          <p className="recommendation-note">Log your meals to receive personalized diet advice!</p>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -316,7 +319,10 @@ const Recommendation = () => {
                           ))}
                         </ul>
                       ) : (
-                        <p>No stress analysis recommendations available at the moment.</p>
+                        <div className="no-recommendations">
+                          <p>No stress analysis recommendations available at the moment.</p>
+                          <p className="recommendation-note">Complete daily check-ins to get personalized stress management tips!</p>
+                        </div>
                       )}
                     </div>
                   </div>

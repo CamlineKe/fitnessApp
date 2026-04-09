@@ -417,15 +417,70 @@
 
 .no-recommendations {
     text-align: center;
-    padding: 3rem 2rem;
-    color: var(--text-muted);
-    background: var(--bg-main);
-    border-radius: var(--border-radius-lg);
-    border: 2px dashed var(--border-light);
+    padding: 2.5rem;
+    color: #64748b;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 2px dashed #cbd5e1;
 }
 
 .no-recommendations p {
     margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.no-recommendations .recommendation-note {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    margin-top: 0.5rem;
+}
+
+/* Chart Empty State */
+.chart-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 250px;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 2px dashed #cbd5e1;
+    text-align: center;
+}
+
+.chart-empty-state i {
+    font-size: 3rem;
+    color: #94a3b8;
+    margin-bottom: 1rem;
+}
+
+.chart-empty-state p {
+    color: #64748b;
+    font-size: 1rem;
+    max-width: 200px;
+    margin: 0;
+}
+
+/* No Logs Empty State */
+.no-logs {
+    text-align: center;
+    padding: 2.5rem;
+    color: #64748b;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 2px dashed #cbd5e1;
+}
+
+.no-logs::before {
+    content: "🏋️";
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.no-logs p {
+    margin: 0;
     font-size: 1.1rem;
 }
 
