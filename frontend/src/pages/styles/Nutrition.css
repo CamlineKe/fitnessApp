@@ -409,11 +409,12 @@
 }
 
 .meal-logs-section li {
-    background-color: #fff;
+    background: white;
     margin-bottom: 1rem;
     padding: 1rem;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
 }
 
 .meal-logs-section li p {
@@ -522,7 +523,7 @@
 }
 
 .unit {
-    color: #666;
+    color: var(--text-muted);
     font-size: 0.9rem;
     position: absolute;
     right: 10px;
@@ -532,10 +533,10 @@
 
 /* Meal Logs List Styling */
 .meal-logs-header {
-    background-color: #f8f9fa;
+    background: var(--bg-main);
     border-radius: 8px 8px 0 0;
     margin-top: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 .meal-logs-list {
@@ -556,10 +557,10 @@
 }
 
 .meal-logs-header .meal-log-item {
-    background-color: #f8f9fa;
+    background: var(--bg-main);
     font-weight: 600;
-    color: #333;
-    border-bottom: 2px solid #ddd;
+    color: var(--text-main);
+    border-bottom: 2px solid var(--border-light);
 }
 
 .meal-logs-list .meal-log-item:last-child {
@@ -567,21 +568,21 @@
 }
 
 .meal-logs-list .meal-log-item:hover {
-    background-color: #f8f9fa;
+    background: var(--bg-main);
 }
 
 .meal-name {
     font-weight: 500;
-    color: #2c3e50;
+    color: var(--text-main);
 }
 
 .meal-type {
-    color: #666;
+    color: var(--text-muted);
     text-transform: capitalize;
 }
 
 .meal-calories {
-    color: #2c3e50;
+    color: var(--text-main);
     font-weight: 500;
 }
 
@@ -605,21 +606,23 @@
 }
 
 .meal-actions button:first-child {
-    background-color: #4CAF50;
+    background: linear-gradient(135deg, var(--secondary) 0%, #0da674 100%);
     color: white;
 }
 
 .meal-actions button:first-child:hover {
-    background-color: #45a049;
+    background: linear-gradient(135deg, #0da674 0%, #059669 100%);
+    transform: translateY(-2px);
 }
 
 .meal-actions .delete-btn {
-    background-color: #ff4444;
+    background: linear-gradient(135deg, var(--accent) 0%, #e11d48 100%);
     color: white;
 }
 
 .meal-actions .delete-btn:hover {
-    background-color: var(--accent-hover);
+    background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+    transform: translateY(-2px);
 }
 
 /* Custom Toast Styling */
@@ -1038,7 +1041,7 @@
 
 /* Loading state for button */
 #mealForm button[type="submit"].loading {
-    background: #ccc;
+    background: var(--text-muted);
     cursor: not-allowed;
     opacity: 0.7;
 }
@@ -1160,6 +1163,6 @@
     }
 
     .suggestion-details {
-        font-size: 0.75rem;
+        font-size: 0.8rem;
     }
 }

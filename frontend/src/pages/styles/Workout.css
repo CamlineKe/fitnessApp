@@ -335,7 +335,7 @@
 }
 
 .add-log-button:disabled {
-    background: #475569;
+    background: var(--text-muted);
     cursor: not-allowed;
     opacity: 0.6;
     transform: none !important;

@@ -525,11 +525,11 @@
 }
 
 .no-mood {
-    color: #666;
+    color: var(--text-muted);
     font-style: italic;
     line-height: 1.5;
     padding: 1rem;
-    background: var(--background-color);
+    background: var(--bg-main);
     border-radius: 8px;
 }
 
@@ -757,7 +757,7 @@
     
     .mood-chip {
         padding: 6px 12px;
-        font-size: 13px;
+        font-size: 0.875rem;
     }
 }
 
@@ -799,7 +799,7 @@
     
     .mood-chip {
         padding: 4px 10px;
-        font-size: 12px;
+        font-size: 0.8rem;
     }
     
     .mood-chip span {
@@ -809,7 +809,7 @@
 
 
 .chart-description {
-    color: #666;
+    color: var(--text-muted);
     font-size: 0.9rem;
     margin-bottom: 1rem;
     text-align: center;

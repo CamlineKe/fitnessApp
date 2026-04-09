@@ -25,6 +25,11 @@
   --nav-height: 72px;
   --border-radius-lg: 16px;
   --border-radius-xl: 24px;
+  
+  /* Scrollbar Colors */
+  --scrollbar-track: var(--bg-main);
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
 }
 
 * {
@@ -74,14 +79,24 @@ a:hover {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-main);
+  background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--scrollbar-thumb);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Mobile UX Improvements */
+* {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent 300ms tap delay on touch devices */
+button, a, input, select, textarea, [role="button"] {
+  touch-action: manipulation;
 }
