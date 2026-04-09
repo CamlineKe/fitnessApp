@@ -33,4 +33,20 @@ export const apiLimiter = rateLimit({
   legacyHeaders: false
 });
 
-export default { authLimiter, apiLimiter };
+// Nutrition API rate limiter (300 requests per 15 minutes) - higher for meal logging
+export const nutritionLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  message: {
+    error: 'Too many nutrition requests',
+    message: 'Please slow down and try again later'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => {
+    // Skip rate limiting in development
+    return process.env.NODE_ENV === 'development';
+  }
+});
+
+export default { authLimiter, apiLimiter, nutritionLimiter };

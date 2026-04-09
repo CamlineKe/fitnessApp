@@ -234,6 +234,44 @@ export const nutritionValidation = {
   ]
 };
 
+// Bulk nutrition validation
+export const bulkNutritionValidation = [
+  body('logs')
+    .isArray({ min: 1, max: 50 }).withMessage('Logs must be an array with 1-50 items'),
+  
+  body('logs.*.date')
+    .optional()
+    .isISO8601().withMessage('Log date must be valid'),
+  
+  body('logs.*.mealType')
+    .isIn(['breakfast', 'lunch', 'dinner', 'snack']).withMessage('Invalid meal type in bulk logs'),
+  
+  body('logs.*.foodItems')
+    .isArray({ min: 1 }).withMessage('Each log must have at least one food item')
+    .custom((items) => {
+      if (!items.every(item => typeof item === 'string' && item.trim().length > 0)) {
+        throw new Error('All food items must be non-empty strings');
+      }
+      return true;
+    }),
+  
+  body('logs.*.calories')
+    .optional()
+    .isInt({ min: 0, max: 10000 }).withMessage('Calories must be between 0 and 10000'),
+  
+  body('logs.*.macronutrients.protein')
+    .optional()
+    .isFloat({ min: 0 }).withMessage('Protein must be a positive number'),
+  
+  body('logs.*.macronutrients.carbohydrates')
+    .optional()
+    .isFloat({ min: 0 }).withMessage('Carbohydrates must be a positive number'),
+  
+  body('logs.*.macronutrients.fats')
+    .optional()
+    .isFloat({ min: 0 }).withMessage('Fats must be a positive number')
+];
+
 // Mental health validation rules
 export const mentalHealthValidation = {
   create: [
@@ -332,5 +370,6 @@ export default {
   mentalHealthValidation,
   idValidation,
   paginationValidation,
-  deviceValidation
+  deviceValidation,
+  bulkNutritionValidation
 };
