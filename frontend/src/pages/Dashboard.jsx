@@ -449,7 +449,9 @@ const Dashboard = () => {
                         <p>{activity.details}</p>
                         <span className="activity-category">{activity.category}</span>
                         <span className="activity-time">
-                          {activity.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {activity.timestamp instanceof Date 
+                            ? activity.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                            : new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
                     </div>
