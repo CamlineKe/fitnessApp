@@ -47,7 +47,25 @@ export const createWorkoutLog = async (req, res) => {
   }
 };
 
-// ✅ Get all workout logs for the authenticated user with pagination
+// Helper to build field projection from query param
+const buildFieldProjection = (fieldsParam) => {
+  if (!fieldsParam) return null;
+  const fields = fieldsParam.split(',').map(f => f.trim()).filter(Boolean);
+  if (fields.length === 0) return null;
+
+  const projection = {};
+  fields.forEach(field => {
+    // Handle exclusion with - prefix
+    if (field.startsWith('-')) {
+      projection[field.substring(1)] = 0;
+    } else {
+      projection[field] = 1;
+    }
+  });
+  return projection;
+};
+
+// ✅ Get all workout logs for the authenticated user with pagination and field projection
 export const getWorkoutLogs = async (req, res) => {
   try {
     if (!req.user || !req.user._id) {
@@ -63,14 +81,23 @@ export const getWorkoutLogs = async (req, res) => {
     // Build sort object
     const sort = { [sortField]: sortOrder };
 
+    // Build field projection
+    const projection = buildFieldProjection(req.query.fields);
+
     // Execute paginated query with lean for faster serialization
     const skip = (page - 1) * limit;
+    const queryBuilder = Workout.find({ userId: req.user._id })
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    if (projection) {
+      queryBuilder.select(projection);
+    }
+
     const [workoutLogs, totalCount] = await Promise.all([
-      Workout.find({ userId: req.user._id })
-        .sort(sort)
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+      queryBuilder,
       Workout.countDocuments({ userId: req.user._id })
     ]);
 
@@ -194,6 +221,71 @@ export const deleteWorkoutLog = async (req, res) => {
   } catch (error) {
     Logger.error("Error deleting workout log:", error);
     res.status(500).json({ message: 'Failed to delete workout log' });
+  }
+};
+
+// ✅ Bulk create workout logs for mobile sync scenarios
+export const bulkCreateWorkoutLogs = async (req, res) => {
+  try {
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { workouts } = req.body;
+
+    if (!Array.isArray(workouts) || workouts.length === 0) {
+      return res.status(400).json({ message: "Workouts array is required and cannot be empty" });
+    }
+
+    if (workouts.length > 100) {
+      return res.status(400).json({ message: "Cannot process more than 100 workouts at once" });
+    }
+
+    // Add userId to each workout
+    const workoutsWithUserId = workouts.map(workout => ({
+      ...workout,
+      userId: req.user._id,
+      date: workout.date ? new Date(workout.date) : new Date()
+    }));
+
+    // Use insertMany for efficient bulk insert
+    const result = await Workout.insertMany(workoutsWithUserId, {
+      ordered: false, // Continue on error, insert valid documents
+      rawResult: true
+    });
+
+    Logger.info(`Bulk created ${result.insertedCount} workout logs for user ${req.user._id}`);
+
+    res.status(201).json({
+      message: "Workout logs created successfully",
+      insertedCount: result.insertedCount,
+      insertedIds: result.insertedIds
+    });
+  } catch (error) {
+    Logger.error("Error bulk creating workout logs:", error);
+
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({
+        message: "Invalid workout data",
+        errors: Object.keys(error.errors).reduce((acc, key) => {
+          acc[key] = error.errors[key].message;
+          return acc;
+        }, {})
+      });
+    }
+
+    if (error.writeErrors) {
+      return res.status(400).json({
+        message: "Some workouts failed to insert",
+        errorCount: error.writeErrors.length,
+        errors: error.writeErrors.slice(0, 5).map(e => ({
+          index: e.index,
+          message: e.errmsg
+        }))
+      });
+    }
+
+    res.status(500).json({ message: 'Failed to create workout logs' });
   }
 };
 

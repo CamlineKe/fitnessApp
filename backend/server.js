@@ -7,6 +7,8 @@ import connectDB from './config/db.js';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
+import rateLimit from 'express-rate-limit';
+import crypto from 'crypto';
 import Logger from './utils/logger.js';
 import validateEnv from './config/validation.js'; // Import environment validation
 
@@ -35,6 +37,36 @@ const PORT = process.env.PORT || 5000;
 // Trust proxy - required for express-rate-limit to work correctly behind Render's proxy
 app.set('trust proxy', 1);
 
+// Rate limiting: 100 requests per 15 minutes per user/IP
+const rateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP/user to 100 requests per windowMs
+  message: {
+    message: 'Too many requests, please try again later.',
+    retryAfter: '15 minutes'
+  },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  // Use user ID if available, otherwise fall back to IP
+  keyGenerator: (req) => {
+    return req.user?._id?.toString() || req.ip;
+  },
+  skip: (req) => {
+    // Skip rate limiting for health checks
+    return req.path === '/api/health';
+  },
+  handler: (req, res, next, options) => {
+    Logger.warn(`Rate limit exceeded for ${req.ip}`, {
+      path: req.path,
+      userId: req.user?._id
+    });
+    res.status(options.statusCode).json(options.message);
+  }
+});
+
+// Apply rate limiting to all API routes
+app.use('/api/', rateLimiter);
+
 // Create HTTP server
 const server = createServer(app);
 
@@ -58,9 +90,17 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Enable gzip compression for responses
+// Optimized: Lower threshold to 512 bytes for better compression of small JSON responses
 app.use(compression({
   level: 6, // Balance between compression ratio and CPU usage
-  threshold: 1024 // Only compress responses > 1KB
+  threshold: 512, // Compress responses > 512 bytes (reduced from 1KB for small JSON payloads)
+  filter: (req, res) => {
+    // Skip compression for small responses or already compressed content
+    if (req.headers['x-no-compression']) {
+      return false;
+    }
+    return compression.filter(req, res);
+  }
 }));
 
 // Middleware to enable Cross-Origin Resource Sharing (CORS)
@@ -95,6 +135,41 @@ app.use(cors({
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
+
+// ETag middleware for client-side caching
+const etagMiddleware = (req, res, next) => {
+  // Skip ETag for non-GET requests and non-JSON responses
+  if (req.method !== 'GET') {
+    return next();
+  }
+
+  // Store original json method
+  const originalJson = res.json.bind(res);
+
+  // Override json method to add ETag
+  res.json = (data) => {
+    // Only generate ETag for successful responses with data
+    if (res.statusCode >= 200 && res.statusCode < 300 && data) {
+      const etag = crypto.createHash('md5').update(JSON.stringify(data)).digest('hex');
+
+      // Check if client has matching ETag
+      const clientEtag = req.headers['if-none-match'];
+      if (clientEtag === etag) {
+        return res.status(304).end(); // Not Modified
+      }
+
+      res.setHeader('ETag', etag);
+      res.setHeader('Cache-Control', 'private, must-revalidate'); // Allow client caching with validation
+    }
+
+    return originalJson(data);
+  };
+
+  next();
+};
+
+// Apply ETag middleware before routes
+app.use(etagMiddleware);
 
 // Initialize routes
 app.use('/api/users', userRoutes);

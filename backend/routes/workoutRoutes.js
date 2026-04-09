@@ -6,6 +6,7 @@ import {
   updateWorkoutLog,
   deleteWorkoutLog,
   getTodayWorkout,
+  bulkCreateWorkoutLogs,
 } from "../controllers/workoutController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
 import { validate } from "../middlewares/validation.js";
@@ -44,6 +45,11 @@ router.put("/:id",
 router.delete("/:id", 
   validate(idValidation), 
   deleteWorkoutLog
+);
+
+// ✅ Bulk create workout logs for mobile sync (max 100 per request)
+router.post("/bulk", 
+  bulkCreateWorkoutLogs
 );
 
 export default router;
