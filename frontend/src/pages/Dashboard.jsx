@@ -314,15 +314,25 @@ const Dashboard = () => {
                   <h3>Nutrition</h3>
                   {loading.nutrition && <SectionLoader />}
                 </div>
-                <div className="stat-content">
-                  <p className="stat-value">{nutritionData?.calories || 0}</p>
-                  <p className="stat-label">Calories Consumed</p>
-                </div>
-                <div className="stat-details">
-                  <span>Protein: {nutritionData?.macronutrients?.protein || 0}g</span>
-                  <span>Carbs: {nutritionData?.macronutrients?.carbohydrates || 0}g</span>
-                  <span>Fat: {nutritionData?.macronutrients?.fats || 0}g</span>
-                </div>
+                {nutritionData?.calories > 0 ? (
+                  <>
+                    <div className="stat-content">
+                      <p className="stat-value">{nutritionData.calories}</p>
+                      <p className="stat-label">Calories Consumed</p>
+                    </div>
+                    <div className="stat-details">
+                      <span>Protein: {nutritionData.macronutrients?.protein || 0}g</span>
+                      <span>Carbs: {nutritionData.macronutrients?.carbohydrates || 0}g</span>
+                      <span>Fat: {nutritionData.macronutrients?.fats || 0}g</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="stat-empty-state">
+                    <i className="fas fa-utensils"></i>
+                    <p>No meals logged today</p>
+                    <span className="empty-label">Click to add nutrition</span>
+                  </div>
+                )}
                 <div className="stat-footer">View Nutrition <i className="fas fa-arrow-right"></i></div>
               </Link>
 
@@ -332,14 +342,22 @@ const Dashboard = () => {
                   <h3>Workouts</h3>
                   {loading.workout && <SectionLoader />}
                 </div>
-                <div className="stat-content">
-                  <p className="stat-value">{workoutData?.duration || 0}</p>
-                  <p className="stat-label">minutes today</p>
-                  <div className="stat-details">
-                    <span>{workoutData?.activityType || 'No workout yet'}</span>
-                    <span>{workoutData?.caloriesBurned || 0} calories burned</span>
+                {workoutData?.duration > 0 ? (
+                  <div className="stat-content">
+                    <p className="stat-value">{workoutData.duration}</p>
+                    <p className="stat-label">minutes today</p>
+                    <div className="stat-details">
+                      <span>{workoutData.activityType}</span>
+                      <span>{workoutData.caloriesBurned || 0} calories burned</span>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="stat-empty-state">
+                    <i className="fas fa-dumbbell"></i>
+                    <p>No workout logged today</p>
+                    <span className="empty-label">Click to add workout</span>
+                  </div>
+                )}
                 <div className="stat-footer">View Workouts →</div>
               </Link>
 
@@ -349,18 +367,24 @@ const Dashboard = () => {
                   <h3>Mental Health</h3>
                   {loading.mentalHealth && <SectionLoader />}
                 </div>
-                <div className="stat-content">
-                  <p className="stat-value">
-                    {mentalHealthData?.[0]?.mood 
-                      ? mentalHealthData[0].mood.charAt(0).toUpperCase() + mentalHealthData[0].mood.slice(1) 
-                      : 'No check-in'}
-                  </p>
-                  <p className="stat-label">today's mood</p>
-                  <div className="stat-details">
-                    <span>Stress: {mentalHealthData?.[0]?.stressLevel || 0}/10</span>
-                    <span>Sleep: {mentalHealthData?.[0]?.sleepQuality || 0}/10</span>
+                {mentalHealthData?.[0]?.mood ? (
+                  <div className="stat-content">
+                    <p className="stat-value">
+                      {mentalHealthData[0].mood.charAt(0).toUpperCase() + mentalHealthData[0].mood.slice(1)}
+                    </p>
+                    <p className="stat-label">today's mood</p>
+                    <div className="stat-details">
+                      <span>Stress: {mentalHealthData[0].stressLevel || 0}/10</span>
+                      <span>Sleep: {mentalHealthData[0].sleepQuality || 0}/10</span>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="stat-empty-state">
+                    <i className="fas fa-brain"></i>
+                    <p>No check-in today</p>
+                    <span className="empty-label">Click to complete check-in</span>
+                  </div>
+                )}
                 <div className="stat-footer">View Mental Health →</div>
               </Link>
 
@@ -370,26 +394,34 @@ const Dashboard = () => {
                   <h3>Progress</h3>
                   {loading.gamification && <SectionLoader />}
                 </div>
-                <div className="stat-content">
-                  <div className="streak-info">
-                    <p className="stat-value">
-                      {gamificationData?.streaks?.currentStreak || 0}
-                      <span className="streak-label"> day streak</span>
-                    </p>
-                    <p className="stat-label">
-                      <FaFire style={{ color: gamificationData?.streaks?.currentStreak > 0 ? '#ff6b6b' : '#999' }} />
-                      {gamificationData?.streaks?.currentStreak > 0 ? 'Keep it up!' : 'Start your streak!'}
-                    </p>
+                {gamificationData?.streaks?.currentStreak > 0 ? (
+                  <div className="stat-content">
+                    <div className="streak-info">
+                      <p className="stat-value">
+                        {gamificationData.streaks.currentStreak}
+                        <span className="streak-label"> day streak</span>
+                      </p>
+                      <p className="stat-label">
+                        <FaFire style={{ color: '#ff6b6b' }} />
+                        Keep it up!
+                      </p>
+                    </div>
+                    <div className="stat-details">
+                      <span>Best Streak: {gamificationData.streaks.bestStreak || 0} days</span>
+                      <span>Total Points: {
+                        (gamificationData.points?.workout || 0) +
+                        (gamificationData.points?.mental || 0) +
+                        (gamificationData.points?.nutrition || 0)
+                      }</span>
+                    </div>
                   </div>
-                  <div className="stat-details">
-                    <span>Best Streak: {gamificationData?.streaks?.bestStreak || 0} days</span>
-                    <span>Total Points: {
-                      (gamificationData?.points?.workout || 0) +
-                      (gamificationData?.points?.mental || 0) +
-                      (gamificationData?.points?.nutrition || 0)
-                    }</span>
+                ) : (
+                  <div className="stat-empty-state">
+                    <i className="fas fa-trophy"></i>
+                    <p>No streak yet</p>
+                    <span className="empty-label">Start logging to build your streak!</span>
                   </div>
-                </div>
+                )}
                 <div className="stat-footer">View Progress <i className="fas fa-arrow-right"></i></div>
               </Link>
             </div>
