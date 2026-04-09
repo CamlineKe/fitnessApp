@@ -744,47 +744,68 @@ const Nutrition = () => {
           <div className="chart-section">
             <h2>Today's Macronutrients</h2>
             <div className="chart-container">
-              <Chart
-                options={macronutrientChartOptions}
-                series={getMacronutrientData()}
-                type="donut"
-              />
+              {mealLogs.length > 0 ? (
+                <Chart
+                  options={macronutrientChartOptions}
+                  series={getMacronutrientData()}
+                  type="donut"
+                />
+              ) : (
+                <div className="chart-empty-state">
+                  <i className="fas fa-chart-pie"></i>
+                  <p>Start logging meals to see your macronutrient breakdown</p>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="chart-section">
             <h2>Weekly Calorie Intake</h2>
             <div className="chart-container">
-              <Chart
-                options={calorieChartOptions}
-                series={[{
-                  name: 'Calories',
-                  data: Array.from({ length: 7 }, (_, i) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - (6 - i));
-                    date.setHours(0, 0, 0, 0);
-                    
-                    return mealLogs
-                      .filter(log => {
-                        const logDate = new Date(log.date);
-                        return logDate.setHours(0, 0, 0, 0) === date.getTime();
-                      })
-                      .reduce((sum, log) => sum + (log.calories || 0), 0);
-                  })
-                }]}
-                type="bar"
-              />
+              {mealLogs.length > 0 ? (
+                <Chart
+                  options={calorieChartOptions}
+                  series={[{
+                    name: 'Calories',
+                    data: Array.from({ length: 7 }, (_, i) => {
+                      const date = new Date();
+                      date.setDate(date.getDate() - (6 - i));
+                      date.setHours(0, 0, 0, 0);
+                      
+                      return mealLogs
+                        .filter(log => {
+                          const logDate = new Date(log.date);
+                          return logDate.setHours(0, 0, 0, 0) === date.getTime();
+                        })
+                        .reduce((sum, log) => sum + (log.calories || 0), 0);
+                    })
+                  }]}
+                  type="bar"
+                />
+              ) : (
+                <div className="chart-empty-state">
+                  <i className="fas fa-chart-bar"></i>
+                  <p>Add meals to track your weekly calorie trends</p>
+                </div>
+              )}
             </div>
           </div>
 
           <div className="chart-section">
             <h2>Meal Type Distribution</h2>
             <div className="chart-container">
-              <Chart
-                options={mealTypeData.options}
-                series={mealTypeData.series}
-                type="radar"
-              />
+              {mealLogs.length > 0 ? (
+                <Chart
+                  options={mealTypeData.options}
+                  series={mealTypeData.series}
+                  type="radar"
+                />
+              ) : (
+                <div className="chart-empty-state">
+                  <i className="fas fa-chart-radar"></i>
+                  <p>Log different meal types to see your distribution</p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -796,127 +817,141 @@ const Nutrition = () => {
             {/* Weekly Calorie Trend */}
             <div className="weekly-chart">
               <h3>Calorie Trend</h3>
-              <Chart
-                options={{
-                  chart: {
-                    type: 'area',
-                    height: 250,
-                    toolbar: { show: false },
-                    zoom: { enabled: false }
-                  },
-                  stroke: {
-                    curve: 'smooth',
-                    width: 2
-                  },
-                  fill: {
-                    type: 'gradient',
-                    gradient: {
-                      shadeIntensity: 1,
-                      opacityFrom: 0.7,
-                      opacityTo: 0.3,
-                      stops: [0, 90, 100]
+              {mealLogs.length > 0 ? (
+                <Chart
+                  options={{
+                    chart: {
+                      type: 'area',
+                      height: 250,
+                      toolbar: { show: false },
+                      zoom: { enabled: false }
+                    },
+                    stroke: {
+                      curve: 'smooth',
+                      width: 2
+                    },
+                    fill: {
+                      type: 'gradient',
+                      gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.7,
+                        opacityTo: 0.3,
+                        stops: [0, 90, 100]
+                      }
+                    },
+                    dataLabels: { enabled: false },
+                    colors: ['#4ECDC4'],
+                    xaxis: {
+                      // Get last 7 days including today
+                      categories: Array.from({ length: 7 }, (_, i) => {
+                        const date = new Date();
+                        date.setDate(date.getDate() - (6 - i));
+                        return date.toDateString() === new Date().toDateString()
+                          ? 'Today'
+                          : date.toLocaleDateString('en-US', { weekday: 'short' });
+                      }),
+                      labels: { style: { colors: '#666' } }
+                    },
+                    yaxis: {
+                      title: { text: 'Calories' },
+                      labels: { style: { colors: '#666' } },
+                      min: 0
+                    },
+                    tooltip: {
+                      theme: 'light',
+                      y: {
+                        formatter: (val) => `${val} kcal`
+                      }
                     }
-                  },
-                  dataLabels: { enabled: false },
-                  colors: ['#4ECDC4'],
-                  xaxis: {
-                    // Get last 7 days including today
-                    categories: Array.from({ length: 7 }, (_, i) => {
+                  }}
+                  series={[{
+                    name: 'Daily Calories',
+                    data: Array.from({ length: 7 }, (_, i) => {
                       const date = new Date();
                       date.setDate(date.getDate() - (6 - i));
-                      return date.toDateString() === new Date().toDateString()
-                        ? 'Today'
-                        : date.toLocaleDateString('en-US', { weekday: 'short' });
-                    }),
-                    labels: { style: { colors: '#666' } }
-                  },
-                  yaxis: {
-                    title: { text: 'Calories' },
-                    labels: { style: { colors: '#666' } },
-                    min: 0
-                  },
-                  tooltip: {
-                    theme: 'light',
-                    y: {
-                      formatter: (val) => `${val} kcal`
-                    }
-                  }
-                }}
-                series={[{
-                  name: 'Daily Calories',
-                  data: Array.from({ length: 7 }, (_, i) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - (6 - i));
-                    date.setHours(0, 0, 0, 0);
-                    
-                    return mealLogs
-                      .filter(log => {
-                        const logDate = new Date(log.date);
-                        return logDate.setHours(0, 0, 0, 0) === date.getTime();
-                      })
-                      .reduce((sum, log) => sum + (log.calories || 0), 0);
-                  })
-                }]}
-                type="area"
-              />
+                      date.setHours(0, 0, 0, 0);
+                      
+                      return mealLogs
+                        .filter(log => {
+                          const logDate = new Date(log.date);
+                          return logDate.setHours(0, 0, 0, 0) === date.getTime();
+                        })
+                        .reduce((sum, log) => sum + (log.calories || 0), 0);
+                    })
+                  }]}
+                  type="area"
+                />
+              ) : (
+                <div className="chart-empty-state weekly-empty">
+                  <i className="fas fa-chart-area"></i>
+                  <p>Log meals to see your weekly calorie trend</p>
+                </div>
+              )}
             </div>
 
             {/* Weekly Macronutrient Distribution */}
             <div className="weekly-chart">
               <h3>Macronutrient Distribution</h3>
-              <Chart
-                options={{
-                  chart: {
-                    type: 'bar',
-                    height: 250,
-                    stacked: true,
-                    toolbar: { show: false }
-                  },
-                  plotOptions: {
-                    bar: {
-                      horizontal: false,
-                      borderRadius: 4,
-                      columnWidth: '70%'
+              {mealLogs.length > 0 ? (
+                <Chart
+                  options={{
+                    chart: {
+                      type: 'bar',
+                      height: 250,
+                      stacked: true,
+                      toolbar: { show: false }
+                    },
+                    plotOptions: {
+                      bar: {
+                        horizontal: false,
+                        borderRadius: 4,
+                        columnWidth: '70%'
+                      }
+                    },
+                    colors: ['#FF6B6B', '#4ECDC4', '#45B7D1'],
+                    xaxis: {
+                      categories: mealLogs
+                        .slice(-7)
+                        .map(log => new Date(log.date).toLocaleDateString('en-US', { weekday: 'short' })),
+                      labels: { style: { colors: '#666' } }
+                    },
+                    yaxis: {
+                      title: { text: 'Grams' },
+                      labels: { style: { colors: '#666' } }
+                    },
+                    legend: {
+                      position: 'top',
+                      horizontalAlign: 'center'
+                    },
+                    tooltip: {
+                      theme: 'light',
+                      y: {
+                        formatter: (val) => `${val}g`
+                      }
                     }
-                  },
-                  colors: ['#FF6B6B', '#4ECDC4', '#45B7D1'],
-                  xaxis: {
-                    categories: mealLogs
-                      .slice(-7)
-                      .map(log => new Date(log.date).toLocaleDateString('en-US', { weekday: 'short' })),
-                    labels: { style: { colors: '#666' } }
-                  },
-                  yaxis: {
-                    title: { text: 'Grams' },
-                    labels: { style: { colors: '#666' } }
-                  },
-                  legend: {
-                    position: 'top',
-                    horizontalAlign: 'center'
-                  },
-                  tooltip: {
-                    theme: 'light',
-                    y: {
-                      formatter: (val) => `${val}g`
+                  }}
+                  series={[
+                    {
+                      name: 'Protein',
+                      data: mealLogs.slice(-7).map(log => log.macronutrients?.protein || 0)
+                    },
+                    {
+                      name: 'Carbs',
+                      data: mealLogs.slice(-7).map(log => log.macronutrients?.carbohydrates || 0)
+                    },
+                    {
+                      name: 'Fats',
+                      data: mealLogs.slice(-7).map(log => log.macronutrients?.fats || 0)
                     }
-                  }
-                }}
-                series={[
-                  {
-                    name: 'Protein',
-                    data: mealLogs.slice(-7).map(log => log.macronutrients?.protein || 0)
-                  },
-                  {
-                    name: 'Carbs',
-                    data: mealLogs.slice(-7).map(log => log.macronutrients?.carbohydrates || 0)
-                  },
-                  {
-                    name: 'Fats',
-                    data: mealLogs.slice(-7).map(log => log.macronutrients?.fats || 0)
-                  }
-                ]}
-                type="bar"
-              />
+                  ]}
+                  type="bar"
+                />
+              ) : (
+                <div className="chart-empty-state weekly-empty">
+                  <i className="fas fa-chart-bar"></i>
+                  <p>Track macros to see your weekly distribution</p>
+                </div>
+              )}
             </div>
 
             {/* Weekly Summary Cards */}

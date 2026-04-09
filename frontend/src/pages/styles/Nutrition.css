@@ -793,11 +793,59 @@
 
 .no-meals {
     text-align: center;
-    padding: 2rem;
-    color: #666;
-    background: #f8f9fa;
-    border-radius: 8px;
+    padding: 2.5rem;
+    color: #64748b;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
     font-size: 1.1rem;
+    border: 2px dashed #cbd5e1;
+}
+
+.no-meals::before {
+    content: "🍽️";
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+/* Chart Empty State */
+.chart-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 250px;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 2px dashed #cbd5e1;
+    text-align: center;
+}
+
+.chart-empty-state i {
+    font-size: 3rem;
+    color: #94a3b8;
+    margin-bottom: 1rem;
+}
+
+.chart-empty-state p {
+    color: #64748b;
+    font-size: 1rem;
+    max-width: 200px;
+    margin: 0;
+}
+
+/* Smaller empty state for weekly charts */
+.chart-empty-state.weekly-empty {
+    min-height: 200px;
+}
+
+.chart-empty-state.weekly-empty i {
+    font-size: 2.5rem;
+}
+
+.chart-empty-state.weekly-empty p {
+    font-size: 0.9rem;
 }
 
 /* Diet Recommendations Section */
@@ -872,13 +920,23 @@
 
 .no-recommendations {
     text-align: center;
-    padding: 2rem;
-    color: #666;
+    padding: 2.5rem;
+    color: #64748b;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 2px dashed #cbd5e1;
+}
+
+.no-recommendations::before {
+    content: "💡";
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 1rem;
 }
 
 .no-recommendations p {
     margin: 0;
-    font-size: 1rem;
+    font-size: 1.1rem;
 }
 
 /* Responsive adjustments for recommendations */
