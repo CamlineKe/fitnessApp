@@ -117,93 +117,85 @@ const Dashboard = () => {
     return sortedActivities;
   };
 
-  // Fetch nutrition data independently
-  const fetchNutritionData = async () => {
+  // Fetch all dashboard data in one call to avoid race conditions
+  const fetchAllDashboardData = async () => {
     if (!userId) return;
-    setLoading(prev => ({ ...prev, nutrition: true }));
+    
+    setLoading({
+      nutrition: true,
+      workout: true,
+      mentalHealth: true,
+      gamification: true
+    });
+    
     try {
-      const nutrition = await getNutritionData();
+      // Fetch all data in parallel
+      const [nutrition, todayWorkout, mentalHealth, gamification] = await Promise.all([
+        getNutritionData().catch(err => {
+          Logger.error("Error fetching nutrition data:", err);
+          return null;
+        }),
+        WorkoutService.getWorkoutData().catch(err => {
+          Logger.error("Error fetching workout data:", err);
+          return null;
+        }),
+        getMentalHealthData(userId).catch(err => {
+          Logger.error("Error fetching mental health data:", err);
+          return null;
+        }),
+        GamificationService.getGamificationData().catch(err => {
+          Logger.error("Error fetching gamification data:", err);
+          return null;
+        })
+      ]);
+      
+      // Update all state at once
       setNutritionData(nutrition);
-      updateActivityFeed(nutrition, [workoutData], mentalHealthData);
-    } catch (error) {
-      Logger.error("Error fetching nutrition data:", error);
-    } finally {
-      setLoading(prev => ({ ...prev, nutrition: false }));
-    }
-  };
-
-  // Fetch workout data independently (only today's workout, not all history)
-  const fetchWorkoutData = async () => {
-    if (!userId) return;
-    setLoading(prev => ({ ...prev, workout: true }));
-    try {
-      const todayWorkout = await WorkoutService.getWorkoutData();
-      const workout = todayWorkout || { activityType: 'No workout yet', duration: 0, caloriesBurned: 0 };
-      setWorkoutData(workout);
-      updateActivityFeed(nutritionData, [workout], mentalHealthData);
-    } catch (error) {
-      Logger.error("Error fetching workout data:", error);
-    } finally {
-      setLoading(prev => ({ ...prev, workout: false }));
-    }
-  };
-
-  // Fetch mental health data independently
-  const fetchMentalHealthData = async () => {
-    if (!userId) return;
-    setLoading(prev => ({ ...prev, mentalHealth: true }));
-    try {
-      const mentalHealth = await getMentalHealthData(userId);
+      setWorkoutData(todayWorkout || { activityType: 'No workout yet', duration: 0, caloriesBurned: 0 });
       setMentalHealthData(mentalHealth);
-      updateActivityFeed(nutritionData, [workoutData], mentalHealth);
-    } catch (error) {
-      Logger.error("Error fetching mental health data:", error);
-    } finally {
-      setLoading(prev => ({ ...prev, mentalHealth: false }));
-    }
-  };
-
-  // Fetch gamification data independently
-  const fetchGamificationData = async () => {
-    if (!userId) return;
-    setLoading(prev => ({ ...prev, gamification: true }));
-    try {
-      const gamification = await GamificationService.getGamificationData();
       setGamificationData(gamification);
-    } catch (error) {
-      Logger.error("Error fetching gamification data:", error);
+      
+      // Get all workouts for activity feed (not just today's)
+      let allWorkouts = [];
+      try {
+        allWorkouts = await WorkoutService.getWorkoutLogs() || [];
+      } catch (err) {
+        Logger.error("Error fetching workout logs:", err);
+      }
+      
+      // Update activity feed once with ALL fresh data
+      const activities = updateActivityFeed(nutrition, allWorkouts, mentalHealth);
+      
+      // Cache all data
+      saveCachedData({
+        nutritionData: nutrition,
+        workoutData: todayWorkout,
+        mentalHealthData: mentalHealth,
+        gamificationData: gamification,
+        activityFeed: activities
+      });
+      
     } finally {
-      setLoading(prev => ({ ...prev, gamification: false }));
+      setLoading({
+        nutrition: false,
+        workout: false,
+        mentalHealth: false,
+        gamification: false
+      });
     }
   };
 
-  // Initial data load - fetch in background without blocking
+  // Initial data load
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    Logger.debug('Dashboard: Fetching all data in background...');
-    
-    // Fetch all sections independently in parallel (no blocking!)
-    Promise.all([
-      fetchNutritionData(),
-      fetchWorkoutData(),
-      fetchMentalHealthData(),
-      fetchGamificationData()
-    ]).then(() => {
-      // Cache all data after successful fetch
-      saveCachedData({
-        nutritionData,
-        workoutData,
-        mentalHealthData,
-        gamificationData,
-        activityFeed
-      });
-    });
+    Logger.debug('Dashboard: Fetching all data...');
+    fetchAllDashboardData();
 
     // Listen for updates using EventEmitter
     const handleWorkoutUpdate = () => {
       Logger.debug('Dashboard: Workout update detected, refreshing...');
-      fetchWorkoutData();
+      fetchAllDashboardData();
     };
 
     const handleGamificationUpdate = (data) => {
@@ -214,18 +206,18 @@ const Dashboard = () => {
           streaks: { ...prevData?.streaks, ...data.streaks }
         }));
       } else {
-        fetchGamificationData();
+        fetchAllDashboardData();
       }
     };
 
     const handleNutritionUpdate = () => {
       Logger.debug('Dashboard: Nutrition update detected, refreshing...');
-      fetchNutritionData();
+      fetchAllDashboardData();
     };
 
     const handleMentalHealthUpdate = () => {
       Logger.debug('Dashboard: Mental health update detected, refreshing...');
-      fetchMentalHealthData();
+      fetchAllDashboardData();
     };
 
     // Refresh data when user returns to dashboard tab/window
@@ -233,12 +225,7 @@ const Dashboard = () => {
       if (document.visibilityState === 'visible') {
         Logger.debug('Dashboard: Tab became visible, refreshing data...');
         localStorage.removeItem(CACHE_KEY); // Clear stale cache
-        Promise.all([
-          fetchNutritionData(),
-          fetchWorkoutData(),
-          fetchMentalHealthData(),
-          fetchGamificationData()
-        ]);
+        fetchAllDashboardData();
       }
     };
 
