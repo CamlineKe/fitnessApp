@@ -5,11 +5,25 @@ import Logger from '../utils/logger.js';
 
 dotenv.config();
 
+// Simple in-memory cache for user data (TTL: 5 minutes)
+const userCache = new Map();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+// Cleanup old cache entries periodically
+setInterval(() => {
+    const now = Date.now();
+    for (const [key, value] of userCache.entries()) {
+        if (now - value.timestamp > CACHE_TTL_MS) {
+            userCache.delete(key);
+        }
+    }
+}, CACHE_TTL_MS);
+
 const authMiddleware = async (req, res, next) => {
     try {
         // ✅ Try to get token from httpOnly cookie first, then fallback to Authorization header
         let token = req.cookies?.accessToken;
-        
+
         if (!token) {
             const authHeader = req.header("Authorization");
             if (authHeader && authHeader.startsWith("Bearer ")) {
@@ -27,10 +41,27 @@ const authMiddleware = async (req, res, next) => {
             return res.status(403).json({ message: "Invalid token payload." });
         }
 
-        const user = await User.findById(decoded.userId).select("-password");
+        // Check cache first
+        const cacheKey = decoded.userId;
+        const cached = userCache.get(cacheKey);
+        const now = Date.now();
+
+        if (cached && (now - cached.timestamp < CACHE_TTL_MS)) {
+            req.user = cached.user;
+            return next();
+        }
+
+        // Cache miss - fetch from database
+        const user = await User.findById(decoded.userId).select("-password -__v");
         if (!user) {
             return res.status(404).json({ message: "User not found." });
         }
+
+        // Store in cache
+        userCache.set(cacheKey, {
+            user,
+            timestamp: now
+        });
 
         req.user = user;
         next();
@@ -38,7 +69,7 @@ const authMiddleware = async (req, res, next) => {
         // Only log unexpected auth errors - expired/missing tokens are normal on public pages
         if (error.name === "TokenExpiredError") {
             Logger.debug("Token expired (expected for unauthenticated users)");
-            return res.status(401).json({ 
+            return res.status(401).json({
                 message: "Access token expired",
                 code: "TOKEN_EXPIRED"
             });
