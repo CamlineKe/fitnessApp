@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from "react";
 import {
   getNutritionData,
+  getNutritionStats,
   createNutritionLog,
   updateNutritionLog,
   deleteNutritionLog,
@@ -21,14 +22,22 @@ const Nutrition = () => {
   const userId = getUserId();
   Logger.debug("User from Context:", user);
 
-  // ✅ State for storing nutrition data (calories, macronutrients, meal logs)
+  // ✅ State for storing nutrition data
   const [nutritionData, setNutritionData] = useState({
-    calories: 0,
-    macronutrients: { protein: 0, carbohydrates: 0, fats: 0 },
-    mealLogs: [],
+    logs: [],
+    pagination: { page: 1, limit: 20, total: 0, pages: 1, hasMore: false }
   });
 
-  // ✅ State for storing meal logs separately
+  // ✅ State for storing today's nutrition totals
+  const [todayStats, setTodayStats] = useState({
+    calories: 0,
+    macronutrients: { protein: 0, carbohydrates: 0, fats: 0 }
+  });
+
+  // ✅ State for weekly stats (for charts)
+  const [weeklyStats, setWeeklyStats] = useState([]);
+
+  // ✅ State for meal logs (derived from nutritionData)
   const [mealLogs, setMealLogs] = useState([]);
   const [editMeal, setEditMeal] = useState(null); // Stores meal being edited
   const [editFormData, setEditFormData] = useState({
@@ -38,18 +47,15 @@ const Nutrition = () => {
     nutrients: { protein: 0, carbohydrates: 0, fats: 0 },
   });
 
-  // ✅ State for new meal input fields
-  const [newMeal, setNewMeal] = useState({
-    meal: "",
-    type: "",
-    calories: 0,
-    nutrients: { protein: 0, carbohydrates: 0, fats: 0 },
-  });
+  // ✅ State for pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMoreLogs, setHasMoreLogs] = useState(false);
 
   const [dietRecommendations, setDietRecommendations] = useState(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   // ✅ State for meal suggestions autocomplete
   const [mealInput, setMealInput] = useState("");
@@ -84,20 +90,60 @@ const Nutrition = () => {
     });
   };
 
+  // ✅ Helper to calculate today's stats from logs
+  const calculateTodayStats = (logs) => {
+    const today = new Date().setHours(0, 0, 0, 0);
+    const todaysLogs = logs.filter(log => new Date(log.date).setHours(0, 0, 0, 0) === today);
+
+    return todaysLogs.reduce((acc, log) => ({
+      calories: acc.calories + (log.calories || 0),
+      macronutrients: {
+        protein: acc.macronutrients.protein + (log.macronutrients?.protein || 0),
+        carbohydrates: acc.macronutrients.carbohydrates + (log.macronutrients?.carbohydrates || 0),
+        fats: acc.macronutrients.fats + (log.macronutrients?.fats || 0)
+      }
+    }), {
+      calories: 0,
+      macronutrients: { protein: 0, carbohydrates: 0, fats: 0 }
+    });
+  };
+
   // ✅ Fetch nutrition data and diet recommendations on component mount or when the user changes
   useEffect(() => {
     if (!isAuthenticated || !userId) return;
 
     const fetchInitialData = async () => {
+      setIsLoading(true);
       try {
-        // Fetch nutrition data
-        const data = await getNutritionData(userId);
-        setNutritionData(data);
-        setMealLogs(data.mealLogs || []);
-        setError(null); // Clear any previous errors
+        // Get date range for last 7 days
+        const endDate = new Date().toISOString();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+
+        // Fetch nutrition logs (paginated) and stats in parallel
+        const [logsResponse, statsResponse] = await Promise.all([
+          getNutritionData({ page: 1, limit: 50, startDate: startDate.toISOString(), endDate }),
+          getNutritionStats('daily', startDate.toISOString(), endDate)
+        ]);
+
+        // Update logs and pagination state
+        setNutritionData(logsResponse);
+        setMealLogs(logsResponse.data || []);
+        setHasMoreLogs(logsResponse.pagination?.hasMore || false);
+        setCurrentPage(1);
+
+        // Calculate today's stats from the logs
+        setTodayStats(calculateTodayStats(logsResponse.data || []));
+
+        // Store weekly stats for charts
+        setWeeklyStats(statsResponse.data || []);
+
+        setError(null);
       } catch (err) {
         Logger.error('Error fetching nutrition data:', err);
         setError('Failed to load nutrition data');
+      } finally {
+        setIsLoading(false);
       }
 
       // Separate try-catch for recommendations
@@ -106,7 +152,6 @@ const Nutrition = () => {
         setDietRecommendations(recommendations);
       } catch (err) {
         Logger.error('Error fetching diet recommendations:', err);
-        // Don't set the main error state, just log it
       }
     };
 
@@ -248,8 +293,7 @@ const Nutrition = () => {
       setMealLogs(prevLogs => [...prevLogs, response]);
       
       // Update today's nutrition data
-      setNutritionData(prev => ({
-        ...prev,
+      setTodayStats(prev => ({
         calories: prev.calories + mealData.calories,
         macronutrients: {
           protein: prev.macronutrients.protein + mealData.nutrients.protein,
@@ -347,8 +391,7 @@ const Nutrition = () => {
         setMealLogs((prevLogs) => prevLogs.map((log) => (log._id === updatedLog._id ? updatedLog : log)));
         
         // Update today's nutrition data by subtracting old values and adding new ones
-        setNutritionData(prev => ({
-          ...prev,
+        setTodayStats(prev => ({
           calories: prev.calories - Number(oldMeal.calories) + Number(editFormData.calories),
           macronutrients: {
             protein: prev.macronutrients.protein - Number(oldMeal.macronutrients?.protein || 0) + Number(editFormData.nutrients.protein),
@@ -393,8 +436,7 @@ const Nutrition = () => {
       
       // Update today's nutrition data by subtracting the deleted meal's values
       if (mealToDelete) {
-        setNutritionData(prev => ({
-          ...prev,
+        setTodayStats(prev => ({
           calories: prev.calories - Number(mealToDelete.calories),
           macronutrients: {
             protein: prev.macronutrients.protein - Number(mealToDelete.macronutrients?.protein || 0),
@@ -425,9 +467,38 @@ const Nutrition = () => {
     }
   };
 
+  // ✅ Load more logs for pagination
+  const handleLoadMore = async () => {
+    if (!hasMoreLogs || isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      const nextPage = currentPage + 1;
+      const endDate = new Date().toISOString();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30); // Load last 30 days on pagination
+      
+      const response = await getNutritionData({
+        page: nextPage,
+        limit: 20,
+        startDate: startDate.toISOString(),
+        endDate
+      });
+      
+      setMealLogs(prev => [...prev, ...(response.data || [])]);
+      setCurrentPage(nextPage);
+      setHasMoreLogs(response.pagination?.hasMore || false);
+    } catch (err) {
+      Logger.error('Error loading more logs:', err);
+      notifyError('Failed to load more logs');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // ✅ Compute macronutrient distribution for the chart
   const getMacronutrientData = () => {
-    const { protein, carbohydrates, fats } = nutritionData.macronutrients;
+    const { protein, carbohydrates, fats } = todayStats.macronutrients;
     return [protein, carbohydrates, fats];
   };
 
@@ -471,12 +542,11 @@ const Nutrition = () => {
       }
     },
     xaxis: {
-      // Get last 7 days including today
-      categories: Array.from({ length: 7 }, (_, i) => {
-        const date = new Date();
-        date.setDate(date.getDate() - (6 - i));
+      // Use weeklyStats data for categories (reversed to show oldest first)
+      categories: weeklyStats.slice(-7).map(stat => {
+        const date = new Date(stat.date || stat._id);
         return date.toLocaleDateString('en-US', { weekday: 'short' });
-      }),
+      }).reverse(),
       labels: { rotate: -45 }
     },
     yaxis: {
@@ -709,9 +779,12 @@ const Nutrition = () => {
                   ))}
               </ul>
               <div className="todays-total">
-                <p>Total Calories Today: {
-                  getTodaysMeals().reduce((sum, log) => sum + (log.calories || 0), 0)
-                } kcal</p>
+                <p>Total Calories Today: {todayStats.calories} kcal</p>
+                <p className="macros-total">
+                  P: {Math.round(todayStats.macronutrients.protein)}g | 
+                  C: {Math.round(todayStats.macronutrients.carbohydrates)}g | 
+                  F: {Math.round(todayStats.macronutrients.fats)}g
+                </p>
               </div>
             </>
           ) : (
@@ -762,23 +835,13 @@ const Nutrition = () => {
           <div className="chart-section">
             <h2>Weekly Calorie Intake</h2>
             <div className="chart-container">
-              {mealLogs.length > 0 ? (
+              {weeklyStats.length > 0 ? (
                 <Chart
                   options={calorieChartOptions}
                   series={[{
                     name: 'Calories',
-                    data: Array.from({ length: 7 }, (_, i) => {
-                      const date = new Date();
-                      date.setDate(date.getDate() - (6 - i));
-                      date.setHours(0, 0, 0, 0);
-                      
-                      return mealLogs
-                        .filter(log => {
-                          const logDate = new Date(log.date);
-                          return logDate.setHours(0, 0, 0, 0) === date.getTime();
-                        })
-                        .reduce((sum, log) => sum + (log.calories || 0), 0);
-                    })
+                    // Use API stats data (reversed to show oldest first)
+                    data: weeklyStats.slice(-7).map(stat => stat.totalCalories || 0).reverse()
                   }]}
                   type="bar"
                 />
@@ -842,13 +905,10 @@ const Nutrition = () => {
                     dataLabels: { enabled: false },
                     colors: ['#4ECDC4'],
                     xaxis: {
-                      // Get last 7 days including today
-                      categories: Array.from({ length: 7 }, (_, i) => {
-                        const date = new Date();
-                        date.setDate(date.getDate() - (6 - i));
-                        return date.toDateString() === new Date().toDateString()
-                          ? 'Today'
-                          : date.toLocaleDateString('en-US', { weekday: 'short' });
+                      // Use weeklyStats for categories
+                      categories: weeklyStats.slice(-7).map((stat, idx, arr) => {
+                        const date = new Date(stat.date || stat._id);
+                        return idx === arr.length - 1 ? 'Today' : date.toLocaleDateString('en-US', { weekday: 'short' });
                       }),
                       labels: { style: { colors: '#666' } }
                     },
@@ -866,18 +926,8 @@ const Nutrition = () => {
                   }}
                   series={[{
                     name: 'Daily Calories',
-                    data: Array.from({ length: 7 }, (_, i) => {
-                      const date = new Date();
-                      date.setDate(date.getDate() - (6 - i));
-                      date.setHours(0, 0, 0, 0);
-                      
-                      return mealLogs
-                        .filter(log => {
-                          const logDate = new Date(log.date);
-                          return logDate.setHours(0, 0, 0, 0) === date.getTime();
-                        })
-                        .reduce((sum, log) => sum + (log.calories || 0), 0);
-                    })
+                    // Use weeklyStats API data
+                    data: weeklyStats.slice(-7).map(stat => stat.totalCalories || 0)
                   }]}
                   type="area"
                 />
@@ -892,7 +942,7 @@ const Nutrition = () => {
             {/* Weekly Macronutrient Distribution */}
             <div className="weekly-chart">
               <h3>Macronutrient Distribution</h3>
-              {mealLogs.length > 0 ? (
+              {weeklyStats.length > 0 ? (
                 <Chart
                   options={{
                     chart: {
@@ -910,9 +960,10 @@ const Nutrition = () => {
                     },
                     colors: ['#FF6B6B', '#4ECDC4', '#45B7D1'],
                     xaxis: {
-                      categories: mealLogs
-                        .slice(-7)
-                        .map(log => new Date(log.date).toLocaleDateString('en-US', { weekday: 'short' })),
+                      categories: weeklyStats.slice(-7).map(stat => {
+                        const date = new Date(stat.date || stat._id);
+                        return date.toLocaleDateString('en-US', { weekday: 'short' });
+                      }),
                       labels: { style: { colors: '#666' } }
                     },
                     yaxis: {
@@ -933,15 +984,15 @@ const Nutrition = () => {
                   series={[
                     {
                       name: 'Protein',
-                      data: mealLogs.slice(-7).map(log => log.macronutrients?.protein || 0)
+                      data: weeklyStats.slice(-7).map(stat => stat.totalProtein || 0)
                     },
                     {
                       name: 'Carbs',
-                      data: mealLogs.slice(-7).map(log => log.macronutrients?.carbohydrates || 0)
+                      data: weeklyStats.slice(-7).map(stat => stat.totalCarbs || 0)
                     },
                     {
                       name: 'Fats',
-                      data: mealLogs.slice(-7).map(log => log.macronutrients?.fats || 0)
+                      data: weeklyStats.slice(-7).map(stat => stat.totalFats || 0)
                     }
                   ]}
                   type="bar"
@@ -962,28 +1013,27 @@ const Nutrition = () => {
                   <div className="stat">
                     <span className="label">Calories</span>
                     <span className="value">
-                      {Math.round(
-                        mealLogs.slice(-7).reduce((acc, log) => acc + log.calories, 0) / 7
-                      )}
+                      {weeklyStats.length > 0 
+                        ? Math.round(weeklyStats.slice(-7).reduce((acc, stat) => acc + (stat.totalCalories || 0), 0) / weeklyStats.slice(-7).length)
+                        : 0}
                     </span>
                     <span className="unit">kcal/day</span>
                   </div>
                   <div className="stat">
                     <span className="label">Protein</span>
                     <span className="value">
-                      {Math.round(
-                        mealLogs.slice(-7).reduce((acc, log) => acc + (log.macronutrients?.protein || 0), 0) / 7
-                      )}
+                      {weeklyStats.length > 0
+                        ? Math.round(weeklyStats.slice(-7).reduce((acc, stat) => acc + (stat.totalProtein || 0), 0) / weeklyStats.slice(-7).length)
+                        : 0}
                     </span>
                     <span className="unit">g/day</span>
                   </div>
                   <div className="stat">
-                    <span className="label">Consistency</span>
+                    <span className="label">Days Logged</span>
                     <span className="value">
-                      {Math.round(
-                        (mealLogs.slice(-7).filter(log => log.calories > 0).length / 7) * 100
-                      )}%
+                      {weeklyStats.filter(stat => (stat.totalCalories || 0) > 0).length}
                     </span>
+                    <span className="unit">/ 7 days</span>
                   </div>
                 </div>
               </div>
@@ -993,8 +1043,12 @@ const Nutrition = () => {
 
         {/* Recent Meal Logs Section */}
         <div className="nutrition-section meal-logs">
-          <h2>Recent Meal Logs</h2>
-          {mealLogs.length > 0 ? (
+          <h2>Recent Meal Logs {nutritionData.pagination?.total > 0 && 
+            <span className="log-count">({nutritionData.pagination.total} total)</span>
+          }</h2>
+          {isLoading ? (
+            <p className="loading">Loading meal logs...</p>
+          ) : mealLogs.length > 0 ? (
             <>
               <div className="meal-logs-header">
                 <div className="meal-log-item">
@@ -1072,6 +1126,18 @@ const Nutrition = () => {
                     );
                   })}
               </ul>
+              {/* Load More Button */}
+              {hasMoreLogs && (
+                <div className="load-more-container">
+                  <button 
+                    onClick={handleLoadMore} 
+                    className="load-more-btn"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Loading...' : 'Load More Logs'}
+                  </button>
+                </div>
+              )}
             </>
           ) : (
             <p>No meal logs yet. Start by adding one!</p>
