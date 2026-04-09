@@ -6,8 +6,9 @@ const FloatingShapes = () => {
   
   useFrame((state) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.05;
-      groupRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.1) * 0.1;
+      const elapsed = state.clock.getElapsedTime();
+      groupRef.current.rotation.y = elapsed * 0.05;
+      groupRef.current.rotation.x = Math.sin(elapsed * 0.1) * 0.1;
     }
   });
 
