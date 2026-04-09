@@ -57,18 +57,14 @@ axios.interceptors.response.use(
           isRefreshing = false;
           Logger.error('Token refresh failed:', refreshError);
           localStorage.removeItem('user');
-          if (!window.location.pathname.includes('/login')) {
-            window.location.href = '/login';
-          }
+          // Don't auto-redirect - let components handle auth state
           return Promise.reject(refreshError);
         }
       }
 
       Logger.warn('Unauthorized request');
       localStorage.removeItem('user');
-      if (!window.location.pathname.includes('/login')) {
-        window.location.href = '/login';
-      }
+      // Don't auto-redirect - let components handle auth state
     }
 
     return Promise.reject(error);

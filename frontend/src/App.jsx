@@ -30,16 +30,16 @@ const App = () => {
 
 const AppWithLayout = () => {
   const location = useLocation();
-  const { user } = React.useContext(UserContext);
+  const { user, isAuthenticated } = React.useContext(UserContext);
 
   const hideNavbarFooterRoutes = ['/', '/login', '/register', '/auth/callback', '/auth/fitbit/callback'];
-  const shouldShowNavbarFooter = !hideNavbarFooterRoutes.includes(location.pathname) && user;
-  const shouldShowFooterOnPublic = hideNavbarFooterRoutes.includes(location.pathname) && !user;
+  const shouldShowNavbarFooter = !hideNavbarFooterRoutes.includes(location.pathname) && isAuthenticated;
+  const shouldShowFooterOnPublic = hideNavbarFooterRoutes.includes(location.pathname) && !isAuthenticated;
 
   return (
     <div className="app-container">
       {shouldShowNavbarFooter && <Navbar />}
-      {user && <Notification />}
+      {isAuthenticated && <Notification />}
       <main className="main-content">
         <Routes>
           <Route path="/" element={<Home />} />

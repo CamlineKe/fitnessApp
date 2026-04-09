@@ -36,12 +36,7 @@ class NotificationService {
     this.socket.on('connect', () => {
       Logger.info('Socket connected:', this.socket.id);
       this.connected = true;
-      
-      // Authenticate the socket connection
-      const token = localStorage.getItem('token');
-      if (token) {
-        this.socket.emit('authenticate', token);
-      }
+      // Cookie-based auth is handled automatically via withCredentials: true
     });
 
     this.socket.on('connect_error', (error) => {

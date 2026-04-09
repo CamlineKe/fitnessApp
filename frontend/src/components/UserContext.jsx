@@ -31,13 +31,16 @@ export const UserProvider = ({ children }) => {
       setIsAuthenticated(true);
       localStorage.setItem("user", JSON.stringify(response.data));
     } catch (error) {
-      Logger.error("Authentication error:", error.response?.data || error.message);
       setUser(null);
       setIsAuthenticated(false);
       localStorage.removeItem("user");
 
+      // Only log 401s as debug (expected on public pages)
+      // Log actual errors for non-401 responses
       if (error.response?.status === 401) {
-        Logger.warn("Authentication failed. User not logged in.");
+        Logger.debug("User not authenticated (expected on public pages)");
+      } else {
+        Logger.error("Authentication error:", error.response?.data || error.message);
       }
     } finally {
       setLoading(false);
