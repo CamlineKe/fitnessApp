@@ -25,10 +25,10 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-container">
         <div className="navbar-title">
-          <NavLink to="/dashboard" className={({ isActive }) => `navbar-link ${isActive ? 'active' : ''}`}>
+          <div className="navbar-brand">
             <MdFitnessCenter className="nav-icon title-icon" />
             {!isMobile && "Fitness Tracker"}
-          </NavLink>
+          </div>
         </div>
 
         {isMobile && (

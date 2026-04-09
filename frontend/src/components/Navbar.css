@@ -41,29 +41,22 @@
   margin: 0 auto;
 }
 
-/* Navbar Title/Brand */
+/* Navbar Title/Brand - Non-clickable brand element */
 .navbar-title {
   margin-right: 2rem;
   flex-shrink: 0;
 }
 
-.navbar-title a {
+.navbar-brand {
   font-size: 1.25rem;
   font-weight: 800;
   color: var(--text-main);
-  text-decoration: none;
   display: flex;
   align-items: center;
   gap: 0.75rem;
   letter-spacing: -0.02em;
-  transition: all 0.3s ease;
   padding: 0.5rem;
-  border-radius: 10px;
-}
-
-.navbar-title a:hover {
-  background: rgba(99, 102, 241, 0.08);
-  color: var(--primary);
+  user-select: none;
 }
 
 .title-icon {
@@ -142,7 +135,7 @@
 
 /* Focus States for Accessibility */
 .navbar-link:focus-visible,
-.navbar-title a:focus-visible,
+.navbar-brand:focus-visible,
 .mobile-menu-button:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
@@ -269,7 +262,7 @@
     font-weight: 500;
   }
   
-  .navbar-title a {
+  .navbar-brand {
     font-size: 1.1rem;
   }
   
@@ -293,7 +286,7 @@
     padding: 0 0.75rem;
   }
   
-  .navbar-title a {
+  .navbar-brand {
     font-size: 1rem;
   }
   
