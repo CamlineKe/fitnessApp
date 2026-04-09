@@ -582,6 +582,42 @@
     }
 }
 
+/* Empty States - Consistent with Nutrition/Workout pages */
+.no-challenges,
+.no-achievements,
+.no-moods {
+    text-align: center;
+    padding: 2.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 12px;
+    border: 2px dashed #cbd5e1;
+    color: #64748b;
+}
+
+.no-challenges i,
+.no-achievements i,
+.no-moods i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: #94a3b8;
+    display: block;
+}
+
+.no-challenges p,
+.no-achievements p,
+.no-moods p {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.no-challenges .empty-label,
+.no-achievements .empty-label,
+.no-moods .empty-label {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin-top: 0.5rem;
+}
+
 /* ========== RESPONSIVE DESIGN ========== */
 
 /* Tablet */

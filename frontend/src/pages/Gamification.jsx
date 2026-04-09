@@ -13,6 +13,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { EventEmitter } from '../utils/EventEmitter';
 import Logger from '../utils/logger';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const getMoodEmoji = (mood) => {
   switch (mood?.toLowerCase()) {
@@ -164,7 +165,11 @@ const Gamification = () => {
       return (
         <div className="challenges-section">
           <h3>Active Challenges</h3>
-          <p className="no-challenges">No active challenges. Keep up the good work!</p>
+          <div className="no-challenges">
+            <i className="fas fa-trophy"></i>
+            <p>No active challenges</p>
+            <span className="empty-label">Keep logging activities to unlock challenges!</span>
+          </div>
         </div>
       );
     }
@@ -244,7 +249,11 @@ const Gamification = () => {
               </div>
             ))}
           {(!gamificationData?.achievements?.filter(a => a.category === 'workout' && a.unlocked)?.length > 0) && (
-            <p className="no-achievements">Complete workouts to earn achievements!</p>
+            <div className="no-achievements">
+              <i className="fas fa-medal"></i>
+              <p>No achievements yet</p>
+              <span className="empty-label">Complete workouts to earn badges!</span>
+            </div>
           )}
         </div>
       </div>
@@ -293,7 +302,11 @@ const Gamification = () => {
               </div>
             ))
           ) : (
-            <p className="no-moods">No mood logs yet. Check in daily to track your mental wellness!</p>
+            <div className="no-moods">
+              <i className="fas fa-brain"></i>
+              <p>No mood logs yet</p>
+              <span className="empty-label">Check in daily to track your mental wellness!</span>
+            </div>
           )}
         </div>
       </div>
@@ -343,7 +356,11 @@ const Gamification = () => {
               </div>
             ))}
           {(!gamificationData?.achievements?.filter(a => a.category === 'nutrition' && a.unlocked)?.length > 0) && (
-            <p className="no-achievements">Log meals to earn nutrition achievements!</p>
+            <div className="no-achievements">
+              <i className="fas fa-medal"></i>
+              <p>No achievements yet</p>
+              <span className="empty-label">Log meals to earn nutrition badges!</span>
+            </div>
           )}
         </div>
       </div>
