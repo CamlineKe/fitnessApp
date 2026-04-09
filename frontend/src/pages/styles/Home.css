@@ -8,10 +8,74 @@
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    padding-top: var(--nav-height);
     width: 100%;
     position: relative;
     z-index: 1;
+}
+
+/* Home Page Navbar - Public landing page only */
+.home-container .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    height: var(--nav-height);
+    padding: 0 5%;
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    box-shadow: var(--shadow-md);
+    position: fixed;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.home-container .navbar-title h1 {
+    font-size: 1.5rem;
+    margin: 0;
+    color: var(--text-main);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.home-container .navbar-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.home-container .nav-link {
+    padding: 0.75rem 1.75rem;
+    background-color: var(--primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-weight: 600;
+    font-size: 0.95rem;
+    border: none;
+    box-shadow: var(--shadow-md);
+}
+
+.home-container .nav-link:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    color: white;
+}
+
+/* First button variation - Sign In (outline style) */
+.home-container .navbar-buttons .nav-link:first-child {
+    background-color: transparent;
+    color: var(--text-main);
+    border: 2px solid var(--border-light);
+    box-shadow: none;
+}
+
+.home-container .navbar-buttons .nav-link:first-child:hover {
+    background-color: var(--bg-main);
+    border-color: var(--primary);
 }
 
 /* Header Styles - Redesigned with 3D Scene - Heroic Dark Theme */
@@ -489,7 +553,31 @@
     .home-container {
         padding-top: calc(var(--nav-height) + 1rem);
     }
-    
+
+    .home-container .navbar {
+        padding: 0 1rem;
+        height: auto;
+        min-height: var(--nav-height);
+        flex-wrap: wrap;
+    }
+
+    .home-container .navbar-title {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .home-container .navbar-buttons {
+        width: 100%;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .home-container .nav-link {
+        padding: 0.6rem 1.25rem;
+        font-size: 0.9rem;
+    }
+
     .home-header {
         padding: 3rem 1rem 2rem;
     }
@@ -564,7 +652,16 @@
     .feature-image-container {
         height: 160px;
     }
-    
+
+    .home-container .navbar-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+    }
+
+    .home-container .nav-link {
+        text-align: center;
+    }
 }
 
 /* Accessibility Improvements */
