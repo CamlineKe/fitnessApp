@@ -30,7 +30,7 @@ const Home = () => {
         </h2>
         <p>Experience a holistic approach to health and wellness. Track your fitness journey, nutrition habits, and mental wellbeing all in one intelligent platform.</p>
         <div className="header-cta">
-          <Link to="register" className="cta-primary">Start Your Journey</Link>
+          <Link to="/register" className="cta-primary">Start Your Journey</Link>
           <a href="https://drive.google.com/file/d/1faXK3lD3dghm01WamZfxO6ZezgGi0vtC/view?usp=drive_link" className="cta-secondary" target="_blank" rel="noopener noreferrer">View Demo</a>
         </div>
         <div className="header-stats">
