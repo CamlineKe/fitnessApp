@@ -184,13 +184,16 @@
 }
 
 .nutrition-content h2 {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     margin-bottom: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
 }
 
 .nutrition-content p {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-bottom: 0.5rem;
+    color: var(--text-muted);
 }
 
 /* Quick Stats Grid */
@@ -280,10 +283,11 @@
 
 /* Daily Intake Section */
 .daily-intake-section {
-    background-color: #fff;
+    background: var(--bg-card);
     padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
     margin-bottom: 2rem;
 }
 
@@ -292,9 +296,10 @@
 }
 
 .daily-intake-header h2 {
-    color: #2c3e50;
+    color: var(--text-main);
     font-size: 1.4rem;
     margin: 0;
+    font-weight: 700;
 }
 
 .nutrition-stats-compact {
@@ -305,9 +310,9 @@
 }
 
 .stat-item {
-    background: #f8f9fa;
+    background: var(--bg-main);
     padding: 0.8rem;
-    border-radius: 6px;
+    border-radius: 8px;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -315,20 +320,20 @@
 }
 
 .stat-item.calories {
-    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    background: linear-gradient(135deg, var(--accent) 0%, #e11d48 100%);
     color: white;
 }
 
 .stat-item.protein {
-    border-top: 3px solid #4caf50;
+    border-top: 3px solid var(--primary);
 }
 
 .stat-item.carbs {
-    border-top: 3px solid #ffeb3b;
+    border-top: 3px solid #f59e0b;
 }
 
 .stat-item.fats {
-    border-top: 3px solid #ff9800;
+    border-top: 3px solid #8b5cf6;
 }
 
 .calories .stat-label,
@@ -340,14 +345,15 @@
 /* Macronutrient Chart */
 .macronutrient-chart {
     margin-top: 1.5rem;
-    padding: 1rem;
+    padding: 1.5rem;
     background: white;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-md);
     text-align: center;
     max-width: 600px;
     margin-left: auto;
     margin-right: auto;
+    border: 1px solid var(--border-light);
 }
 
 .macronutrient-chart canvas {
@@ -365,21 +371,24 @@
 
 .chart-section {
     background: white;
-    border-radius: 12px;
+    border-radius: var(--border-radius-lg);
     padding: 1.5rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
+    transition: all 0.3s ease;
 }
 
 .chart-section:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
 }
 
 .chart-section h2 {
     font-size: 1.25rem;
     margin-bottom: 1.5rem;
     text-align: center;
-    color: #333;
+    color: var(--text-main);
+    font-weight: 700;
 }
 
 .chart-container {
@@ -418,45 +427,49 @@
 }
 
 .meal-actions button {
-    padding: 8px 16px;
+    padding: 0.5rem 1rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.3s ease;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 .meal-actions button:first-child {
-    background-color: #4CAF50;
+    background: linear-gradient(135deg, var(--secondary) 0%, #0da674 100%);
     color: white;
 }
 
 .meal-actions button:first-child:hover {
-    background-color: #45a049;
+    background: linear-gradient(135deg, #0da674 0%, #059669 100%);
+    transform: translateY(-2px);
 }
 
 .delete-btn {
-    background-color: #f44336;
+    background: linear-gradient(135deg, var(--accent) 0%, #e11d48 100%);
     color: white;
 }
 
 .delete-btn:hover {
-    background-color: #da190b;
+    background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+    transform: translateY(-2px);
 }
 
 /* Add Meal Form */
 .add-meal-form {
-    background-color: #f8f9fa;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: var(--bg-main);
+    padding: 1.5rem;
+    border-radius: var(--border-radius-lg);
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
 }
 
 .add-meal-form h3 {
-    margin-bottom: 15px;
-    color: #333;
-    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    color: var(--text-main);
+    font-size: 1.25rem;
+    font-weight: 700;
 }
 
 .form-group {
@@ -474,18 +487,28 @@
 }
 
 .input-with-label label {
-    font-weight: 500;
-    color: #555;
+    font-weight: 600;
+    color: var(--text-main);
     font-size: 0.9rem;
 }
 
 .input-with-label input,
 .input-with-label select {
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-light);
+    border-radius: 10px;
     font-size: 1rem;
     width: 100%;
+    background: white;
+    color: var(--text-main);
+    transition: all 0.3s ease;
+}
+
+.input-with-label input:focus,
+.input-with-label select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
 }
 
 .input-with-label select {
@@ -596,23 +619,23 @@
 }
 
 .meal-actions .delete-btn:hover {
-    background-color: #cc0000;
+    background-color: var(--accent-hover);
 }
 
 /* Custom Toast Styling */
 .Toastify__toast {
-    border-radius: 12px;
-    font-family: 'Poppins', sans-serif;
+    border-radius: var(--border-radius-lg);
+    font-family: 'Inter', system-ui, sans-serif;
     font-size: 1rem;
 }
 
 .Toastify__toast--success {
-    background: #4CAF50;
+    background: var(--secondary);
     color: white;
 }
 
 .Toastify__toast--error {
-    background: #f44336;
+    background: var(--accent);
     color: white;
 }
 
@@ -630,30 +653,35 @@
 }
 
 /* SweetAlert2 Toast Customization */
-.swal2-container.swal2-top-right>.swal2-popup {
-    margin-right: 1rem !important;
+.swal2-container.swal2-top-right {
+    right: 1rem !important;
+    top: calc(var(--nav-height) + 1rem) !important;
 }
 
 .nutrition-toast {
-    padding: 1rem !important;
-    border-radius: 12px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    padding: 1rem 1.25rem !important;
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
+    backdrop-filter: blur(10px) !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
 }
 
 /* Weekly Overview Section */
 .weekly-overview {
     background: white;
-    border-radius: 16px;
+    border-radius: var(--border-radius-xl);
     padding: 2rem;
     margin: 2rem 0;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
 }
 
 .weekly-overview h2 {
-    color: #2c3e50;
+    color: var(--text-main);
     margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-    font-weight: 600;
+    font-size: 1.75rem;
+    font-weight: 700;
 }
 
 .weekly-charts-container {
@@ -670,10 +698,10 @@
 }
 
 .weekly-chart h3 {
-    color: #2c3e50;
+    color: var(--text-main);
     margin-bottom: 1rem;
     font-size: 1.2rem;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .weekly-summary {
@@ -682,17 +710,17 @@
 }
 
 .summary-card {
-    background: linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%);
-    border-radius: 10px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    border-radius: var(--border-radius-lg);
     padding: 1.5rem;
     color: white;
-    box-shadow: 0 4px 15px rgba(73, 205, 196, 0.3);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
 }
 
 .summary-card h4 {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     margin-bottom: 1rem;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .summary-stats {
@@ -763,17 +791,18 @@
 /* Today's Meals Section */
 .todays-meals {
     background: white;
-    border-radius: 12px;
+    border-radius: var(--border-radius-xl);
     padding: 2rem;
     margin-bottom: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
 }
 
 .todays-meals h2 {
-    color: #2c3e50;
+    color: var(--text-main);
     margin-bottom: 1.5rem;
-    font-size: 1.8rem;
-    font-weight: 600;
+    font-size: 1.75rem;
+    font-weight: 700;
 }
 
 .todays-total {
@@ -785,7 +814,7 @@
 }
 
 .todays-total p {
-    color: #2c3e50;
+    color: var(--text-main);
     font-weight: 600;
     font-size: 1.1rem;
     margin: 0;
@@ -850,33 +879,31 @@
 
 /* Diet Recommendations Section */
 .diet-recommendations-section {
-    background-color: #fff;
+    background: white;
     padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius-xl);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-light);
     margin-top: 2rem;
 }
 
-.diet-recommendations-section .section-header {
-    margin-bottom: 1.5rem;
-}
-
 .diet-recommendations-section .section-header h2 {
-    color: #2c3e50;
+    color: var(--text-main);
     font-size: 1.5rem;
     margin: 0 0 0.5rem 0;
+    font-weight: 700;
 }
 
 .diet-recommendations-section .section-header p {
-    color: #666;
+    color: var(--text-muted);
     margin: 0;
     font-size: 0.95rem;
 }
 
 .recommendations-container {
     padding: 1rem;
-    background-color: #f8f9fa;
-    border-radius: 6px;
+    background: var(--bg-main);
+    border-radius: var(--border-radius-lg);
 }
 
 .recommendations-list {
@@ -890,10 +917,11 @@
     align-items: flex-start;
     padding: 1rem;
     margin-bottom: 0.5rem;
-    background-color: white;
-    border-radius: 6px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
+    transition: all 0.3s ease;
 }
 
 .recommendation-item:last-child {
@@ -906,14 +934,14 @@
 }
 
 .recommendation-item i {
-    color: #4CAF50;
+    color: var(--secondary);
     margin-right: 1rem;
     font-size: 1.1rem;
     padding-top: 0.2rem;
 }
 
 .recommendation-item span {
-    color: #2c3e50;
+    color: var(--text-main);
     line-height: 1.5;
     flex: 1;
 }
@@ -962,11 +990,11 @@
 
 /* Submit Button Styling */
 #mealForm button[type="submit"] {
-    background: linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%);
+    background: linear-gradient(135deg, var(--secondary) 0%, #0da674 100%);
     color: white;
     padding: 1rem 2rem;
     border: none;
-    border-radius: 50px;
+    border-radius: 12px;
     font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
@@ -977,12 +1005,12 @@
     display: block;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 15px rgba(73, 205, 196, 0.3);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
 }
 
 #mealForm button[type="submit"]:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(73, 205, 196, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(16, 185, 129, 0.35);
 }
 
 #mealForm button[type="submit"]:active {
@@ -999,7 +1027,7 @@
     height: 100%;
     background: linear-gradient(90deg,
             transparent,
-            rgba(255, 255, 255, 0.2),
+            rgba(255, 255, 255, 0.3),
             transparent);
     transition: 0.5s;
 }
@@ -1050,9 +1078,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: calc(100vh - 64px);
+    min-height: calc(100vh - var(--nav-height));
     font-size: 1.4rem;
-    color: #666;
+    color: var(--text-muted);
 }
 
 /* Meal Suggestions Autocomplete Styles */
@@ -1067,10 +1095,10 @@
     width: 100%;
     max-height: 250px;
     overflow-y: auto;
-    background-color: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-lg);
     z-index: 1000;
     margin-top: 5px;
 }
@@ -1078,7 +1106,7 @@
 .suggestion-item {
     padding: 10px 15px;
     cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border-light);
     transition: background-color 0.2s ease;
 }
 
@@ -1087,24 +1115,24 @@
 }
 
 .suggestion-item:hover {
-    background-color: #f8f9fa;
+    background: var(--bg-main);
 }
 
 .suggestion-name {
     font-weight: 600;
     margin-bottom: 4px;
-    color: #333;
+    color: var(--text-main);
 }
 
 .suggestion-details {
     display: flex;
     gap: 10px;
     font-size: 0.85rem;
-    color: #666;
+    color: var(--text-muted);
 }
 
 .suggestion-details span {
-    background-color: #f0f4f8;
+    background: var(--bg-main);
     padding: 2px 6px;
     border-radius: 4px;
     white-space: nowrap;

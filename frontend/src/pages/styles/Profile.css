@@ -116,31 +116,35 @@
 
 .form-group label {
     display: block;
-    color: #1e3c72;
+    color: var(--text-main);
     margin-bottom: 0.5rem;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.95rem;
 }
 
 .form-control {
     width: 100%;
-    padding: 0.875rem;
-    border: 2px solid #e1e1e1;
-    border-radius: 10px;
+    padding: 0.875rem 1rem;
+    border: 2px solid var(--border-light);
+    border-radius: 12px;
     font-size: 1rem;
     transition: all 0.3s ease;
     background: white;
+    color: var(--text-main);
+    font-family: inherit;
 }
 
 .form-control:focus {
     outline: none;
-    border-color: #2a5298;
-    box-shadow: 0 0 0 4px rgba(42, 82, 152, 0.1);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    background: white;
 }
 
 .form-control:disabled {
-    background: #f8f9fa;
+    background: var(--bg-main);
     cursor: not-allowed;
+    opacity: 0.7;
 }
 
 textarea.form-control {
@@ -167,52 +171,56 @@ textarea.form-control {
 }
 
 .edit-button {
-    background: #1e3c72;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
     color: white;
     width: auto;
 }
 
 .edit-button:hover {
-    background: #2a5298;
+    background: linear-gradient(135deg, var(--primary-hover) 0%, #4338ca 100%);
     transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
 }
 
 .save-button {
-    background: #2ecc71;
+    background: linear-gradient(135deg, var(--secondary) 0%, #0da674 100%);
     color: white;
     flex: 1;
 }
 
 .save-button:hover {
-    background: #27ae60;
+    background: linear-gradient(135deg, #0da674 0%, #059669 100%);
     transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
 }
 
 .cancel-button {
-    background: #e74c3c;
+    background: linear-gradient(135deg, var(--accent) 0%, #e11d48 100%);
     color: white;
     flex: 1;
 }
 
 .cancel-button:hover {
-    background: #c0392b;
+    background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
     transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(244, 63, 94, 0.25);
 }
 
 .connected-devices-section,
 .settings-section {
-    background: white;
-    border-radius: 15px;
+    background: var(--bg-card);
+    border-radius: var(--border-radius-xl);
     padding: 2rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-light);
 }
 
 .connected-devices-section h2,
 .settings-section h2 {
-    color: #1e3c72;
+    color: var(--text-main);
     margin-bottom: 1.5rem;
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .device-list {
@@ -222,10 +230,11 @@ textarea.form-control {
 }
 
 .device-item {
-    background: #f8f9fa;
+    background: var(--bg-main);
     border-radius: 12px;
     padding: 1.5rem;
     margin-bottom: 1rem;
+    border: 1px solid var(--border-light);
 }
 
 .device-info {
@@ -237,11 +246,11 @@ textarea.form-control {
 .device-info p {
     margin: 0;
     font-size: 1rem;
-    color: #2c3e50;
+    color: var(--text-main);
 }
 
 .device-info strong {
-    color: #1e3c72;
+    color: var(--primary);
 }
 
 .device-buttons {
@@ -260,12 +269,12 @@ textarea.form-control {
 }
 
 .device-button.connect {
-    background: #2ecc71;
+    background: linear-gradient(135deg, var(--secondary) 0%, #0da674 100%);
     color: white;
 }
 
 .device-button.disconnect {
-    background: #e74c3c;
+    background: linear-gradient(135deg, var(--accent) 0%, #e11d48 100%);
     color: white;
 }
 
@@ -279,19 +288,19 @@ textarea.form-control {
 }
 
 .device-button.connect:hover:not(:disabled) {
-    background: #27ae60;
+    background: linear-gradient(135deg, #0da674 0%, #059669 100%);
 }
 
 .device-button.disconnect:hover:not(:disabled) {
-    background: #c0392b;
+    background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
 }
 
 .change-password-button {
-    background: #3498db;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
     color: white;
     border: none;
     padding: 0.75rem 1.5rem;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -305,15 +314,17 @@ textarea.form-control {
 }
 
 .change-password-button:hover {
-    background: #2980b9;
+    background: linear-gradient(135deg, var(--primary-hover) 0%, #4338ca 100%);
     transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.25);
 }
 
 .change-password-form {
     margin-top: 1.5rem;
     padding: 1.5rem;
-    background: #f8f9fa;
-    border-radius: 10px;
+    background: var(--bg-main);
+    border-radius: 12px;
+    border: 1px solid var(--border-light);
 }
 
 .password-input-container {
@@ -327,22 +338,22 @@ textarea.form-control {
     transform: translateY(-50%);
     background: none;
     border: none;
-    color: #666;
+    color: var(--text-muted);
     cursor: pointer;
     padding: 0.5rem;
     font-size: 0.9rem;
-    transition: color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .toggle-password:hover {
-    color: #1e3c72;
+    color: var(--primary);
 }
 
 .loading-spinner {
     width: 20px;
     height: 20px;
-    border: 2px solid #f3f3f3;
-    border-top: 2px solid #1e3c72;
+    border: 2px solid var(--border-light);
+    border-top: 2px solid var(--primary);
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -358,14 +369,18 @@ textarea.form-control {
 }
 
 /* SweetAlert2 Toast Customization */
-.swal2-container.swal2-top-right>.swal2-popup {
-    margin-right: 1rem !important;
+.swal2-container.swal2-top-right {
+    right: 1rem !important;
+    top: calc(var(--nav-height) + 1rem) !important;
 }
 
 .profile-toast {
-    padding: 0.75rem 1.25rem !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    padding: 1rem 1.25rem !important;
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
+    backdrop-filter: blur(10px) !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
 }
 
 /* Responsive Design */

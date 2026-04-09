@@ -143,13 +143,13 @@
 
 .state-item label {
     font-weight: 500;
-    color: var(--text-color);
+    color: var(--text-main);
     font-size: 0.9rem;
 }
 
 .state-item span {
     font-size: 1.1rem;
-    color: var(--primary-color);
+    color: var(--primary);
 }
 
 .recommendations {
@@ -159,7 +159,7 @@
 }
 
 .recommendations h3 {
-    color: var(--text-color);
+    color: var(--text-main);
     margin-bottom: 1rem;
     font-size: 1.2rem;
 }
@@ -177,9 +177,9 @@
     background: white;
     padding: 1rem;
     border-radius: 8px;
-    box-shadow: var(--shadow);
-    border-left: 4px solid var(--primary-color);
-    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+    border-left: 4px solid var(--primary);
+    transition: all 0.3s ease;
 }
 
 .recommendations li:hover {
@@ -255,15 +255,15 @@
 
 /* Submit Button */
 .daily-check-in button {
-    background-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
     color: white;
     padding: 1rem;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     font-size: 1.1rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s ease;
 }
 
 .daily-check-in button:hover {
@@ -280,10 +280,10 @@
 
 .mental-logs li {
     background: #f8f9fa;
-    border-left: 4px solid var(--primary-color);
+    border-left: 4px solid var(--primary);
     padding: 1.5rem;
     border-radius: 8px;
-    transition: var(--transition);
+    transition: all 0.3s ease;
 }
 
 .mental-logs li:hover {
@@ -296,7 +296,7 @@
 }
 
 .mental-logs strong {
-    color: var(--primary-color);
+    color: var(--primary);
     font-weight: 600;
 }
 
@@ -315,57 +315,58 @@
 
 .stress-analysis li:before {
     content: "•";
-    color: var(--primary-color);
+    color: var(--primary);
     font-weight: bold;
     margin-right: 0.5rem;
 }
 
 /* Delete Log Button */
 .delete-log-btn {
-    background-color: #dc3545;
+    background: linear-gradient(135deg, var(--accent) 0%, #e11d48 100%);
     color: white;
     border: none;
     padding: 0.5rem 1rem;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: var(--transition);
+    transition: all 0.3s ease;
 }
 
 .delete-log-btn:hover {
     background-color: #c82333;
 }
 
-/* Custom Toast Styles */
+/* Toast Styles - Using design system variables */
 .Toastify__toast {
-    font-family: Arial, sans-serif;
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-family: 'Inter', system-ui, sans-serif;
+    border-radius: var(--border-radius-lg);
+    padding: 1rem 1.25rem;
+    box-shadow: var(--shadow-lg);
 }
 
 .Toastify__toast--success {
-    background: #4CAF50;
+    background: var(--secondary);
     color: white;
-    border-left: 6px solid #2E7D32;
+    border-left: 4px solid #0da674;
 }
 
 .Toastify__toast--error {
-    background: #f44336;
+    background: var(--accent);
     color: white;
-    border-left: 6px solid #c62828;
+    border-left: 4px solid #e11d48;
 }
 
 .Toastify__toast--warning {
-    background: #ff9800;
+    background: #f59e0b;
     color: white;
-    border-left: 6px solid #ef6c00;
+    border-left: 4px solid #d97706;
 }
 
 .Toastify__toast--info {
-    background: #2196F3;
+    background: var(--primary);
     color: white;
-    border-left: 6px solid #1565c0;
+    border-left: 4px solid var(--primary-hover);
 }
 
 .Toastify__progress-bar {
@@ -374,19 +375,23 @@
 }
 
 .Toastify__toast-body {
-    font-size: 14px;
+    font-size: 0.95rem;
     line-height: 1.5;
 }
 
 /* SweetAlert2 Toast Customization */
-.swal2-container.swal2-top-right>.swal2-popup {
-    margin-right: 1rem !important;
+.swal2-container.swal2-top-right {
+    right: 1rem !important;
+    top: calc(var(--nav-height) + 1rem) !important;
 }
 
 .mental-health-toast {
-    padding: 0.75rem 1.25rem !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+    padding: 1rem 1.25rem !important;
+    border-radius: var(--border-radius-lg) !important;
+    box-shadow: var(--shadow-lg) !important;
+    backdrop-filter: blur(10px) !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-light) !important;
 }
 
 /* Mood Tracker Grid Layout */
@@ -515,7 +520,7 @@
 
 .mood-stat-item .stat-value {
     font-weight: 600;
-    color: var(--primary-color);
+    color: var(--primary);
     text-transform: capitalize;
 }
 
@@ -802,11 +807,6 @@
     }
 }
 
-.page-content {
-    padding-top: 64px;
-    min-height: 100vh;
-    background: #f8f9fa;
-}
 
 .chart-description {
     color: #666;
