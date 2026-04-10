@@ -1,4 +1,4 @@
-name: Keep Render Service Alive
+name: Keep Render AI Service Alive
 
 on:
   schedule:
@@ -7,16 +7,61 @@ on:
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
-  ping:
+  ping-flask-ai:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Render AI Service
+      - name: Ping Flask AI Service (Model Server)
         run: |
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-            https://fitness-app-backend-ap0r.onrender.com/api/ping)
-          echo "Response code: $RESPONSE"
+          # OPTIMIZED: Ping the actual Flask AI service, not the Node backend
+          # The Flask service at fitness-ai-service.onrender.com hosts the ML models
+          # and needs to stay warm for fast recommendation responses
+          
+          MAX_RETRIES=3
+          RETRY_DELAY=5
+          URL="https://fitness-ai-service.onrender.com/api/ping"
+          
+          for i in $(seq 1 $MAX_RETRIES); do
+            echo "Attempt $i/$MAX_RETRIES: Pinging $URL"
+            
+            # Use --max-time to prevent hanging on unresponsive service
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$URL")
+            echo "Response code: $RESPONSE"
+            
+            if [ "$RESPONSE" = "200" ]; then
+              echo "✅ Flask AI service is alive and warm"
+              exit 0
+            elif [ "$RESPONSE" = "503" ] || [ "$RESPONSE" = "502" ]; then
+              # Service might be starting up (cold start), wait and retry
+              echo "⚠️ Service may be starting up (code: $RESPONSE), retrying in ${RETRY_DELAY}s..."
+              sleep $RETRY_DELAY
+            else
+              echo "❌ Service returned $RESPONSE"
+              if [ $i -lt $MAX_RETRIES ]; then
+                sleep $RETRY_DELAY
+              fi
+            fi
+          done
+          
+          echo "❌ Failed to reach Flask AI service after $MAX_RETRIES attempts"
+          # Don't fail the workflow - service might be legitimately down
+          # But log for monitoring
+          exit 0
+
+  ping-node-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Node.js Backend
+        run: |
+          # Also keep the Node backend warm (it proxies to Flask)
+          URL="https://fitness-app-backend-ap0r.onrender.com/api/health"
+          
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$URL")
+          echo "Node backend response: $RESPONSE"
+          
           if [ "$RESPONSE" = "200" ]; then
-            echo "Service is alive"
+            echo "✅ Node backend is healthy"
           else
-            echo "Service returned $RESPONSE"
+            echo "⚠️ Node backend returned $RESPONSE (non-critical)"
           fi
+          
+          exit 0

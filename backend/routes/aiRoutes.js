@@ -1,5 +1,5 @@
 import express from 'express';
-import { getDietRecommendations, getWorkoutRecommendations, getStressAnalysis } from '../controllers/aiController.js';
+import { getDietRecommendations, getWorkoutRecommendations, getStressAnalysis, getAllRecommendations } from '../controllers/aiController.js';
 import authMiddleware from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
@@ -8,5 +8,8 @@ const router = express.Router();
 router.post('/diet', authMiddleware, getDietRecommendations);
 router.post('/workout', authMiddleware, getWorkoutRecommendations);
 router.post('/stress', authMiddleware, getStressAnalysis);
+
+// OPTIMIZED: Batch endpoint - fetch all 3 recommendations in parallel
+router.post('/all', authMiddleware, getAllRecommendations);
 
 export default router;

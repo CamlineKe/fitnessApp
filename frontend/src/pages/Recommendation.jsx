@@ -1,4 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
+// OPTIMIZED: Using batch service instead of 3 separate services
+import RecommendationService from '../services/RecommendationService';
 import DietRecommendationService from '../services/DietRecommendationService';
 import StressAnalysisService from '../services/StressAnalysisService';
 import WorkoutRecommenderService from '../services/WorkoutRecommenderService';
@@ -80,13 +82,41 @@ const Recommendation = () => {
       const validLogs = dataArray.filter(log => log && log.mood && log.date && log._id);
       const sortedLogs = validLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      // Fetch all recommendations in PARALLEL for faster loading
-      console.log('[Recommendation] Calling APIs with userId:', userId);
-      const [dietData, stressData, workoutData] = await Promise.allSettled([
-        DietRecommendationService.getDietRecommendations(userId),
-        StressAnalysisService.getStressAnalysis(sortedLogs, userId),
-        WorkoutRecommenderService.getWorkoutRecommendations(userId)
-      ]);
+      // OPTIMIZED: Use batch endpoint for single round-trip
+      // Falls back to individual calls if batch fails (backward compatibility)
+      console.log('[Recommendation] Using batch endpoint for recommendations');
+      
+      let batchResult;
+      try {
+        batchResult = await RecommendationService.getAllRecommendations();
+        Logger.info('[Recommendation] Batch cache hits:', batchResult.cache_hits);
+      } catch (batchError) {
+        Logger.warn('[Recommendation] Batch failed, falling back to individual calls:', batchError);
+        // Fallback: individual calls (original behavior)
+        const [dietData, stressData, workoutData] = await Promise.allSettled([
+          DietRecommendationService.getDietRecommendations(userId),
+          StressAnalysisService.getStressAnalysis(sortedLogs, userId),
+          WorkoutRecommenderService.getWorkoutRecommendations(userId)
+        ]);
+        batchResult = {
+          diet: dietData.status === 'fulfilled' ? dietData.value : null,
+          workout: workoutData.status === 'fulfilled' ? workoutData.value : null,
+          stress: stressData.status === 'fulfilled' ? stressData.value : null,
+          cache_hits: { diet: false, workout: false, stress: false }
+        };
+      }
+      
+      // Convert batch result to Promise.allSettled format for existing handlers
+      const dietData = batchResult.diet 
+        ? { status: 'fulfilled', value: batchResult.diet }
+        : { status: 'rejected', reason: new Error('No diet data') };
+      const stressData = batchResult.stress
+        ? { status: 'fulfilled', value: batchResult.stress }
+        : { status: 'rejected', reason: new Error('No stress data') };
+      const workoutData = batchResult.workout
+        ? { status: 'fulfilled', value: batchResult.workout }
+        : { status: 'rejected', reason: new Error('No workout data') };
+      
       console.log('[Recommendation] API results:', { dietData, stressData, workoutData });
 
         // Process diet results
