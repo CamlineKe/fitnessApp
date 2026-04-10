@@ -37,10 +37,6 @@ const userSchema = new mongoose.Schema({
         heartRate: { type: Number, default: 0 },
         lastUpdated: { type: Date }
       }
-    },
-    appleHealth: {
-      connected: { type: Boolean, default: false },
-      lastSynced: { type: Date }
     }
   }
 }, { timestamps: true });
