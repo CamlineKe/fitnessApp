@@ -102,11 +102,14 @@ const MentalHealth = () => {
       setError(null);
 
       Logger.debug("Fetching data for user:", userId);
-      const data = await getMentalHealthData(userId);
-      Logger.debug("Received data:", data);
+      const result = await getMentalHealthData(userId, { limit: 100, offset: 0 });
+      Logger.debug("Received result:", result);
+
+      // Extract logs from paginated response
+      const data = result.logs || [];
 
       // Handle empty or null data
-      if (!data || (Array.isArray(data) && data.length === 0)) {
+      if (!data || data.length === 0) {
         setError("No mental health records found. Start by adding your first check-in!");
         setMentalHealthData([]);
         setMentalLogs([]);
@@ -115,11 +118,8 @@ const MentalHealth = () => {
         return;
       }
 
-      // Ensure data is an array
-      const dataArray = Array.isArray(data) ? data : [data];
-      
       // Filter valid logs
-      const validLogs = dataArray.filter(log => {
+      const validLogs = data.filter(log => {
         const isValid = log && log.mood && log.date && log._id;
         if (!isValid) {
           Logger.debug("Invalid log found:", log);

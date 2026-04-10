@@ -43,7 +43,7 @@ export const createMentalHealthLog = async (req, res) => {
 };
 
 /**
- * ✅ Get all mental health logs (Only for logged-in users)
+ * ✅ Get all mental health logs with pagination (Only for logged-in users)
  */
 export const getMentalHealthLogs = async (req, res) => {
   try {
@@ -51,14 +51,32 @@ export const getMentalHealthLogs = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized: User not found" });
     }
 
-    Logger.debug("Fetching logs for user:", req.user._id);
-    const mentalHealthLogs = await MentalHealth.find({ userId: req.user._id }).sort({ date: -1 });
+    // Pagination params
+    const limit = Math.min(parseInt(req.query.limit, 10) || 50, 100);
+    const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
 
-    if (!mentalHealthLogs.length) {
-      return res.status(404).json({ message: "No mental health logs found for this user." });
-    }
+    Logger.debug(`Fetching logs for user: ${req.user._id}, limit: ${limit}, offset: ${offset}`);
 
-    res.json(mentalHealthLogs);
+    // Run count and fetch in parallel
+    const [total, mentalHealthLogs] = await Promise.all([
+      MentalHealth.countDocuments({ userId: req.user._id }),
+      MentalHealth.find({ userId: req.user._id })
+        .select('date stressLevel mood sleepQuality notes')
+        .sort({ date: -1 })
+        .skip(offset)
+        .limit(limit)
+        .lean()
+    ]);
+
+    res.json({
+      data: mentalHealthLogs,
+      pagination: {
+        total,
+        offset,
+        limit,
+        hasMore: offset + mentalHealthLogs.length < total
+      }
+    });
   } catch (error) {
     Logger.error("Error fetching mental health logs:", error);
     res.status(500).json({ message: "Server error" });

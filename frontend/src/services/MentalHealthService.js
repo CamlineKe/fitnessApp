@@ -4,30 +4,41 @@ import Logger from '../utils/logger';
 const API_URL = `${import.meta.env.VITE_API_URL}/mentalhealth`;
 
 // Fetch mental health logs for the authenticated user
-export const getMentalHealthData = async (userId) => {
+export const getMentalHealthData = async (userId, { limit = 50, offset = 0 } = {}) => {
   if (!userId) {
     throw new Error("User ID is required to fetch mental health data");
   }
 
   try {
     Logger.debug("API URL being called:", API_URL);
-    Logger.debug("User ID:", userId);
-    
-    const response = await axios.get(API_URL);
+    Logger.debug("User ID:", userId, "Limit:", limit, "Offset:", offset);
+
+    const response = await axios.get(API_URL, {
+      params: { limit, offset }
+    });
 
     Logger.info("Response from server:", response.data);
 
     if (!response.data) {
       Logger.error("No data in response");
-      return []; // Return empty array instead of throwing error
+      return { logs: [], pagination: null };
     }
 
-    if (!Array.isArray(response.data)) {
-      Logger.debug("Converting non-array response to array");
-      return [response.data]; // Convert single item to array
+    // Handle paginated response structure: { data: [...], pagination: {...} }
+    if (response.data.data && Array.isArray(response.data.data)) {
+      return {
+        logs: response.data.data,
+        pagination: response.data.pagination || null
+      };
     }
 
-    return response.data;
+    // Fallback for legacy array response
+    if (Array.isArray(response.data)) {
+      return { logs: response.data, pagination: null };
+    }
+
+    // Single item fallback
+    return { logs: [response.data], pagination: null };
   } catch (error) {
     Logger.error("Full error details:", {
       message: error.message,
