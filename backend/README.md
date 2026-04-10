@@ -9,10 +9,10 @@ This backend service provides the API infrastructure for a comprehensive health 
 - 🔄 Integration with multiple fitness platforms (Google Fit, Fitbit)
 - 📊 Real-time data synchronization with Socket.IO
 - 🤖 AI-powered health recommendations with optimized caching
-- � LRU cache with 4-minute TTL aligned with Flask AI service
+- 💾 LRU cache with 4-minute TTL aligned with Flask AI service
 - ⚡ HTTP keep-alive for connection reuse with Flask AI
 - 🚀 Batch API endpoint for parallel recommendation fetching
-- �📱 Cross-platform data management
+- 📱 Cross-platform data management
 - 🔌 WebSocket support for real-time updates
 - 🏃‍♂️ Workout tracking and management
 - 🥗 Nutrition monitoring
@@ -266,7 +266,7 @@ services:
 - [ ] Set `MONGO_URI` in Render environment variables
 - [ ] Set `FRONTEND_URL` to your Vercel frontend URL
 - [ ] Configure OAuth credentials (Google Fit, Fitbit)
-- [ ] Deploy Flask AI service separately and set `FLASK_AI_URL`
+- [ ] Deploy Flask AI service separately and set `FLASK_URL`
 - [ ] Ensure CORS origins include your frontend domain
 
 ## Contributing

@@ -12,8 +12,8 @@ This application serves as a holistic health management platform, combining fitn
 - 🤖 **AI-Powered**: ML recommendations from Flask AI service (diet, workout, stress)
 - ⚡ **Batch API**: Single request fetches all recommendations (saves ~300-400ms)
 - 💾 **Session Caching**: 5-minute client-side cache for recommendations
-- � **Cache Invalidation**: Auto-clear on profile updates (gender/DOB changes)
-- �📊 **Data Visualization**: Interactive charts with Chart.js and ApexCharts
+- 🔄 **Cache Invalidation**: Auto-clear on profile updates (gender/DOB changes)
+- 📊 **Data Visualization**: Interactive charts with Chart.js and ApexCharts
 - 🔗 **Platform Integration**: Google Fit and Fitbit OAuth sync
 - 🔔 **Real-time Notifications**: Socket.IO for live updates
 - 📱 **Responsive Design**: Mobile-first with React Bootstrap

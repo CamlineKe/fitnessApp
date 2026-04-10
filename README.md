@@ -120,6 +120,7 @@ fitnessApp/
 │   │   │   ├── GoogleFitService.js
 │   │   │   ├── FitbitService.js
 │   │   │   ├── DietRecommendationService.js
+│   │   │   ├── RecommendationService.js  # Batch API for all recommendations
 │   │   │   ├── StressAnalysisService.js
 │   │   │   └── WorkoutRecommenderService.js
 │   │   ├── utils/            # Helper functions
@@ -268,8 +269,8 @@ FITBIT_REDIRECT_URI=http://localhost:3000/auth/fitbit/callback
 # Frontend URL for CORS
 FRONTEND_URL=http://localhost:3000
 
-# Flask AI Service URL
-FLASK_AI_URL=http://localhost:5001
+# Flask AI Service URL (base URL only, appends /api automatically)
+FLASK_URL=http://localhost:5001
 ```
 
 #### Frontend (.env.local)
@@ -406,6 +407,7 @@ The platform uses machine learning models to provide personalized recommendation
 - `POST /api/ai/diet` - Get diet recommendations
 - `POST /api/ai/workout` - Get workout recommendations
 - `POST /api/ai/stress` - Get stress analysis
+- `POST /api/ai/all` - Get all recommendations in single request (batch)
 
 ### Device Sync
 - `GET /api/sync/device-status` - Get device connection status
@@ -478,11 +480,17 @@ The AI service includes `render.yaml` with gunicorn configuration:
 
 ## 📈 Performance Optimizations
 
+- **Backend**: HTTP keep-alive for Flask AI connection reuse
+- **Backend**: LRU cache (4-min TTL) with optimized key bucketing
+- **Backend**: Batch API reduces round trips from 3 to 1 (~300-500ms saved)
+- **Flask AI**: Bounded LRU cache (100 entries) prevents memory leaks
+- **Flask AI**: Async model loading eliminates cold-start timeouts
+- **Frontend**: SessionStorage caching (5-min TTL) for recommendations
+- **Frontend**: Axios instance with connection reuse
 - MongoDB indexing for fast queries
 - Socket.IO for real-time updates
 - Lazy loading of routes and components
 - Optimized bundle size with Vite
-- ML model caching in memory
 - Environment-based logging levels
 
 ## 🤝 Contributing
