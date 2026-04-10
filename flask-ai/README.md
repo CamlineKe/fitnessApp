@@ -11,8 +11,8 @@ This AI service provides machine learning-powered recommendations for diet, work
 - 🤖 **ML-Powered**: Trained models with confidence scoring and graceful fallback
 - 🔄 **Auto-Refresh**: Models can be retrained with `retrain_models.py`
 - 📊 **Feature Engineering**: One-hot encoding for categorical data (moods, activity types)
-- � **Response Caching**: 5-minute TTL cache for improved performance
-- �🔌 **RESTful API**: Well-defined endpoints with input validation
+- 💾 **Bounded LRU Cache**: 5-minute TTL with 100-entry limit prevents memory leaks
+- 🔌 **RESTful API**: Well-defined endpoints with input validation
 - 🔒 **CORS-Enabled**: Secure cross-origin request handling
 
 ## Technical Stack
@@ -54,11 +54,17 @@ Returns the health status of the service and loaded models.
     }
   },
   "cache": {
+    "type": "bounded_lru_ttl",
     "cached_entries": 3,
-    "cache_ttl_minutes": 5
+    "max_entries": 100,
+    "cache_ttl_minutes": 5,
+    "memory_safe": true
   },
-  "lazy_loading": false,
-  "note": "Models pre-loaded on startup, responses cached for 5 minutes"
+  "models": {
+    "preload_mode": "async",
+    "preload_async": true
+  },
+  "note": "Models load asynchronously, responses cached with LRU eviction"
 }
 ```
 
@@ -273,6 +279,9 @@ pip install -r requirements.txt
 PORT=5001
 CORS_ORIGIN=http://localhost:3000  # Frontend URL for CORS
 FLASK_ENV=development  # Set to 'production' in production
+
+# Optional - Model loading behavior
+PRELOAD_ASYNC=true   # Set to 'false' for synchronous model loading (local dev)
 ```
 
 ### Running the Service
@@ -344,11 +353,11 @@ The service includes comprehensive error handling:
 - Environment-based debug mode
 
 ## Performance Considerations
-- Models loaded once at startup (not per request)
-- Feature names cached for consistent inference
-- Graceful degradation when models unavailable
-- Response caching (5-minute TTL) to reduce compute
-- Optimized for quick response times (<100ms for cached, <500ms for fresh)
+- **Bounded LRU Cache**: 100-entry limit with 5-minute TTL prevents unbounded memory growth
+- **Async Model Loading**: Server starts immediately while models load in background (no cold-start timeouts)
+- **Connection Keep-Alive**: HTTP connection reuse for faster responses
+- **Graceful degradation**: Rule-based fallback when ML models unavailable
+- **Optimized response times**: <100ms cached, <500ms fresh, <1s cold start with async loading
 
 ## Contributing
 1. Fork the repository
@@ -361,7 +370,12 @@ The service includes comprehensive error handling:
 MIT License - see LICENSE file for details
 
 ## Version History
-- **v1.1.0** (Current)
+- **v1.2.0** (Current)
+  - Bounded LRU cache (100 entries max) prevents memory leaks on free tier
+  - Async model loading eliminates cold-start timeouts
+  - Cache key optimization with value bucketing for better hit rates
+  - Enhanced health check with cache stats and preload status
+- **v1.1.0**
   - ML model integration with confidence scoring
   - Automatic fallback to rule-based logic
   - Enhanced health check endpoint with model status
