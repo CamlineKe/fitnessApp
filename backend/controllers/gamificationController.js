@@ -109,15 +109,10 @@ export const updatePoints = async (req, res) => {
       });
     }
 
-    let gamificationData = await Gamification.findOne({ userId: req.user._id });
-    
-    if (!gamificationData) {
-      Logger.debug('No gamification data found, initializing...');
-      gamificationData = await initializeGamificationData(req.user._id);
-    }
-
     // Calculate points based on activity type
     let pointsEarned = 0;
+    const statsUpdate = {};
+
     switch (activity) {
       case 'workout':
         // Validate workout data
@@ -128,12 +123,12 @@ export const updatePoints = async (req, res) => {
           });
         }
         pointsEarned = Math.floor(Number(data.duration) / 10) + Math.floor(Number(data.caloriesBurned) / 100);
-        gamificationData.stats.totalWorkoutTime += Number(data.duration);
-        gamificationData.stats.totalCaloriesBurned += Number(data.caloriesBurned);
+        statsUpdate.totalWorkoutTime = Number(data.duration);
+        statsUpdate.totalCaloriesBurned = Number(data.caloriesBurned);
         break;
       case 'mental':
         pointsEarned = 10;
-        gamificationData.stats.totalMoodChecks++;
+        statsUpdate.totalMoodChecks = 1;
         break;
       case 'nutrition':
         pointsEarned = 5;
@@ -147,26 +142,49 @@ export const updatePoints = async (req, res) => {
             if (isBalanced) pointsEarned += 5;
           }
         }
-        gamificationData.stats.totalMealsLogged++;
+        statsUpdate.totalMealsLogged = 1;
         break;
     }
 
-    // Update points
-    gamificationData.points[activity] += pointsEarned;
+    // Atomic update using findOneAndUpdate to prevent race conditions
+    let gamificationData = await Gamification.findOne({ userId: req.user._id });
+    
+    if (!gamificationData) {
+      Logger.debug('No gamification data found, initializing...');
+      gamificationData = await initializeGamificationData(req.user._id);
+    }
 
-    // Check for level up
-    const totalPoints = 
+    // Calculate new level before atomic update
+    const currentTotalPoints = 
       gamificationData.points.workout + 
       gamificationData.points.mental + 
       gamificationData.points.nutrition;
-    
-    const newLevel = Math.floor(totalPoints / 100) + 1;
-    const leveledUp = newLevel > gamificationData.level;
+    const newTotalPoints = currentTotalPoints + pointsEarned;
+    const currentLevel = gamificationData.level;
+    const newLevel = Math.floor(newTotalPoints / 100) + 1;
+    const leveledUp = newLevel > currentLevel;
+
+    // Build atomic update operations
+    const updateOps = {
+      $inc: { [`points.${activity}`]: pointsEarned }
+    };
+
+    // Add stats increments
+    Object.keys(statsUpdate).forEach(key => {
+      updateOps.$inc[`stats.${key}`] = statsUpdate[key];
+    });
+
+    // Update level if needed
     if (leveledUp) {
-      gamificationData.level = newLevel;
+      updateOps.$set = { level: newLevel };
     }
 
-    await gamificationData.save();
+    // Atomic update - prevents race conditions
+    gamificationData = await Gamification.findOneAndUpdate(
+      { userId: req.user._id },
+      updateOps,
+      { new: true, upsert: true }
+    );
     
     // Get Socket.IO instance
     const io = req.app.get('io');
@@ -174,7 +192,7 @@ export const updatePoints = async (req, res) => {
     // Prepare response data
     const responseData = { 
       points: pointsEarned, 
-      total: totalPoints, 
+      total: newTotalPoints, 
       level: gamificationData.level,
       leveledUp,
       activityPoints: gamificationData.points[activity]
@@ -189,7 +207,7 @@ export const updatePoints = async (req, res) => {
       if (leveledUp) {
         io.to(`user_${req.user._id}`).emit('level_up', {
           newLevel: gamificationData.level,
-          totalPoints
+          totalPoints: newTotalPoints
         });
       }
     }
@@ -222,6 +240,11 @@ export const updateStreak = async (req, res) => {
       });
     }
 
+    const categoryCapitalized = category.charAt(0).toUpperCase() + category.slice(1);
+    const streakKey = `${category}Streak`;
+    const lastDateKey = `last${categoryCapitalized}Date`;
+    
+    // Fetch current data for streak calculation
     let gamificationData = await Gamification.findOne({ userId: req.user._id });
     if (!gamificationData) {
       gamificationData = await initializeGamificationData(req.user._id);
@@ -230,13 +253,16 @@ export const updateStreak = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const lastActivityDate = gamificationData.streaks[`last${category.charAt(0).toUpperCase() + category.slice(1)}Date`];
-    const streakKey = `${category}Streak`;
+    const lastActivityDate = gamificationData.streaks[lastDateKey];
+    let streakUpdate = {};
+    let currentStreakValue = gamificationData.streaks[streakKey];
     
     if (!lastActivityDate) {
       // First activity ever
-      gamificationData.streaks[streakKey] = 1;
-      gamificationData.streaks[`last${category.charAt(0).toUpperCase() + category.slice(1)}Date`] = today;
+      streakUpdate[streakKey] = 1;
+      streakUpdate[lastDateKey] = today;
+      currentStreakValue = 1;
+      Logger.debug('First activity ever, setting streak to 1');
     } else {
       const lastDate = new Date(lastActivityDate);
       lastDate.setHours(0, 0, 0, 0);
@@ -248,38 +274,60 @@ export const updateStreak = async (req, res) => {
       } else if (diffDays === 1) {
         // Activity done on consecutive day, increase streak
         Logger.debug('Consecutive day activity, increasing streak');
-        gamificationData.streaks[streakKey]++;
-        gamificationData.streaks[`last${category.charAt(0).toUpperCase() + category.slice(1)}Date`] = today;
+        streakUpdate[streakKey] = gamificationData.streaks[streakKey] + 1;
+        streakUpdate[lastDateKey] = today;
+        currentStreakValue = streakUpdate[streakKey];
       } else {
         // Break in streak, reset to 1
         Logger.debug('Break in streak, resetting to 1');
-        gamificationData.streaks[streakKey] = 1;
-        gamificationData.streaks[`last${category.charAt(0).toUpperCase() + category.slice(1)}Date`] = today;
+        streakUpdate[streakKey] = 1;
+        streakUpdate[lastDateKey] = today;
+        currentStreakValue = 1;
       }
     }
 
-    // Update overall streak metrics
-    const allStreaks = [
-      gamificationData.streaks.workoutStreak,
-      gamificationData.streaks.mentalStreak,
-      gamificationData.streaks.nutritionStreak
+    // If no update needed (already logged today), return current state
+    if (Object.keys(streakUpdate).length === 0) {
+      return res.json({
+        streaks: gamificationData.streaks,
+        message: `${category} streak unchanged - already logged today`
+      });
+    }
+
+    // Calculate overall streak metrics
+    const otherStreaks = [
+      category === 'workout' ? currentStreakValue : gamificationData.streaks.workoutStreak,
+      category === 'mental' ? currentStreakValue : gamificationData.streaks.mentalStreak,
+      category === 'nutrition' ? currentStreakValue : gamificationData.streaks.nutritionStreak
     ];
     
-    gamificationData.streaks.currentStreak = Math.max(...allStreaks);
-    gamificationData.streaks.bestStreak = Math.max(
+    const newCurrentStreak = Math.max(...otherStreaks);
+    const newBestStreak = Math.max(
       gamificationData.streaks.bestStreak || 0,
-      gamificationData.streaks.currentStreak
+      newCurrentStreak
     );
 
-    Logger.debug('Updated streak data:', {
+    streakUpdate.currentStreak = newCurrentStreak;
+    streakUpdate.bestStreak = newBestStreak;
+
+    Logger.debug('Atomic streak update:', {
       userId: req.user._id,
       category,
-      currentStreak: gamificationData.streaks.currentStreak,
-      lastActivity: gamificationData.streaks[streakKey],
-      streakUpdated: gamificationData.streaks[streakKey] !== gamificationData.streaks[streakKey]
+      streakUpdate
     });
 
-    await gamificationData.save();
+    // Build atomic $set operations for streak updates
+    const streakSetOps = {};
+    Object.keys(streakUpdate).forEach(key => {
+      streakSetOps[`streaks.${key}`] = streakUpdate[key];
+    });
+
+    // Atomic update - prevents race conditions
+    gamificationData = await Gamification.findOneAndUpdate(
+      { userId: req.user._id },
+      { $set: streakSetOps },
+      { new: true, upsert: true }
+    );
 
     res.json({
       streaks: gamificationData.streaks,
@@ -299,23 +347,35 @@ export const logMood = async (req, res) => {
     }
 
     const { mood } = req.body;
-    let gamificationData = await Gamification.findOne({ userId: req.user._id });
     
+    // Validate mood input
+    if (!mood || typeof mood !== 'string') {
+      return res.status(400).json({ 
+        message: 'Invalid mood data',
+        details: 'Mood must be a non-empty string'
+      });
+    }
+
+    // Ensure user has gamification data (initialize if not exists)
+    let gamificationData = await Gamification.findOne({ userId: req.user._id });
     if (!gamificationData) {
       gamificationData = await initializeGamificationData(req.user._id);
     }
 
-    gamificationData.moodLog.push({
-      mood,
-      timestamp: new Date()
-    });
+    // Atomic $push with $slice - keeps only last 30 entries, no need to load entire document
+    gamificationData = await Gamification.findOneAndUpdate(
+      { userId: req.user._id },
+      { 
+        $push: { 
+          moodLog: { 
+            $each: [{ mood, timestamp: new Date() }], 
+            $slice: -30 
+          } 
+        }
+      },
+      { new: true, upsert: true }
+    );
 
-    // Keep only last 30 days of mood logs
-    if (gamificationData.moodLog.length > 30) {
-      gamificationData.moodLog = gamificationData.moodLog.slice(-30);
-    }
-
-    await gamificationData.save();
     res.json({ success: true, moodLog: gamificationData.moodLog });
   } catch (error) {
     Logger.error('Error logging mood:', error);
@@ -407,7 +467,25 @@ export const getLeaderboard = async (req, res) => {
         }
       },
       { $sort: { totalPoints: -1 } },
-      { $limit: 10 }
+      { $limit: 10 },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          userId: 1,
+          totalPoints: 1,
+          level: 1,
+          username: { $ifNull: ['$user.username', 'Unknown User'] },
+          displayName: { $ifNull: ['$user.displayName', '$user.username', 'Unknown User'] }
+        }
+      }
     ]);
 
     res.json(leaderboard);

@@ -49,4 +49,61 @@ export const nutritionLimiter = rateLimit({
   }
 });
 
-export default { authLimiter, apiLimiter, nutritionLimiter };
+// Gamification points update limiter (60 per hour - allows frequent activity logging but prevents abuse)
+export const pointsLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 60,
+  message: {
+    error: 'Too many points updates',
+    message: 'Please slow down with activity logging'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res, next, options) => {
+    Logger.warn(`Points rate limit exceeded for user: ${req.user?._id || req.ip}`);
+    res.status(429).json(options.message);
+  },
+  skip: (req) => {
+    return process.env.NODE_ENV === 'development';
+  }
+});
+
+// Gamification streak update limiter (10 per hour - streaks should not update too frequently)
+export const streakLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10,
+  message: {
+    error: 'Too many streak updates',
+    message: 'Streak updates are limited to prevent abuse'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res, next, options) => {
+    Logger.warn(`Streak rate limit exceeded for user: ${req.user?._id || req.ip}`);
+    res.status(429).json(options.message);
+  },
+  skip: (req) => {
+    return process.env.NODE_ENV === 'development';
+  }
+});
+
+// Gamification mood logging limiter (30 per hour)
+export const moodLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 30,
+  message: {
+    error: 'Too many mood logs',
+    message: 'Please slow down with mood logging'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res, next, options) => {
+    Logger.warn(`Mood logging rate limit exceeded for user: ${req.user?._id || req.ip}`);
+    res.status(429).json(options.message);
+  },
+  skip: (req) => {
+    return process.env.NODE_ENV === 'development';
+  }
+});
+
+export default { authLimiter, apiLimiter, nutritionLimiter, pointsLimiter, streakLimiter, moodLimiter };

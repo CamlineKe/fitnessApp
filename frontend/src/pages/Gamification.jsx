@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
 import GamificationService from '../services/GamificationService';
+import NotificationService from '../services/NotificationService';
 import { UserContext } from '../components/UserContext';
 import './styles/Gamification.css';
 import { Tab, Tabs, ProgressBar } from 'react-bootstrap';
 import {
   FaTrophy, FaMedal, FaStar, FaFire, FaRunning, FaDumbbell,
   FaSwimmer, FaHeart, FaBolt, FaStopwatch, FaBrain, FaAppleAlt,
-  FaCalendarCheck, FaClock
+  FaCalendarCheck, FaClock, FaCrown, FaUsers
 } from 'react-icons/fa';
 import { GiMeditation } from 'react-icons/gi';
 import { toast } from 'react-toastify';
@@ -67,12 +68,15 @@ const Gamification = () => {
     challenges: [],
     moodLog: []
   });
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [activeTab, setActiveTab] = useState('workout');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState({
     data: true,
     workout: true,
     mental: true,
-    nutrition: true
+    nutrition: true,
+    leaderboard: true
   });
 
   useEffect(() => {
@@ -106,7 +110,70 @@ const Gamification = () => {
       }
     };
 
+    const fetchLeaderboard = async () => {
+      try {
+        setLoading(prev => ({ ...prev, leaderboard: true }));
+        const data = await GamificationService.getLeaderboard();
+        if (data) {
+          setLeaderboard(data);
+        }
+      } catch (error) {
+        Logger.error('Failed to fetch leaderboard:', error);
+      } finally {
+        setLoading(prev => ({ ...prev, leaderboard: false }));
+      }
+    };
+
     fetchGamificationData();
+    fetchLeaderboard();
+
+    // Initialize Socket.IO connection
+    NotificationService.initialize();
+    if (user?._id) {
+      NotificationService.joinUserRoom(user._id);
+    }
+
+    // Set up Socket.IO event listeners for real-time updates
+    const unsubscribePoints = NotificationService.onPointsUpdated((data) => {
+      Logger.debug('Real-time points update received:', data);
+      // Refresh data to show updated points
+      fetchGamificationData();
+    });
+
+    const unsubscribeLevelUp = NotificationService.onLevelUp((data) => {
+      Logger.info('Level up event received:', data);
+      // Show level-up celebration toast
+      toast.success(
+        <div>
+          <strong>🎉 Level Up!</strong>
+          <p>Congratulations! You've reached Level {data.newLevel}!</p>
+          <p>Total Points: {data.totalPoints}</p>
+        </div>,
+        { autoClose: 5000, position: 'top-center' }
+      );
+      // Refresh data
+      fetchGamificationData();
+    });
+
+    const unsubscribeAchievement = NotificationService.onAchievementUnlocked((data) => {
+      Logger.info('Achievement unlocked event received:', data);
+      // Show achievement toast
+      toast.success(
+        <div>
+          <strong>🏆 Achievement Unlocked!</strong>
+          <p>{data.name}</p>
+          <p>{data.description}</p>
+        </div>,
+        { autoClose: 5000 }
+      );
+      // Refresh data
+      fetchGamificationData();
+    });
+
+    const unsubscribeStreak = NotificationService.onStreakUpdated((data) => {
+      Logger.debug('Streak updated event received:', data);
+      fetchGamificationData();
+    });
 
     // Listen for gamification updates from other components
     const handleGamificationUpdate = (data) => {
@@ -118,8 +185,60 @@ const Gamification = () => {
 
     return () => {
       EventEmitter.off(EventEmitter.Events.GAMIFICATION_UPDATED, handleGamificationUpdate);
+      // Unsubscribe from Socket.IO events
+      unsubscribePoints();
+      unsubscribeLevelUp();
+      unsubscribeAchievement();
+      unsubscribeStreak();
     };
   }, [user, isAuthLoading]);
+
+  const renderLeaderboardSection = () => (
+    <div className="section-content">
+      <div className="section-header-row">
+        <FaTrophy className="section-icon" />
+        <h2>Leaderboard</h2>
+      </div>
+      <div className="leaderboard-container">
+        {loading.leaderboard ? (
+          <div className="loading-spinner">Loading leaderboard...</div>
+        ) : leaderboard.length === 0 ? (
+          <div className="no-leaderboard">
+            <FaUsers className="empty-icon" />
+            <p>No leaderboard data available</p>
+          </div>
+        ) : (
+          <div className="leaderboard-list">
+            {leaderboard.map((entry, index) => (
+              <div 
+                key={entry.userId} 
+                className={`leaderboard-item ${entry.userId === user?._id ? 'current-user' : ''} rank-${index + 1}`}
+              >
+                <div className="leaderboard-rank">
+                  {index === 0 && <FaCrown className="rank-icon gold" />}
+                  {index === 1 && <FaMedal className="rank-icon silver" />}
+                  {index === 2 && <FaMedal className="rank-icon bronze" />}
+                  {index > 2 && <span className="rank-number">{index + 1}</span>}
+                </div>
+                <div className="leaderboard-user">
+                  <span className="leaderboard-username">
+                    {entry.displayName || entry.username || 'Unknown User'}
+                  </span>
+                  {entry.userId === user?._id && <span className="you-badge">You</span>}
+                </div>
+                <div className="leaderboard-stats">
+                  <span className="leaderboard-points">
+                    <FaStar className="points-icon" /> {entry.totalPoints} pts
+                  </span>
+                  <span className="leaderboard-level">Level {entry.level}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 
   const renderStreakCard = (category) => {
     const streak = gamificationData?.streaks?.[`${category}Streak`] || 0;

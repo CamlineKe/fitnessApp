@@ -47,13 +47,7 @@ class GamificationService {
     try {
       Logger.debug('Attempting to update points:', { activity, data });
       
-      // First ensure gamification data exists
-      let gamificationData = await this.getGamificationData();
-      if (!gamificationData) {
-        Logger.warn('No gamification data found, initializing...');
-        gamificationData = await this.initializeNewUserData();
-      }
-
+      // Backend now handles data initialization automatically via upsert
       const response = await requestHandler('post', `${API_URL}/points`, { activity, data });
       Logger.info('Points updated successfully:', response);
       return response;
@@ -65,23 +59,31 @@ class GamificationService {
         activity,
         data
       });
+      
+      // Handle rate limit errors specifically
+      if (error.response?.status === 429) {
+        const errorMessage = error.response?.data?.message || 'Too many updates. Please slow down.';
+        throw new Error(errorMessage);
+      }
+      
       throw new Error(error.response?.data?.message || 'Failed to update points. Please try again.');
     }
   }
 
   static async updateStreak(category) {
     try {
-      // First ensure gamification data exists
-      let gamificationData = await this.getGamificationData();
-      if (!gamificationData) {
-        Logger.warn('No gamification data found, initializing...');
-        gamificationData = await this.initializeNewUserData();
-      }
-
+      // Backend now handles data initialization automatically via upsert
       const response = await requestHandler('post', `${API_URL}/streak`, { category });
       return response;
     } catch (error) {
       Logger.error('Error updating streak:', error);
+      
+      // Handle rate limit errors specifically
+      if (error.response?.status === 429) {
+        const errorMessage = error.response?.data?.message || 'Too many streak updates. Please slow down.';
+        throw new Error(errorMessage);
+      }
+      
       throw new Error(error.response?.data?.message || 'Failed to update streak. Please try again.');
     }
   }
@@ -92,6 +94,13 @@ class GamificationService {
       return response;
     } catch (error) {
       Logger.error('Error logging mood:', error);
+      
+      // Handle rate limit errors specifically
+      if (error.response?.status === 429) {
+        const errorMessage = error.response?.data?.message || 'Too many mood logs. Please slow down.';
+        throw new Error(errorMessage);
+      }
+      
       throw error;
     }
   }

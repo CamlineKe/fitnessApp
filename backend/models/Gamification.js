@@ -56,8 +56,13 @@ const gamificationSchema = new mongoose.Schema({
 });
 
 // Create indexes for efficient querying
-gamificationSchema.index({ userId: 1 });
+gamificationSchema.index({ userId: 1 }, { unique: true }); // Prevent duplicate gamification docs
 gamificationSchema.index({ 'achievements.category': 1 });
 gamificationSchema.index({ 'challenges.category': 1 });
+
+// Compound index for leaderboard queries - allows efficient sorting by total points
+// The points fields are indexed individually and together for flexibility
+gamificationSchema.index({ 'points.workout': -1, 'points.mental': -1, 'points.nutrition': -1 });
+gamificationSchema.index({ level: -1 });
 
 export default mongoose.model('Gamification', gamificationSchema);
