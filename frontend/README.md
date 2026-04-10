@@ -10,7 +10,10 @@ This application serves as a holistic health management platform, combining fitn
 - 🧘‍♀️ **Mental Health**: Mood tracking and stress analysis with AI insights
 - 🎮 **Gamification**: Achievement system with confetti rewards and badges
 - 🤖 **AI-Powered**: ML recommendations from Flask AI service (diet, workout, stress)
-- 📊 **Data Visualization**: Interactive charts with Chart.js and ApexCharts
+- ⚡ **Batch API**: Single request fetches all recommendations (saves ~300-400ms)
+- 💾 **Session Caching**: 5-minute client-side cache for recommendations
+- � **Cache Invalidation**: Auto-clear on profile updates (gender/DOB changes)
+- �📊 **Data Visualization**: Interactive charts with Chart.js and ApexCharts
 - 🔗 **Platform Integration**: Google Fit and Fitbit OAuth sync
 - 🔔 **Real-time Notifications**: Socket.IO for live updates
 - 📱 **Responsive Design**: Mobile-first with React Bootstrap
@@ -41,9 +44,10 @@ This application serves as a holistic health management platform, combining fitn
 The frontend communicates with a Python Flask AI service for intelligent recommendations:
 
 ```
-POST /api/diet      → Diet recommendations based on nutrition data
-POST /api/stress    → Stress analysis from mood/sleep patterns  
-POST /api/workout   → Workout recommendations with heart rate zones
+POST /api/ai/diet      → Diet recommendations based on nutrition data
+POST /api/ai/stress    → Stress analysis from mood/sleep patterns  
+POST /api/ai/workout   → Workout recommendations with heart rate zones
+POST /api/ai/all       → Batch endpoint - all 3 in single request (optimized)
 ```
 
 Configure the AI service URL in your environment:
@@ -62,6 +66,7 @@ The Vite dev server proxies `/api` requests to the backend automatically.
 - `MentalHealthService.js` - Mental health logs and analysis
 - `NotificationService.js` - Real-time notifications (Socket.IO)
 - `NutritionService.js` - Food logging and nutrition data
+- `RecommendationService.js` - **Batch API for all recommendations (optimized)**
 - `StressAnalysisService.js` - AI stress analysis API
 - `UserService.js` - Authentication and user profile
 - `WorkoutRecommenderService.js` - AI workout recommendation API
@@ -199,6 +204,9 @@ frontend/
 │   │   └── AuthCallback.jsx
 │   ├── services/           # API service integrations
 │   ├── utils/              # Helper functions
+│   │   ├── recommendationsCache.js  # SessionStorage cache for recommendations
+│   │   ├── EventEmitter.js          # Custom event bus
+│   │   └── logger.js                # Logging utility
 │   ├── data/               # Static data/constants
 │   ├── App.jsx             # Root component with routing
 │   ├── main.jsx            # Entry point
@@ -221,9 +229,12 @@ frontend/
 - **Chunk Size Warning**: 1000kb limit monitoring
 
 ### Runtime Optimizations
-- Axios request/response interceptors for caching
+- **Batch API**: `RecommendationService.js` fetches all AI recommendations in single request
+- **SessionStorage Caching**: 5-minute TTL cache in `recommendationsCache.js` reduces API calls
+- **Cache Invalidation**: `Profile.jsx` clears cache on gender/DOB changes for fresh recommendations
+- **Axios Instance**: Configured instance with interceptors for consistent auth handling
+- **Graceful Fallback**: Batch failure falls back to individual API calls
 - React Bootstrap for efficient component rendering
-- Optimized dependency pre-bundling
 
 ## Security Measures
 - JWT token management
@@ -244,6 +255,13 @@ frontend/
 MIT License
 
 ## Version History
+- **v1.1.0** - AI Optimizations
+  - Batch API endpoint integration (saves ~300-400ms load time)
+  - SessionStorage caching for recommendations (5-minute TTL)
+  - Cache invalidation on profile updates
+  - Axios instance configuration for connection reuse
+  - Graceful fallback to individual API calls
+
 - **v1.0.0** - Initial Release
   - User authentication (JWT + OAuth2)
   - Fitness tracking with Google Fit/Fitbit integration
