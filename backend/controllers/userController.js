@@ -274,22 +274,39 @@ export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    Logger.debug('Login request received. Email provided:', !!email, 'Password provided:', !!password);
+    
+    if (!email || !password) {
+      Logger.warn('Login failed: Missing email or password');
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+    
+    const normalizedEmail = email.toLowerCase().trim();
+    Logger.debug('Login attempt for email:', normalizedEmail);
+
+    const user = await User.findOne({ 
+      email: { $regex: new RegExp('^' + normalizedEmail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') }
+    });
+    
     if (!user) {
+      Logger.warn('Login failed: User not found for email:', normalizedEmail);
       return res.status(400).json({ message: 'Invalid email or password' });
     }
 
+    Logger.debug('User found, comparing password...');
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
+      Logger.warn('Login failed: Password mismatch for user:', user.email);
       return res.status(400).json({ message: 'Invalid email or password' });
     }
+    Logger.debug('Password matched successfully');
 
     // Generate new tokens
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    // Store refresh token hash in database
-    const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
+    // Store refresh token hash in database using SHA256 (fast, sufficient for token integrity)
+    const refreshTokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
     user.refreshToken = refreshTokenHash;
     user.refreshTokenExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     await user.save();

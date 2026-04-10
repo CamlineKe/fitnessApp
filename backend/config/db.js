@@ -4,8 +4,30 @@ import Logger from '../utils/logger.js';
 
 dotenv.config();
 
-// Enable query profiling for slow queries (>100ms)
-const SLOW_QUERY_THRESHOLD_MS = 100;
+// Validate database collections health on startup - only warns on issues
+const validateDatabaseHealth = async (conn) => {
+  try {
+    const db = conn.connection.db;
+    const collections = await db.listCollections().toArray();
+    
+    for (const collectionInfo of collections) {
+      const collectionName = collectionInfo.name;
+      const collection = db.collection(collectionName);
+      
+      // Check document count vs index consistency
+      const docCount = await collection.countDocuments();
+      const stats = await db.command({ collStats: collectionName });
+      const indexCount = stats.nindexes || 0;
+      
+      // Only log warnings for orphaned indexes (indexes exist but no documents)
+      if (docCount === 0 && indexCount > 1) {
+        Logger.warn(`⚠️  Collection ${collectionName} has orphaned indexes. Consider dropping and recreating.`);
+      }
+    }
+  } catch (error) {
+    Logger.error('Database health check failed:', error.message);
+  }
+};
 
 const connectDB = async () => {
   try {
@@ -23,27 +45,8 @@ const connectDB = async () => {
     const conn = await mongoose.connect(process.env.MONGO_URI, options);
     Logger.info(`MongoDB Connected: ${conn.connection.host}`);
 
-    // Enable slow query logging
-    mongoose.set('debug', (collectionName, method, query, doc, options) => {
-      const startTime = Date.now();
-      // Store start time on the query object for later use
-      query._startTime = startTime;
-    });
-
-    // Add post-query hook to log slow queries
-    mongoose.plugin((schema) => {
-      schema.post(['find', 'findOne', 'findOneAndUpdate', 'findOneAndDelete', 'countDocuments'], function() {
-        const duration = Date.now() - (this.options._startTime || Date.now());
-        if (duration > SLOW_QUERY_THRESHOLD_MS) {
-          Logger.warn(`Slow query detected (${duration}ms): ${this.model.modelName}.${this.op}`, {
-            collection: this.model.collection.name,
-            operation: this.op,
-            duration,
-            filter: this.getFilter ? this.getFilter() : null
-          });
-        }
-      });
-    });
+    // Validate collections health on startup
+    await validateDatabaseHealth(conn);
 
     // Handle initial connection errors
     conn.connection.on('error', (err) => {
