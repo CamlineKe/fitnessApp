@@ -1,6 +1,7 @@
 import Nutrition from "../models/Nutrition.js";
 import Logger from '../utils/logger.js';
 import { cacheResponse, invalidateUserCache } from '../utils/nutritionCache.js';
+import { dietCache } from '../utils/aiCache.js';
 
 // Create a new nutrition log
 export const createNutritionLog = async (req, res) => {
@@ -24,6 +25,9 @@ export const createNutritionLog = async (req, res) => {
     await nutritionLog.save();
     // Invalidate user cache after creating new log
     invalidateUserCache(userId);
+    // ✅ Invalidate diet recommendations cache since new meal affects AI analysis
+    dietCache.invalidate(userId);
+    Logger.info(`[Nutrition] Diet cache invalidated for user ${userId}`);
     return res.status(201).json(nutritionLog);
   } catch (error) {
     Logger.error("Error creating nutrition log:", error);
@@ -122,6 +126,9 @@ export const updateNutritionLog = async (req, res) => {
 
     // Invalidate user cache after update
     invalidateUserCache(req.user._id);
+    // ✅ Invalidate diet recommendations cache since updated meal affects AI analysis
+    dietCache.invalidate(req.user._id);
+    Logger.info(`[Nutrition] Diet cache invalidated for user ${req.user._id}`);
     
     return res.json(updatedLog);
   } catch (error) {
@@ -141,6 +148,9 @@ export const deleteNutritionLog = async (req, res) => {
 
     // Invalidate user cache after delete
     invalidateUserCache(req.user._id);
+    // ✅ Invalidate diet recommendations cache since deleted meal affects AI analysis
+    dietCache.invalidate(req.user._id);
+    Logger.info(`[Nutrition] Diet cache invalidated for user ${req.user._id}`);
     
     return res.json({ message: "Nutrition log deleted successfully" });
   } catch (error) {
