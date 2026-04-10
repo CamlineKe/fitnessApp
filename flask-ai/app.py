@@ -60,7 +60,7 @@ class BoundedTTLCache:
                 return result
             else:
                 logger.debug(f"Cache expired for {key}")
-                del self._cache[key]
+                self._cache.pop(key, None)  # Safe delete (handles race condition)
         return None
     
     def set(self, key, result):
