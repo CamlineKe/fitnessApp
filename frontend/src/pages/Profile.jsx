@@ -4,6 +4,7 @@ import { UserContext } from "../components/UserContext";
 import UserService from "../services/UserService";
 import GoogleFitService from '../services/GoogleFitService';
 import FitbitService from '../services/FitbitService';
+import { clearRecommendationsCache } from '../utils/recommendationsCache';
 import "./styles/Profile.css";
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -114,6 +115,10 @@ const Profile = () => {
       // Update both local storage and context
       localStorage.setItem('user', JSON.stringify(formattedUser));
       updateUser(formattedUser, response.token);
+
+      // ✅ Clear recommendations cache since profile data (gender/DOB) affects AI recommendations
+      clearRecommendationsCache();
+      Logger.info('Profile updated - recommendations cache cleared');
 
       // Fetch fresh user data to ensure everything is in sync
       await fetchUser();
