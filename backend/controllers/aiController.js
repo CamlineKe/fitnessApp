@@ -47,6 +47,7 @@ export const getDietRecommendations = async (req, res) => {
 
     // Format the data to match Flask API expectations
     const requestData = {
+      user_id: req.user._id,  // Enable per-user caching in Flask-AI
       user_data: {
         dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null,
         gender: user.gender
@@ -114,6 +115,7 @@ export const getWorkoutRecommendations = async (req, res) => {
 
     // Format the data to match Flask API expectations
     const requestData = {
+      user_id: req.user._id,  // Enable per-user caching in Flask-AI
       user_data: {
         dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null,
         gender: user.gender
@@ -175,6 +177,7 @@ export const getStressAnalysis = async (req, res) => {
 
     // Format the data to match what the Flask API expects
     const requestData = {
+      user_id: req.user._id,  // Enable per-user caching in Flask-AI
       user_data: {
         dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null,
         gender: user.gender
@@ -245,18 +248,21 @@ export const getAllRecommendations = async (req, res) => {
 
     // Prepare all request data
     const dietData = {
+      user_id: req.user._id,  // Enable per-user caching in Flask-AI
       user_data: { dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null, gender: user.gender },
       daily_intake: { calories: currentDayLog.calories || 0, macronutrients: { protein: currentDayLog.macronutrients?.protein || 0, carbohydrates: currentDayLog.macronutrients?.carbohydrates || 0, fats: currentDayLog.macronutrients?.fats || 0 } },
       nutrition_logs: nutritionLogs.map(log => ({ calories: log.calories, macronutrients: log.macronutrients, timestamp: log.date, meals: log.meals }))
     };
 
     const workoutData = {
+      user_id: req.user._id,  // Enable per-user caching in Flask-AI
       user_data: { dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null, gender: user.gender },
       workout_history: workoutLogs.map(log => ({ activityType: log.activityType, duration: log.duration, heartRate: log.heartRate, caloriesBurned: log.caloriesBurned, date: log.date })),
       current_stats: workoutLogs[0] ? { activityType: currentWorkout.activityType, duration: currentWorkout.duration, heartRate: currentWorkout.heartRate, caloriesBurned: currentWorkout.caloriesBurned } : {}
     };
 
     const stressData = {
+      user_id: req.user._id,  // Enable per-user caching in Flask-AI
       user_data: { dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null, gender: user.gender },
       daily_logs: mentalHealthLogs.map(log => ({ date: log.date, mood: log.mood, stressLevel: log.stressLevel, sleepQuality: log.sleepQuality, notes: log.notes })),
       current_check_in: currentMental ? { mood: currentMental.mood, stressLevel: currentMental.stressLevel, sleepQuality: currentMental.sleepQuality, notes: currentMental.notes } : null
