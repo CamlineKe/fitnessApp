@@ -56,7 +56,7 @@ export const getMentalHealthData = async (userId, { limit = 50, offset = 0 } = {
     }
     if (error.response?.status === 404) {
       Logger.error("API endpoint not found. Please check the URL configuration.");
-      return []; // Return empty array for no records instead of throwing error
+      return { logs: [], pagination: null }; // Return empty result for no records
     }
     throw new Error(error.response?.data?.message || "Failed to fetch mental health data");
   }

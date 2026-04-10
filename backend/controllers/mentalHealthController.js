@@ -95,14 +95,14 @@ export const getMentalHealthLog = async (req, res) => {
       return res.status(400).json({ message: "Invalid log ID format" });
     }
 
-    const mentalHealthLog = await MentalHealth.findById(logId);
+    // Fetch with ownership check in single query
+    const mentalHealthLog = await MentalHealth.findOne({
+      _id: logId,
+      userId: req.user._id
+    });
 
     if (!mentalHealthLog) {
-      return res.status(404).json({ message: "Mental health log not found" });
-    }
-
-    if (String(mentalHealthLog.userId) !== String(req.user._id)) {
-      return res.status(403).json({ message: "Forbidden: You do not own this log." });
+      return res.status(404).json({ message: "Mental health log not found or access denied" });
     }
 
     res.json(mentalHealthLog);
@@ -113,7 +113,7 @@ export const getMentalHealthLog = async (req, res) => {
 };
 
 /**
- * ✅ Update a mental health log (Ensure user owns it)
+ * ✅ Update a mental health log (Ensure user owns it) - Atomic operation
  */
 export const updateMentalHealthLog = async (req, res) => {
   try {
@@ -125,35 +125,26 @@ export const updateMentalHealthLog = async (req, res) => {
 
     const { date, stressLevel, mood, sleepQuality, notes } = req.body;
 
-    // ✅ Validate input data
-    if (mood && !["happy", "sad", "anxious", "neutral"].includes(mood)) {
-      return res.status(400).json({ message: "Invalid mood value" });
-    }
-    if (stressLevel && (typeof stressLevel !== "number" || stressLevel < 0 || stressLevel > 10)) {
-      return res.status(400).json({ message: "Stress level must be between 0 and 10" });
-    }
-    if (sleepQuality && (typeof sleepQuality !== "number" || sleepQuality < 0 || sleepQuality > 10)) {
-      return res.status(400).json({ message: "Sleep quality must be between 0 and 10" });
-    }
+    // Build update object with only provided fields
+    const updateData = {};
+    if (date !== undefined) updateData.date = date;
+    if (stressLevel !== undefined) updateData.stressLevel = stressLevel;
+    if (mood !== undefined) updateData.mood = mood;
+    if (sleepQuality !== undefined) updateData.sleepQuality = sleepQuality;
+    if (notes !== undefined) updateData.notes = notes;
 
-    const mentalHealthLog = await MentalHealth.findById(logId);
+    // Atomic update with ownership check in query
+    const updatedLog = await MentalHealth.findOneAndUpdate(
+      { _id: logId, userId: req.user._id },
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
 
-    if (!mentalHealthLog) {
-      return res.status(404).json({ message: "Mental health log not found" });
-    }
-
-    if (String(mentalHealthLog.userId) !== String(req.user._id)) {
-      return res.status(403).json({ message: "Forbidden: You do not own this log." });
+    if (!updatedLog) {
+      return res.status(404).json({ message: "Mental health log not found or access denied" });
     }
 
-    mentalHealthLog.date = date || mentalHealthLog.date;
-    if (stressLevel !== undefined) mentalHealthLog.stressLevel = stressLevel;
-    if (mood) mentalHealthLog.mood = mood;
-    if (sleepQuality !== undefined) mentalHealthLog.sleepQuality = sleepQuality;
-    if (notes !== undefined) mentalHealthLog.notes = notes;
-
-    await mentalHealthLog.save();
-    res.json(mentalHealthLog);
+    res.json(updatedLog);
   } catch (error) {
     Logger.error("Error updating mental health log:", error);
     res.status(500).json({ message: "Server error" });
@@ -161,7 +152,7 @@ export const updateMentalHealthLog = async (req, res) => {
 };
 
 /**
- * ✅ Delete a mental health log (Ensure user owns it)
+ * ✅ Delete a mental health log (Ensure user owns it) - Atomic operation
  */
 export const deleteMentalHealthLog = async (req, res) => {
   try {
@@ -171,17 +162,16 @@ export const deleteMentalHealthLog = async (req, res) => {
       return res.status(400).json({ message: "Invalid log ID format" });
     }
 
-    const mentalHealthLog = await MentalHealth.findById(logId);
+    // Atomic delete with ownership check in query
+    const deletedLog = await MentalHealth.findOneAndDelete({
+      _id: logId,
+      userId: req.user._id
+    });
 
-    if (!mentalHealthLog) {
-      return res.status(404).json({ message: "Mental health log not found" });
+    if (!deletedLog) {
+      return res.status(404).json({ message: "Mental health log not found or access denied" });
     }
 
-    if (String(mentalHealthLog.userId) !== String(req.user._id)) {
-      return res.status(403).json({ message: "Forbidden: You do not own this log." });
-    }
-
-    await mentalHealthLog.deleteOne();
     res.json({ message: "Mental health log deleted successfully" });
   } catch (error) {
     Logger.error("Error deleting mental health log:", error);
