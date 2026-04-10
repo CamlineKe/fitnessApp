@@ -1,5 +1,6 @@
 import Workout from "../models/Workout.js";
 import Logger from '../utils/logger.js';
+import { workoutCache } from '../utils/aiCache.js';
 
 // ✅ Create a new workout log
 export const createWorkoutLog = async (req, res) => {
@@ -30,6 +31,11 @@ export const createWorkoutLog = async (req, res) => {
     });
 
     await workoutLog.save();
+    
+    // ✅ Invalidate workout recommendations cache since new workout affects recommendations
+    workoutCache.invalidate(req.user._id);
+    Logger.info(`[Workout] Cache invalidated for user ${req.user._id}`);
+    
     Logger.info('Successfully created workout log:', workoutLog);
     res.status(201).json(workoutLog);
   } catch (error) {

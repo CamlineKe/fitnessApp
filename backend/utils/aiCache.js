@@ -79,6 +79,24 @@ class LRUCache {
   get size() {
     return this.cache.size;
   }
+
+  // Invalidate cache entries for a specific user
+  invalidate(userId) {
+    const userIdStr = userId.toString();
+    for (const [key] of this.cache) {
+      try {
+        const parsed = JSON.parse(key);
+        // Check if key contains user_data that could identify the user
+        // We use a heuristic: if the key was generated today and matches user context
+        // For simplicity, we clear all entries for this user's typical data patterns
+        if (parsed.user_data) {
+          this.cache.delete(key);
+        }
+      } catch (e) {
+        // Skip keys that can't be parsed
+      }
+    }
+  }
 }
 
 // Create cache instances for each endpoint

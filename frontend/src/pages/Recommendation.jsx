@@ -190,15 +190,23 @@ const Recommendation = () => {
       fetchRecommendations(true); // Skip cache on meal updates
     };
 
+    const handleWorkoutUpdated = () => {
+      Logger.debug("Workout updated, refreshing recommendations (skipping cache)");
+      clearRecommendationsCache();
+      fetchRecommendations(true); // Skip cache on workout updates
+    };
+
     EventEmitter.on(EventEmitter.Events.MEAL_ADDED, handleMealUpdated);
     EventEmitter.on(EventEmitter.Events.MEAL_UPDATED, handleMealUpdated);
     EventEmitter.on(EventEmitter.Events.MEAL_DELETED, handleMealUpdated);
+    EventEmitter.on(EventEmitter.Events.WORKOUT_UPDATED, handleWorkoutUpdated);
 
     // Cleanup event listeners
     return () => {
       EventEmitter.off(EventEmitter.Events.MEAL_ADDED, handleMealUpdated);
       EventEmitter.off(EventEmitter.Events.MEAL_UPDATED, handleMealUpdated);
       EventEmitter.off(EventEmitter.Events.MEAL_DELETED, handleMealUpdated);
+      EventEmitter.off(EventEmitter.Events.WORKOUT_UPDATED, handleWorkoutUpdated);
     };
   }, [user]);
 
