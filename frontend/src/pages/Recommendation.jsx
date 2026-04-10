@@ -196,10 +196,17 @@ const Recommendation = () => {
       fetchRecommendations(true); // Skip cache on workout updates
     };
 
+    const handleMentalHealthUpdated = () => {
+      Logger.debug("Mental health updated, refreshing recommendations (skipping cache)");
+      clearRecommendationsCache();
+      fetchRecommendations(true); // Skip cache on mental health updates
+    };
+
     EventEmitter.on(EventEmitter.Events.MEAL_ADDED, handleMealUpdated);
     EventEmitter.on(EventEmitter.Events.MEAL_UPDATED, handleMealUpdated);
     EventEmitter.on(EventEmitter.Events.MEAL_DELETED, handleMealUpdated);
     EventEmitter.on(EventEmitter.Events.WORKOUT_UPDATED, handleWorkoutUpdated);
+    EventEmitter.on(EventEmitter.Events.MENTAL_HEALTH_UPDATED, handleMentalHealthUpdated);
 
     // Cleanup event listeners
     return () => {
@@ -207,6 +214,7 @@ const Recommendation = () => {
       EventEmitter.off(EventEmitter.Events.MEAL_UPDATED, handleMealUpdated);
       EventEmitter.off(EventEmitter.Events.MEAL_DELETED, handleMealUpdated);
       EventEmitter.off(EventEmitter.Events.WORKOUT_UPDATED, handleWorkoutUpdated);
+      EventEmitter.off(EventEmitter.Events.MENTAL_HEALTH_UPDATED, handleMentalHealthUpdated);
     };
   }, [user]);
 

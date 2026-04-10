@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import MentalHealth from "../models/MentalHealth.js";
 import Logger from '../utils/logger.js';
+import { stressCache } from '../utils/aiCache.js';
 
 /**
  * ✅ Create a mental health log (Only for logged-in users)
@@ -34,6 +35,11 @@ export const createMentalHealthLog = async (req, res) => {
     });
 
     await mentalHealthLog.save();
+    
+    // ✅ Invalidate stress recommendations cache since new mental health log affects analysis
+    stressCache.invalidate(req.user._id);
+    Logger.info(`[MentalHealth] Stress cache invalidated for user ${req.user._id}`);
+    
     Logger.info("Created Log:", mentalHealthLog);
     res.status(201).json(mentalHealthLog);
   } catch (error) {
