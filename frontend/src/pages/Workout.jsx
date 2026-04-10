@@ -78,6 +78,9 @@ const Workout = () => {
     feedback: "Log your first workout for today!",
   });
   const [workoutLogs, setWorkoutLogs] = useState(cache?.workoutLogs || []);
+  const [pagination, setPagination] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [newLog, setNewLog] = useState({
     date: new Date(),
     activityType: "",
@@ -134,26 +137,56 @@ const Workout = () => {
   useEffect(() => {
     if (!isAuthenticated || !userId) return;
 
-    // Fetch workout logs independently (only last 30 for display)
-    const fetchWorkoutLogs = async () => {
+    // Fetch workout logs with pagination
+    const fetchWorkoutLogs = async (page = 1, append = false) => {
       if (!userId) return;
-      setLoading(prev => ({ ...prev, logs: true }));
+
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(prev => ({ ...prev, logs: true }));
+      }
+
       try {
-        const logs = await WorkoutService.getWorkoutLogs();
-        Logger.debug('Fetched workout logs:', logs);
-        // Only keep last 30 logs for UI display to reduce memory/processing
-        const recentLogs = (logs || []).slice(-30);
-        setWorkoutLogs(recentLogs);
-        
-        // Find today's workout from logs
-        const todayWorkout = recentLogs.find(log => isToday(log.date));
-        setWorkoutData(todayWorkout || {
-          activityType: "No workout logged yet",
-          duration: 0,
-          caloriesBurned: 0,
-          heartRate: 0,
-          feedback: "Log your first workout for today!",
+        // Use field projection to fetch only needed fields for charts
+        const fields = ['date', 'activityType', 'duration', 'caloriesBurned', 'heartRate', 'feedback'];
+
+        const result = await WorkoutService.getWorkoutLogs({
+          page,
+          limit: 30,
+          sortBy: 'date',
+          order: 'desc',
+          fields
         });
+
+        Logger.debug('Fetched workout logs:', result);
+
+        if (result.cached) {
+          Logger.debug('Using cached workout logs');
+          return;
+        }
+
+        const newLogs = result.data || [];
+
+        // Update logs (append for pagination, replace for initial load)
+        if (append) {
+          setWorkoutLogs(prev => [...prev, ...newLogs]);
+        } else {
+          setWorkoutLogs(newLogs);
+
+          // Find today's workout from first page only
+          const todayWorkout = newLogs.find(log => isToday(log.date));
+          setWorkoutData(todayWorkout || {
+            activityType: "No workout logged yet",
+            duration: 0,
+            caloriesBurned: 0,
+            heartRate: 0,
+            feedback: "Log your first workout for today!",
+          });
+        }
+
+        setPagination(result.pagination);
+        setCurrentPage(page);
       } catch (err) {
         Logger.error('Error fetching workout logs:', err);
         if (err.message?.includes("No authentication token found") || err.response?.status === 401) {
@@ -162,6 +195,14 @@ const Workout = () => {
         }
       } finally {
         setLoading(prev => ({ ...prev, logs: false }));
+        setLoadingMore(false);
+      }
+    };
+
+    // Load more handler
+    const handleLoadMore = () => {
+      if (pagination?.hasNextPage && !loadingMore) {
+        fetchWorkoutLogs(currentPage + 1, true);
       }
     };
 
@@ -182,7 +223,7 @@ const Workout = () => {
     };
 
     // Fetch data in parallel without blocking UI
-    Promise.all([fetchWorkoutLogs(), fetchRecommendations()]);
+    Promise.all([fetchWorkoutLogs(1, false), fetchRecommendations()]);
 
     // Subscribe to workout recommendation updates
     const handleWorkoutUpdate = (newRecommendations) => {
@@ -197,6 +238,33 @@ const Workout = () => {
       EventEmitter.off(EventEmitter.Events.WORKOUT_RECOMMENDATIONS_UPDATED, handleWorkoutUpdate);
     };
   }, [isAuthenticated, userId, logout]);
+
+  // Load more handler (defined outside useEffect)
+  const handleLoadMore = () => {
+    if (pagination?.hasNextPage && !loadingMore) {
+      const nextPage = currentPage + 1;
+      setLoadingMore(true);
+
+      WorkoutService.getWorkoutLogs({
+        page: nextPage,
+        limit: 30,
+        sortBy: 'date',
+        order: 'desc',
+        fields: ['date', 'activityType', 'duration', 'caloriesBurned', 'heartRate', 'feedback']
+      }).then(result => {
+        if (!result.cached && result.data) {
+          setWorkoutLogs(prev => [...prev, ...result.data]);
+          setPagination(result.pagination);
+          setCurrentPage(nextPage);
+        }
+      }).catch(err => {
+        Logger.error('Error loading more logs:', err);
+        handleError("Failed to load more logs");
+      }).finally(() => {
+        setLoadingMore(false);
+      });
+    }
+  };
 
   // Cache data when it changes
   useEffect(() => {
@@ -620,26 +688,53 @@ const Workout = () => {
 
               {/* Workout Logs Section */}
               <div className="workout-logs">
-                <h2>Recent Workout Logs {loading.logs && <span className="loading-inline">⏳</span>}</h2>
+                <h2>
+                  Recent Workout Logs
+                  {loading.logs && <span className="loading-inline">⏳</span>}
+                  {!loading.logs && pagination && (
+                    <span className="log-count">({pagination.totalCount} total)</span>
+                  )}
+                </h2>
                 {workoutLogs.length > 0 ? (
-                  <div className="logs-grid">
-                    {workoutLogs.slice(0, 10).map((log, index) => (
-                      <div key={log._id || index} className="log-card">
-                        <div className="log-header">
-                          <span className="log-date">{formatDate(log.date)}</span>
-                          <span className="log-type">{log.activityType}</span>
+                  <>
+                    <div className="logs-grid">
+                      {workoutLogs.map((log, index) => (
+                        <div key={log._id || index} className="log-card">
+                          <div className="log-header">
+                            <span className="log-date">{formatDate(log.date)}</span>
+                            <span className="log-type">{log.activityType}</span>
+                          </div>
+                          <div className="log-details">
+                            <span className="log-duration">⏱️ {log.duration} min</span>
+                            <span className="log-calories">🔥 {log.caloriesBurned} kcal</span>
+                            <span className="log-heartrate">❤️ {log.heartRate} bpm</span>
+                          </div>
+                          {log.feedback && (
+                            <div className="log-feedback">💬 {log.feedback}</div>
+                          )}
                         </div>
-                        <div className="log-details">
-                          <span className="log-duration">⏱️ {log.duration} min</span>
-                          <span className="log-calories">🔥 {log.caloriesBurned} kcal</span>
-                          <span className="log-heartrate">❤️ {log.heartRate} bpm</span>
-                        </div>
-                        {log.feedback && (
-                          <div className="log-feedback">💬 {log.feedback}</div>
-                        )}
+                      ))}
+                    </div>
+
+                    {/* Load More Button */}
+                    {pagination?.hasNextPage && (
+                      <div className="load-more-container">
+                        <button
+                          className="load-more-button"
+                          onClick={handleLoadMore}
+                          disabled={loadingMore}
+                        >
+                          {loadingMore ? (
+                            <>
+                              <span className="loading-spinner">⏳</span> Loading...
+                            </>
+                          ) : (
+                            <>Load More ({pagination.totalCount - workoutLogs.length} remaining)</>
+                          )}
+                        </button>
                       </div>
-                    ))}
-                  </div>
+                    )}
+                  </>
                 ) : (
                   <div className="no-logs">
                     <p>No workout logs yet. Start by logging your first workout above!</p>

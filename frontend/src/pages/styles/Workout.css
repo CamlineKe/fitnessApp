@@ -855,3 +855,127 @@
         -webkit-backdrop-filter: blur(10px);
     }
 }
+
+/* Log count display */
+.log-count {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-left: 0.5rem;
+}
+
+/* Load More Container */
+.load-more-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-light);
+}
+
+/* Load More Button */
+.load-more-button {
+    padding: 0.875rem 2rem;
+    background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.load-more-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    background: linear-gradient(135deg, #4f46e5 0%, var(--primary) 100%);
+}
+
+.load-more-button:disabled {
+    background: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.loading-spinner {
+    display: inline-block;
+    animation: spin 1s linear infinite;
+}
+
+/* Logs Grid - Fixed to match JSX */
+.logs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+}
+
+/* Log Card */
+.log-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    border: 1px solid var(--border-light);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.log-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--secondary);
+}
+
+.log-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.log-date {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.log-type {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+}
+
+.log-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    font-size: 0.95rem;
+    color: var(--text-main);
+}
+
+.log-details span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.log-feedback {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-style: italic;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border-light);
+    margin-top: 0.25rem;
+}
