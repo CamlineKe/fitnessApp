@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import Swal from 'sweetalert2';
 import { UserContext } from "../components/UserContext";
+import EmptyState from "../components/EmptyState";
 import WorkoutService from "../services/WorkoutService";
 import WorkoutRecommenderService from "../services/WorkoutRecommenderService";
 import GamificationService from "../services/GamificationService";
@@ -663,10 +664,11 @@ const Workout = () => {
                     {workoutLogs.length > 0 ? (
                       <Line data={workoutMetricsData} options={lineChartOptions} />
                     ) : (
-                      <div className="chart-empty-state">
-                        <i className="fas fa-chart-line"></i>
-                        <p>Log workouts to track your progress over time</p>
-                      </div>
+                      <EmptyState
+                        icon="fa-chart-line"
+                        title="Log workouts to track your progress over time"
+                        variant="chart"
+                      />
                     )}
                   </div>
                 </div>
@@ -677,10 +679,11 @@ const Workout = () => {
                     {workoutLogs.length > 0 ? (
                       <Pie data={workoutTypeData} options={pieChartOptions} />
                     ) : (
-                      <div className="chart-empty-state">
-                        <i className="fas fa-chart-pie"></i>
-                        <p>Start logging different activities to see your distribution</p>
-                      </div>
+                      <EmptyState
+                        icon="fa-chart-pie"
+                        title="Start logging different activities to see your distribution"
+                        variant="chart"
+                      />
                     )}
                   </div>
                 </div>
@@ -736,9 +739,12 @@ const Workout = () => {
                     )}
                   </>
                 ) : (
-                  <div className="no-logs">
-                    <p>No workout logs yet. Start by logging your first workout above!</p>
-                  </div>
+                  <EmptyState
+                    icon="fa-dumbbell"
+                    title="No workout logs yet"
+                    subtitle="Start by logging your first workout above!"
+                    variant="default"
+                  />
                 )}
               </div>
           </div>

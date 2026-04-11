@@ -7,6 +7,7 @@ import {
   deleteNutritionLog,
 } from "../services/NutritionService";
 import Chart from "react-apexcharts";
+import EmptyState from "../components/EmptyState";
 import "./styles/Nutrition.css";
 import { UserContext } from "../components/UserContext";
 import DietRecommendationService from '../services/DietRecommendationService';
@@ -788,7 +789,12 @@ const Nutrition = () => {
               </div>
             </>
           ) : (
-            <p className="no-meals">No meals logged today. Start by adding one above!</p>
+            <EmptyState
+              icon="fa-utensils"
+              title="No meals logged today"
+              subtitle="Start by adding one above!"
+              variant="default"
+            />
           )}
         </div>
 
@@ -824,10 +830,11 @@ const Nutrition = () => {
                   type="donut"
                 />
               ) : (
-                <div className="chart-empty-state">
-                  <i className="fas fa-chart-pie"></i>
-                  <p>Start logging meals to see your macronutrient breakdown</p>
-                </div>
+                <EmptyState
+                  icon="fa-chart-pie"
+                  title="Start logging meals to see your macronutrient breakdown"
+                  variant="chart"
+                />
               )}
             </div>
           </div>
@@ -846,10 +853,11 @@ const Nutrition = () => {
                   type="bar"
                 />
               ) : (
-                <div className="chart-empty-state">
-                  <i className="fas fa-chart-bar"></i>
-                  <p>Add meals to track your weekly calorie trends</p>
-                </div>
+                <EmptyState
+                  icon="fa-chart-bar"
+                  title="Add meals to track your weekly calorie trends"
+                  variant="chart"
+                />
               )}
             </div>
           </div>
@@ -864,10 +872,11 @@ const Nutrition = () => {
                   type="radar"
                 />
               ) : (
-                <div className="chart-empty-state">
-                  <i className="fas fa-chart-radar"></i>
-                  <p>Log different meal types to see your distribution</p>
-                </div>
+                <EmptyState
+                  icon="fa-chart-radar"
+                  title="Log different meal types to see your distribution"
+                  variant="chart"
+                />
               )}
             </div>
           </div>
@@ -932,10 +941,11 @@ const Nutrition = () => {
                   type="area"
                 />
               ) : (
-                <div className="chart-empty-state weekly-empty">
-                  <i className="fas fa-chart-area"></i>
-                  <p>Log meals to see your weekly calorie trend</p>
-                </div>
+                <EmptyState
+                  icon="fa-chart-area"
+                  title="Log meals to see your weekly calorie trend"
+                  variant="chart"
+                />
               )}
             </div>
 

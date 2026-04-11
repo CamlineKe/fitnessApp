@@ -1,5 +1,6 @@
 import React, { useContext, useState, useEffect } from "react";
 import { UserContext } from "../components/UserContext";
+import EmptyState from "../components/EmptyState";
 import "./styles/Dashboard.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Link, useNavigate } from "react-router-dom";
@@ -314,11 +315,13 @@ const Dashboard = () => {
                     </div>
                   </>
                 ) : (
-                  <div className="stat-empty-state">
-                    <i className="fas fa-utensils"></i>
-                    <p>No meals logged today</p>
-                    <span className="empty-label">Click to add nutrition</span>
-                  </div>
+                  <EmptyState
+                    icon="fa-utensils"
+                    title="No meals logged today"
+                    subtitle="Click to add nutrition"
+                    variant="compact"
+                    action={{ label: "Log Meal", to: "/nutrition", icon: "fa-plus" }}
+                  />
                 )}
                 <div className="stat-footer">View Nutrition <i className="fas fa-arrow-right"></i></div>
               </Link>
@@ -339,11 +342,13 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="stat-empty-state">
-                    <i className="fas fa-dumbbell"></i>
-                    <p>No workout logged today</p>
-                    <span className="empty-label">Click to add workout</span>
-                  </div>
+                  <EmptyState
+                    icon="fa-dumbbell"
+                    title="No workout logged today"
+                    subtitle="Click to add workout"
+                    variant="compact"
+                    action={{ label: "Log Workout", to: "/workout", icon: "fa-plus" }}
+                  />
                 )}
                 <div className="stat-footer">View Workouts →</div>
               </Link>
@@ -366,11 +371,13 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="stat-empty-state">
-                    <i className="fas fa-brain"></i>
-                    <p>No check-in today</p>
-                    <span className="empty-label">Click to complete check-in</span>
-                  </div>
+                  <EmptyState
+                    icon="fa-brain"
+                    title="No check-in today"
+                    subtitle="Click to complete check-in"
+                    variant="compact"
+                    action={{ label: "Check In", to: "/mentalhealth", icon: "fa-plus" }}
+                  />
                 )}
                 <div className="stat-footer">View Mental Health →</div>
               </Link>
@@ -403,11 +410,13 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="stat-empty-state">
-                    <i className="fas fa-trophy"></i>
-                    <p>No streak yet</p>
-                    <span className="empty-label">Start logging to build your streak!</span>
-                  </div>
+                  <EmptyState
+                    icon="fa-trophy"
+                    title="No streak yet"
+                    subtitle="Start logging to build your streak!"
+                    variant="compact"
+                    action={{ label: "View Progress", to: "/gamification", icon: "fa-arrow-right" }}
+                  />
                 )}
                 <div className="stat-footer">View Progress <i className="fas fa-arrow-right"></i></div>
               </Link>
@@ -422,21 +431,13 @@ const Dashboard = () => {
 
             <div className="activity-feed">
               {activityFeed.length === 0 ? (
-                <div className="no-activities">
-                  <i className="fas fa-calendar-plus"></i>
-                  <p>No activities logged today. Start your wellness journey!</p>
-                  <div className="quick-add-buttons">
-                    <Link to="/workout" className="quick-add-btn workout">
-                      <i className="fas fa-dumbbell"></i> Log Workout
-                    </Link>
-                    <Link to="/nutrition" className="quick-add-btn nutrition">
-                      <i className="fas fa-utensils"></i> Log Meal
-                    </Link>
-                    <Link to="/mentalhealth" className="quick-add-btn mental">
-                      <i className="fas fa-brain"></i> Check-in
-                    </Link>
-                  </div>
-                </div>
+                <EmptyState
+                  icon="fa-calendar-plus"
+                  title="No activities logged today"
+                  subtitle="Start your wellness journey!"
+                  variant="default"
+                  action={{ label: "Log Workout", to: "/workout", icon: "fa-dumbbell" }}
+                />
               ) : (
                 <div className="activity-list">
                   {activityFeed.map((activity, index) => (

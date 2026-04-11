@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { UserContext } from "../components/UserContext";
+import EmptyState from "../components/EmptyState";
 import { getMentalHealthData, logDailyCheckIn } from "../services/MentalHealthService";
 import StressAnalysisService from "../services/StressAnalysisService";
 import GamificationService from "../services/GamificationService"; 
@@ -377,7 +378,12 @@ const MentalHealth = () => {
                       </div>
                     </>
                   ) : (
-                    <p>No mood logged for today. Add your first check-in!</p>
+                    <EmptyState
+                      icon="fa-brain"
+                      title="No mood logged for today"
+                      subtitle="Add your first check-in!"
+                      variant="compact"
+                    />
                   )}
                 </div>
               )}
@@ -527,7 +533,12 @@ const MentalHealth = () => {
                 <Line data={prepareDailyMoodData(mentalHealthData)} options={chartOptions} />
               </div>
             ) : (
-              <p>No mood data available yet. Start by adding your first daily check-in!</p>
+              <EmptyState
+                icon="fa-chart-line"
+                title="No mood data available yet"
+                subtitle="Start by adding your first daily check-in!"
+                variant="chart"
+              />
             )}
           </div>
 

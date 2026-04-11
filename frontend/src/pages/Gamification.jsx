@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import GamificationService from '../services/GamificationService';
 import NotificationService from '../services/NotificationService';
 import { UserContext } from '../components/UserContext';
+import EmptyState from '../components/EmptyState';
 import './styles/Gamification.css';
 import { Tab, Tabs, ProgressBar } from 'react-bootstrap';
 import {
@@ -368,11 +369,12 @@ const Gamification = () => {
               </div>
             ))}
           {(!gamificationData?.achievements?.filter(a => a.category === 'workout' && a.unlocked)?.length > 0) && (
-            <div className="no-achievements">
-              <i className="fas fa-medal"></i>
-              <p>No achievements yet</p>
-              <span className="empty-label">Complete workouts to earn badges!</span>
-            </div>
+            <EmptyState
+              icon="fa-medal"
+              title="No achievements yet"
+              subtitle="Complete workouts to earn badges!"
+              variant="compact"
+            />
           )}
         </div>
       </div>
@@ -421,11 +423,12 @@ const Gamification = () => {
               </div>
             ))
           ) : (
-            <div className="no-moods">
-              <i className="fas fa-brain"></i>
-              <p>No mood logs yet</p>
-              <span className="empty-label">Check in daily to track your mental wellness!</span>
-            </div>
+            <EmptyState
+              icon="fa-brain"
+              title="No mood logs yet"
+              subtitle="Check in daily to track your mental wellness!"
+              variant="compact"
+            />
           )}
         </div>
       </div>
@@ -475,11 +478,12 @@ const Gamification = () => {
               </div>
             ))}
           {(!gamificationData?.achievements?.filter(a => a.category === 'nutrition' && a.unlocked)?.length > 0) && (
-            <div className="no-achievements">
-              <i className="fas fa-medal"></i>
-              <p>No achievements yet</p>
-              <span className="empty-label">Log meals to earn nutrition badges!</span>
-            </div>
+            <EmptyState
+              icon="fa-medal"
+              title="No achievements yet"
+              subtitle="Log meals to earn nutrition badges!"
+              variant="compact"
+            />
           )}
         </div>
       </div>
