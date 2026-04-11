@@ -7,7 +7,7 @@ on:
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
-  ping-flask-ai:
+  ping-services:
     runs-on: ubuntu-latest
     steps:
       - name: Ping Flask AI Service (Model Server)
@@ -47,9 +47,6 @@ jobs:
           # But log for monitoring
           exit 0
 
-  ping-node-backend:
-    runs-on: ubuntu-latest
-    steps:
       - name: Ping Node.js Backend
         run: |
           # Also keep the Node backend warm (it proxies to Flask)
