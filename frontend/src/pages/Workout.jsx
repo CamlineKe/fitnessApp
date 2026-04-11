@@ -274,6 +274,13 @@ const Workout = () => {
     }
   }, [workoutData, workoutLogs]);
 
+  // Section loader component
+  const SectionLoader = () => (
+    <div className="section-loader">
+      <div className="loading-spinner-small"></div>
+    </div>
+  );
+
   const handleNewLogChange = (e) => {
     const { name, value } = e.target;
 
@@ -512,7 +519,7 @@ const Workout = () => {
           
           {/* Today's Workout Section */}
           <div className="todays-workout">
-            <h2>Today's Workout {loading.logs && <span className="loading-inline">⏳</span>}</h2>
+            <h2>Today's Workout {loading.logs && <SectionLoader />}</h2>
                 {workoutData ? (
                   <div className="workout-stats">
                     <div className="stat-item">
@@ -640,7 +647,7 @@ const Workout = () => {
 
               {/* Recommendations Section */}
               <div className="recommendations">
-                <h2>Recommendations {loading.recommendations && <span className="loading-inline">⏳</span>}</h2>
+                <h2>Recommendations {loading.recommendations && <SectionLoader />}</h2>
                 <p>Based on your recent workout data, here are some personalized recommendations:</p>
                 {workoutRecommendations?.recommendations?.length > 0 ? (
                   <ul>
@@ -693,7 +700,7 @@ const Workout = () => {
               <div className="workout-logs">
                 <h2>
                   Recent Workout Logs
-                  {loading.logs && <span className="loading-inline">⏳</span>}
+                  {loading.logs && <SectionLoader />}
                   {!loading.logs && pagination && (
                     <span className="log-count">({pagination.totalCount} total)</span>
                   )}

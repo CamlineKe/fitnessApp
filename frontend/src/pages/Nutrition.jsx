@@ -52,6 +52,13 @@ const Nutrition = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMoreLogs, setHasMoreLogs] = useState(false);
 
+  // Section loader component
+  const SectionLoader = () => (
+    <div className="section-loader">
+      <div className="loading-spinner-small"></div>
+    </div>
+  );
+
   const [dietRecommendations, setDietRecommendations] = useState(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -1053,11 +1060,15 @@ const Nutrition = () => {
 
         {/* Recent Meal Logs Section */}
         <div className="nutrition-section meal-logs">
-          <h2>Recent Meal Logs {nutritionData.pagination?.total > 0 && 
-            <span className="log-count">({nutritionData.pagination.total} total)</span>
-          }</h2>
+          <h2>
+            Recent Meal Logs
+            {nutritionData.pagination?.total > 0 && (
+              <span className="log-count">({nutritionData.pagination.total} total)</span>
+            )}
+            {isLoading && <SectionLoader />}
+          </h2>
           {isLoading ? (
-            <p className="loading">Loading meal logs...</p>
+            <SectionLoader />
           ) : mealLogs.length > 0 ? (
             <>
               <div className="meal-logs-header">

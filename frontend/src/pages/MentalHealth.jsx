@@ -61,6 +61,13 @@ const MentalHealth = () => {
     });
   };
 
+  // Section loader component
+  const SectionLoader = () => (
+    <div className="section-loader">
+      <div className="loading-spinner-small"></div>
+    </div>
+  );
+
   const handleError = (message) => {
     Toast.fire({
       icon: 'error',
@@ -524,10 +531,10 @@ const MentalHealth = () => {
 
           {/* Mood Chart Section */}
           <div className="mentalhealth-section mood-chart-section">
-            <h2>Mood Trends</h2>
+            <h2>Mood Trends {isLoading && <SectionLoader />}</h2>
             <p className="chart-description">Your daily moods for the past 7 days</p>
             {isLoading ? (
-              <p>Loading your mood data...</p>
+              <SectionLoader />
             ) : mentalHealthData.length > 0 ? (
               <div className="mood-chart-container">
                 <Line data={prepareDailyMoodData(mentalHealthData)} options={chartOptions} />
@@ -544,10 +551,10 @@ const MentalHealth = () => {
 
           {/* Mood History Section */}
           <div className="mentalhealth-section mental-logs">
-            <h2>Mood History</h2>
+            <h2>Mood History {isLoading && <SectionLoader />}</h2>
             <p className="chart-description">Your daily moods for the past 7 days</p>
             {isLoading ? (
-              <p>Loading your mental health logs...</p>
+              <SectionLoader />
             ) : mentalLogs.length > 0 ? (
               <div className="mental-logs-grid">
                 {mentalLogs
