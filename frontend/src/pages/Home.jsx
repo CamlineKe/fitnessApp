@@ -5,7 +5,7 @@ import './styles/Home.css';
 
 const Home = () => {
   return (
-    <div className="home-container">
+    <div className="page-container home-page">
       <nav className="navbar">
         <div className="navbar-title">
           <h1>Fitness Tracker</h1>

@@ -499,7 +499,7 @@ const Workout = () => {
   };
 
   return (
-    <div className="page-content">
+    <div className="page-container">
       <div className="workout-container">
         <div className="workout-header">
           <h1>Workout</h1>

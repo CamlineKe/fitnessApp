@@ -1,7 +1,7 @@
 /* Workout.css - Professional UI Fix */
 
 /* Page Container - Single definition */
-.page-content {
+.page-container {
     min-height: calc(100vh - var(--nav-height));
     margin-top: var(--nav-height);
     background: var(--bg-main);
