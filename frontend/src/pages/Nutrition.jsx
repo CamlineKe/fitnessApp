@@ -593,14 +593,14 @@ const Nutrition = () => {
   };
 
   return (
-    <div className="page-content">  
-    <div className="nutrition-container">
-      <div className="nutrition-header">
-        <h1>Nutrition</h1>
-        <p>Track your daily nutrition intake.</p>
-      </div>
+    <div className="page-container">
+      <div className="nutrition-container">
+        <div className="nutrition-header">
+          <h1>Nutrition</h1>
+          <p>Track your daily nutrition intake.</p>
+        </div>
 
-      <div className="nutrition-content">
+        <div className="nutrition-content">
         {/* Meal Form Section */}
         <div className="nutrition-section meal-form">
           <h2>Add Meal</h2>

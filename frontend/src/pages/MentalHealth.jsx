@@ -334,7 +334,7 @@ const MentalHealth = () => {
   };
 
   return (
-    <div className="page-content">
+    <div className="page-container">
       <div className="mentalhealth-container">
         <div className="mentalhealth-header">
           <h1>Mental Health</h1>

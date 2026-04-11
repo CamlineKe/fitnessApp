@@ -219,7 +219,7 @@ const Recommendation = () => {
   }, [user]);
 
   return (
-    <div className="page-content">
+    <div className="page-container">
       <div className="recommendation-container">
         <div className="recommendation-header">
           <h1>Your Personalized Recommendations</h1>

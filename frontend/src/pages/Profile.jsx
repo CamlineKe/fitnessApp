@@ -377,7 +377,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="page-content">
+    <div className="page-container">
       <div className="profile-container">
         <div className="profile-header">
           <h1>Profile</h1>
