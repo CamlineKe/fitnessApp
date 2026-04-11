@@ -115,3 +115,31 @@
     opacity: 0;
   }
 }
+
+/* Mobile: Position at bottom-center to avoid navbar overlap */
+@media (max-width: 768px) {
+  .notification-container {
+    top: auto;
+    bottom: 1rem;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: calc(100% - 2rem);
+    max-width: 360px;
+  }
+
+  .notification-item {
+    animation: slide-in-up 0.3s ease-out;
+  }
+}
+
+@keyframes slide-in-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
