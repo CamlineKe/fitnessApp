@@ -24,13 +24,13 @@ jobs:
             echo "Attempt $i/$MAX_RETRIES: Pinging $URL"
             
             # Use --max-time to prevent hanging on unresponsive service
-            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$URL")
+            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$URL" || echo "TIMEOUT")
             echo "Response code: $RESPONSE"
             
             if [ "$RESPONSE" = "200" ]; then
               echo "✅ Flask AI service is alive and warm"
               exit 0
-            elif [ "$RESPONSE" = "503" ] || [ "$RESPONSE" = "502" ]; then
+            elif [ "$RESPONSE" = "TIMEOUT" ] || [ "$RESPONSE" = "503" ] || [ "$RESPONSE" = "502" ]; then
               # Service might be starting up (cold start), wait and retry
               echo "⚠️ Service may be starting up (code: $RESPONSE), retrying in ${RETRY_DELAY}s..."
               sleep $RETRY_DELAY
@@ -55,11 +55,13 @@ jobs:
           # Also keep the Node backend warm (it proxies to Flask)
           URL="https://fitness-app-backend-ap0r.onrender.com/api/health"
           
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$URL")
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "$URL" || echo "TIMEOUT")
           echo "Node backend response: $RESPONSE"
           
           if [ "$RESPONSE" = "200" ]; then
             echo "✅ Node backend is healthy"
+          elif [ "$RESPONSE" = "TIMEOUT" ]; then
+            echo "⚠️ Node backend timeout (non-critical)"
           else
             echo "⚠️ Node backend returned $RESPONSE (non-critical)"
           fi
