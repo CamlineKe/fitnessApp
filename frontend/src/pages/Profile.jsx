@@ -400,7 +400,7 @@ const Profile = () => {
                         name={field}
                         value={updatedProfile[field] || ''}
                         onChange={handleInputChange}
-                        className="form-control"
+                        className="form-input"
                       >
                         <option value="">Select Gender</option>
                         <option value="male">Male</option>
@@ -413,7 +413,7 @@ const Profile = () => {
                         name={field}
                         value={updatedProfile[field] || ''}
                         onChange={handleInputChange}
-                        className="form-control"
+                        className="form-input"
                         rows="4"
                         placeholder="Enter your health and fitness goals..."
                       />
@@ -425,7 +425,7 @@ const Profile = () => {
                         value={updatedProfile[field] || ''}
                         onChange={handleInputChange}
                         disabled={field === 'username' || field === 'email'}
-                        className="form-control"
+                        className="form-input"
                       />
                     )}
                   </div>
@@ -558,7 +558,7 @@ const Profile = () => {
                           id="currentPassword"
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
-                          className="form-control"
+                          className="form-input"
                           placeholder="Enter current password"
                         />
                         <button
@@ -578,7 +578,7 @@ const Profile = () => {
                           id="newPassword"
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
-                          className="form-control"
+                          className="form-input"
                           placeholder="Enter new password"
                         />
                         <button
@@ -598,7 +598,7 @@ const Profile = () => {
                           id="confirmNewPassword"
                           value={confirmNewPassword}
                           onChange={(e) => setConfirmNewPassword(e.target.value)}
-                          className="form-control"
+                          className="form-input"
                           placeholder="Confirm new password"
                         />
                         <button

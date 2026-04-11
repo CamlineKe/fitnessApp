@@ -134,20 +134,20 @@
     font-family: inherit;
 }
 
-.form-control:focus {
+.form-input:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
     background: white;
 }
 
-.form-control:disabled {
+.form-input:disabled {
     background: var(--bg-main);
     cursor: not-allowed;
     opacity: 0.7;
 }
 
-textarea.form-control {
+textarea.form-input {
     min-height: 120px;
     resize: vertical;
 }
@@ -446,7 +446,7 @@ textarea.form-control {
         margin-bottom: 1rem;
     }
 
-    .form-control {
+    .form-input {
         padding: 0.75rem;
     }
 
@@ -535,7 +535,7 @@ textarea.form-control {
 .connected-devices-section,
 .settings-section,
 .detail-row,
-.form-control,
+.form-input,
 .button-group button {
     transition: all 0.3s ease;
 }
