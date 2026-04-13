@@ -213,28 +213,31 @@ const initializeDefaultData = async (userId) => {
 
     await Gamification.create({
       userId,
-      streaks: {
-        workoutStreak: 0,
-        mentalStreak: 0,
-        nutritionStreak: 0,
-        lastWorkoutDate: null,
-        lastMentalDate: null,
-        lastNutritionDate: null
-      },
       points: {
         workout: 0,
         mental: 0,
         nutrition: 0
       },
       level: 1,
+      streaks: {
+        workoutStreak: 0,
+        mentalStreak: 0,
+        nutritionStreak: 0,
+        currentStreak: 0,
+        bestStreak: 0,
+        lastWorkoutDate: null,
+        lastMentalDate: null,
+        lastNutritionDate: null
+      },
       achievements: defaultAchievements,
       challenges: [],
-      waterIntake: {
-        daily: 0,
-        target: 2000,
-        lastUpdated: new Date()
-      },
-      moodLog: []
+      moodLog: [],
+      stats: {
+        totalWorkoutTime: 0,
+        totalCaloriesBurned: 0,
+        totalMealsLogged: 0,
+        totalMoodChecks: 0
+      }
     });
 
     Logger.info("Default data initialized for user:", userId);
