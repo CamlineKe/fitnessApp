@@ -135,30 +135,6 @@ const initializeDefaultData = async (userId) => {
       feedback: "",
     });
 
-    // Default nutrition data
-    await Nutrition.create({
-      userId,
-      dailyCalories: 0,
-      mealType: "breakfast",  // Set a default meal type
-      foodItems: ["Initial meal"],  // Add a default food item since it's required
-      calories: 0,
-      macronutrients: {
-        protein: 0,
-        carbohydrates: 0,
-        fats: 0,
-      },
-    });
-
-    // Default mental health data
-    await MentalHealth.create({
-      userId,
-      date: new Date(),
-      stressLevel: 5, // Default to neutral stress level
-      mood: "neutral", // Default to neutral mood
-      sleepQuality: 5, // Default to neutral sleep quality
-      notes: "Initial check-in"
-    });
-
     // Default gamification data with complete achievement structure
     const defaultAchievements = [
       {
