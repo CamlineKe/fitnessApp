@@ -13,6 +13,29 @@ import { dietCache, workoutCache, stressCache } from '../utils/aiCache.js';
 const httpAgent = new http.Agent({ keepAlive: true, maxSockets: 10 });
 const httpsAgent = new https.Agent({ keepAlive: true, maxSockets: 10 });
 
+// ✅ Helper to calculate today's total intake from all nutrition logs
+const calculateTodayIntake = (nutritionLogs) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const todaysLogs = nutritionLogs.filter(log => {
+    const logDate = new Date(log.date);
+    return logDate.setHours(0, 0, 0, 0) === today.getTime();
+  });
+
+  return todaysLogs.reduce((acc, log) => ({
+    calories: acc.calories + (log.calories || 0),
+    macronutrients: {
+      protein: acc.macronutrients.protein + (log.macronutrients?.protein || 0),
+      carbohydrates: acc.macronutrients.carbohydrates + (log.macronutrients?.carbohydrates || 0),
+      fats: acc.macronutrients.fats + (log.macronutrients?.fats || 0)
+    }
+  }), {
+    calories: 0,
+    macronutrients: { protein: 0, carbohydrates: 0, fats: 0 }
+  });
+};
+
 // ✅ Configure axios instance with timeout and keep-alive for Flask AI
 const flaskAxios = axios.create({
   timeout: 180000, // 180 second timeout for model loading on cold start
@@ -48,8 +71,8 @@ export const getDietRecommendations = async (req, res) => {
       Logger.info('[AI] Fresh diet data requested - skipping cache');
     }
 
-    // Get the most recent nutrition log for current daily intake
-    const currentDayLog = nutritionLogs[0] || {};
+    // ✅ Calculate today's total intake from all of today's nutrition logs
+    const todayIntake = calculateTodayIntake(nutritionLogs);
 
     // Format the data to match Flask API expectations
     const requestData = {
@@ -59,14 +82,7 @@ export const getDietRecommendations = async (req, res) => {
         dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null,
         gender: user.gender
       },
-      daily_intake: {
-        calories: currentDayLog.calories || 0,
-        macronutrients: {
-          protein: currentDayLog.macronutrients?.protein || 0,
-          carbohydrates: currentDayLog.macronutrients?.carbohydrates || 0,
-          fats: currentDayLog.macronutrients?.fats || 0
-        }
-      },
+      daily_intake: todayIntake,
       nutrition_logs: nutritionLogs.map(log => ({
         calories: log.calories,
         macronutrients: log.macronutrients,
@@ -281,7 +297,8 @@ export const getAllRecommendations = async (req, res) => {
       MentalHealth.find({ userId: req.user._id }).sort({ date: -1 }).limit(7)
     ]);
 
-    const currentDayLog = nutritionLogs[0] || {};
+    // ✅ Calculate today's total intake from all of today's nutrition logs
+    const todayIntake = calculateTodayIntake(nutritionLogs);
     const currentWorkout = workoutLogs[0] || {};
     const currentMental = mentalHealthLogs[0] || null;
 
@@ -289,7 +306,7 @@ export const getAllRecommendations = async (req, res) => {
     const dietData = {
       user_id: req.user._id,  // Enable per-user caching in Flask-AI
       user_data: { dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null, gender: user.gender },
-      daily_intake: { calories: currentDayLog.calories || 0, macronutrients: { protein: currentDayLog.macronutrients?.protein || 0, carbohydrates: currentDayLog.macronutrients?.carbohydrates || 0, fats: currentDayLog.macronutrients?.fats || 0 } },
+      daily_intake: todayIntake,
       nutrition_logs: nutritionLogs.map(log => ({ calories: log.calories, macronutrients: log.macronutrients, timestamp: log.date, meals: log.meals }))
     };
 
