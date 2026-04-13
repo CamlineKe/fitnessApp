@@ -3,9 +3,9 @@ import Logger from '../utils/logger';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/ai/stress`;
 
-const getStressAnalysis = async (mentalLogs = [], userId) => {
-  Logger.debug("StressAnalysisService - Received mental logs:", mentalLogs);
-  
+const getStressAnalysis = async (mentalLogs = [], userId, skipCache = false) => {
+  Logger.debug("StressAnalysisService - Received mental logs:", mentalLogs, "skipCache:", skipCache);
+
   try {
     // Get user data from localStorage
     const userData = JSON.parse(localStorage.getItem('user') || '{}');
@@ -14,6 +14,7 @@ const getStressAnalysis = async (mentalLogs = [], userId) => {
     // Prepare the request data - backend will use this to fetch additional data
     const requestData = {
       user_id: userId,
+      skip_cache: skipCache,
       user_data: {
         dateOfBirth: userData.dateOfBirth,
         gender: userData.gender

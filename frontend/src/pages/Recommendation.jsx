@@ -88,15 +88,15 @@ const Recommendation = () => {
       
       let batchResult;
       try {
-        batchResult = await RecommendationService.getAllRecommendations();
+        batchResult = await RecommendationService.getAllRecommendations(skipCache);
         Logger.info('[Recommendation] Batch cache hits:', batchResult.cache_hits);
       } catch (batchError) {
         Logger.warn('[Recommendation] Batch failed, falling back to individual calls:', batchError);
         // Fallback: individual calls (original behavior)
         const [dietData, stressData, workoutData] = await Promise.allSettled([
-          DietRecommendationService.getDietRecommendations(userId),
-          StressAnalysisService.getStressAnalysis(sortedLogs, userId),
-          WorkoutRecommenderService.getWorkoutRecommendations(userId)
+          DietRecommendationService.getDietRecommendations(userId, skipCache),
+          StressAnalysisService.getStressAnalysis(sortedLogs, userId, skipCache),
+          WorkoutRecommenderService.getWorkoutRecommendations(userId, skipCache)
         ]);
         batchResult = {
           diet: dietData.status === 'fulfilled' ? dietData.value : null,

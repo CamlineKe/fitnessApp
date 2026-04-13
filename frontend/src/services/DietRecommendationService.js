@@ -3,13 +3,13 @@ import Logger from '../utils/logger';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/ai/diet`;
 
-const getDietRecommendations = async (userId) => {
+const getDietRecommendations = async (userId, skipCache = false) => {
   try {
-    console.log('[DietService] Starting request with userId:', userId);
+    console.log('[DietService] Starting request with userId:', userId, 'skipCache:', skipCache);
     console.log('[DietService] API_URL:', API_URL);
-    
+
     // Send user_id for caching - backend will fetch user data and nutrition logs
-    const response = await axios.post(API_URL, { user_id: userId });
+    const response = await axios.post(API_URL, { user_id: userId, skip_cache: skipCache });
     // axiosConfig handles auth cookies automatically
 
     console.log('[DietService] Response received:', response.status, response.data);

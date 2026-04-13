@@ -118,15 +118,20 @@ def cache_response(endpoint):
         def decorated_function(*args, **kwargs):
             # Get user_id from request if available
             user_id = None
+            skip_cache = False
             if request.is_json and request.json:
                 user_id = request.json.get('user_id')
+                skip_cache = request.json.get('skip_cache', False)
             
             cache_key = get_cache_key(endpoint, user_id)
             
-            # Try to get cached result
-            cached = get_cached_result(cache_key)
-            if cached is not None:
-                return jsonify(cached), 200
+            # Try to get cached result (unless skip_cache is true)
+            if not skip_cache:
+                cached = get_cached_result(cache_key)
+                if cached is not None:
+                    return jsonify(cached), 200
+            else:
+                logger.info(f"[{endpoint}] Cache skip requested for user {user_id}")
             
             # Execute function and cache result
             result = f(*args, **kwargs)

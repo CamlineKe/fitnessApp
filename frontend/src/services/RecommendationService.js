@@ -6,16 +6,17 @@ const API_URL = `${import.meta.env.VITE_API_URL}/ai/all`;
 /**
  * Get all recommendations (diet, workout, stress) in a single batch request.
  * Uses the optimized /ai/all endpoint for reduced latency.
- * 
+ *
+ * @param {boolean} skipCache - If true, bypass all caches and fetch fresh data
  * @returns {Promise<{diet: object, workout: object, stress: object, cache_hits: object}>}
  */
-const getAllRecommendations = async () => {
+const getAllRecommendations = async (skipCache = false) => {
   try {
-    Logger.debug('[RecommendationService] Fetching batch recommendations');
-    
+    Logger.debug('[RecommendationService] Fetching batch recommendations', { skipCache });
+
     // OPTIMIZED: Single API call replaces 3 separate calls
     // Backend fetches user data from auth cookie (req.user._id)
-    const response = await axios.post(API_URL, {});
+    const response = await axios.post(API_URL, { skip_cache: skipCache });
     
     Logger.debug('[RecommendationService] Batch response:', response.data);
     

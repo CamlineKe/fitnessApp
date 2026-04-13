@@ -3,10 +3,10 @@ import Logger from '../utils/logger';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/ai/workout`;
 
-const getWorkoutRecommendations = async (userId) => {
+const getWorkoutRecommendations = async (userId, skipCache = false) => {
   try {
     // Send user_id for caching - backend will fetch user data and workout history
-    const response = await axios.post(API_URL, { user_id: userId });
+    const response = await axios.post(API_URL, { user_id: userId, skip_cache: skipCache });
     // axiosConfig handles auth cookies automatically
 
     Logger.debug('Workout recommendations response:', response.data);

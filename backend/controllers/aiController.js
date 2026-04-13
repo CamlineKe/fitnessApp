@@ -35,12 +35,18 @@ export const getDietRecommendations = async (req, res) => {
   try {
     Logger.info('[AI] Diet recommendations request received for user:', req.user?._id);
     Logger.info('[AI] FLASK_API_URL:', FLASK_API_URL);
-    
+
     const user = await User.findById(req.user._id);
     Logger.info('[AI] User found:', user?._id, 'DOB:', user?.dateOfBirth, 'Gender:', user?.gender);
-    
+
     const nutritionLogs = await Nutrition.find({ userId: req.user._id }).sort({ date: -1 }).limit(7);
     Logger.info('[AI] Nutrition logs count:', nutritionLogs.length);
+
+    // Check if fresh data is requested (e.g., after meal update)
+    const skipCache = req.body.skip_cache === true;
+    if (skipCache) {
+      Logger.info('[AI] Fresh diet data requested - skipping cache');
+    }
 
     // Get the most recent nutrition log for current daily intake
     const currentDayLog = nutritionLogs[0] || {};
@@ -48,6 +54,7 @@ export const getDietRecommendations = async (req, res) => {
     // Format the data to match Flask API expectations
     const requestData = {
       user_id: req.user._id,  // Enable per-user caching in Flask-AI
+      skip_cache: skipCache,   // Pass skip flag to Flask AI
       user_data: {
         dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null,
         gender: user.gender
@@ -68,23 +75,27 @@ export const getDietRecommendations = async (req, res) => {
       }))
     };
 
-    // ✅ Check cache first (with type-specific key)
+    // Generate cache key for caching fresh response
     const cacheKey = dietCache.generateKey(requestData, 'diet');
-    const cached = dietCache.get(cacheKey);
-    if (cached) {
-      Logger.info('Diet cache hit - returning cached response');
-      return res.json(cached);
+
+    // ✅ Check cache first (with type-specific key) unless skipCache is true
+    if (!skipCache) {
+      const cached = dietCache.get(cacheKey);
+      if (cached) {
+        Logger.info('Diet cache hit - returning cached response');
+        return res.json(cached);
+      }
     }
 
     Logger.info('[AI] Calling Flask API at:', `${FLASK_API_URL}/diet`);
     Logger.info('[AI] Request data:', JSON.stringify(requestData, null, 2));
 
     const response = await flaskAxios.post(`${FLASK_API_URL}/diet`, requestData);
-    
+
     Logger.info('[AI] Flask response status:', response.status);
     Logger.info('[AI] Flask response data:', JSON.stringify(response.data, null, 2).substring(0, 500));
-    
-    // ✅ Cache the response
+
+    // ✅ Cache the fresh response
     dietCache.set(cacheKey, response.data);
     Logger.info(`Diet cache miss - cached response (cache size: ${dietCache.size})`);
     
@@ -113,9 +124,16 @@ export const getWorkoutRecommendations = async (req, res) => {
     const workoutLogs = await Workout.find({ userId: req.user._id }).sort({ date: -1 }).limit(7);
     Logger.info('[AI] Workout logs count:', workoutLogs.length);
 
+    // Check if fresh data is requested (e.g., after workout update)
+    const skipCache = req.body.skip_cache === true;
+    if (skipCache) {
+      Logger.info('[AI] Fresh workout data requested - skipping Flask cache');
+    }
+
     // Format the data to match Flask API expectations
     const requestData = {
       user_id: req.user._id,  // Enable per-user caching in Flask-AI
+      skip_cache: skipCache,   // Pass skip flag to Flask AI
       user_data: {
         dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null,
         gender: user.gender
@@ -135,19 +153,23 @@ export const getWorkoutRecommendations = async (req, res) => {
       } : {}
     };
 
-    // ✅ Check cache first (with type-specific key)
+    // Generate cache key for caching fresh response
     const cacheKey = workoutCache.generateKey(requestData, 'workout');
-    const cached = workoutCache.get(cacheKey);
-    if (cached) {
-      Logger.info('Workout cache hit - returning cached response');
-      return res.json(cached);
+
+    // ✅ Check cache first (with type-specific key) unless skipCache is true
+    if (!skipCache) {
+      const cached = workoutCache.get(cacheKey);
+      if (cached) {
+        Logger.info('Workout cache hit - returning cached response');
+        return res.json(cached);
+      }
     }
 
     Logger.info('[AI] Calling Flask API at:', `${FLASK_API_URL}/workout`);
     const response = await flaskAxios.post(`${FLASK_API_URL}/workout`, requestData);
     Logger.info('[AI] Workout Flask response status:', response.status);
-    
-    // ✅ Cache the response
+
+    // ✅ Cache the fresh response
     workoutCache.set(cacheKey, response.data);
     Logger.info(`Workout cache miss - cached response (cache size: ${workoutCache.size})`);
     
@@ -168,16 +190,23 @@ export const getWorkoutRecommendations = async (req, res) => {
 export const getStressAnalysis = async (req, res) => {
   try {
     Logger.info('[AI] Stress analysis request received for user:', req.user?._id);
-    
+
     const user = await User.findById(req.user._id);
     Logger.info('[AI] User found:', user?._id);
-    
+
     const mentalHealthLogs = await MentalHealth.find({ userId: req.user._id }).sort({ date: -1 }).limit(7);
     Logger.info('[AI] Mental health logs count:', mentalHealthLogs.length);
+
+    // Check if fresh data is requested (e.g., after mental health update)
+    const skipCache = req.body.skip_cache === true;
+    if (skipCache) {
+      Logger.info('[AI] Fresh stress data requested - skipping cache');
+    }
 
     // Format the data to match what the Flask API expects
     const requestData = {
       user_id: req.user._id,  // Enable per-user caching in Flask-AI
+      skip_cache: skipCache,   // Pass skip flag to Flask AI
       user_data: {
         dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null,
         gender: user.gender
@@ -197,19 +226,23 @@ export const getStressAnalysis = async (req, res) => {
       } : null
     };
 
-    // ✅ Check cache first (with type-specific key)
+    // Generate cache key for caching fresh response
     const cacheKey = stressCache.generateKey(requestData, 'stress');
-    const cached = stressCache.get(cacheKey);
-    if (cached) {
-      Logger.info('Stress cache hit - returning cached response');
-      return res.json(cached);
+
+    // ✅ Check cache first (with type-specific key) unless skipCache is true
+    if (!skipCache) {
+      const cached = stressCache.get(cacheKey);
+      if (cached) {
+        Logger.info('Stress cache hit - returning cached response');
+        return res.json(cached);
+      }
     }
 
     Logger.info('[AI] Calling Flask API at:', `${FLASK_API_URL}/stress`);
     const response = await flaskAxios.post(`${FLASK_API_URL}/stress`, requestData);
     Logger.info('[AI] Stress Flask response status:', response.status);
-    
-    // ✅ Cache the response
+
+    // ✅ Cache the fresh response
     stressCache.set(cacheKey, response.data);
     Logger.info(`Stress cache miss - cached response (cache size: ${stressCache.size})`);
     
@@ -232,6 +265,12 @@ export const getStressAnalysis = async (req, res) => {
 export const getAllRecommendations = async (req, res) => {
   try {
     Logger.info('[AI] Batch recommendations request received for user:', req.user?._id);
+    
+    // Check if fresh data is requested (e.g., after workout/meal/mental health update)
+    const skipCache = req.body.skip_cache === true;
+    if (skipCache) {
+      Logger.info('[AI] Fresh data requested - skipping all caches');
+    }
     
     const user = await User.findById(req.user._id);
     
@@ -256,6 +295,7 @@ export const getAllRecommendations = async (req, res) => {
 
     const workoutData = {
       user_id: req.user._id,  // Enable per-user caching in Flask-AI
+      skip_cache: skipCache,   // Pass skip flag to Flask AI for fresh data
       user_data: { dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null, gender: user.gender },
       workout_history: workoutLogs.map(log => ({ activityType: log.activityType, duration: log.duration, heartRate: log.heartRate, caloriesBurned: log.caloriesBurned, date: log.date })),
       current_stats: workoutLogs[0] ? { activityType: currentWorkout.activityType, duration: currentWorkout.duration, heartRate: currentWorkout.heartRate, caloriesBurned: currentWorkout.caloriesBurned } : {}
@@ -268,14 +308,14 @@ export const getAllRecommendations = async (req, res) => {
       current_check_in: currentMental ? { mood: currentMental.mood, stressLevel: currentMental.stressLevel, sleepQuality: currentMental.sleepQuality, notes: currentMental.notes } : null
     };
 
-    // Check individual caches
+    // Check individual caches (skip if fresh data requested)
     const dietKey = dietCache.generateKey(dietData, 'diet');
     const workoutKey = workoutCache.generateKey(workoutData, 'workout');
     const stressKey = stressCache.generateKey(stressData, 'stress');
     
-    const cachedDiet = dietCache.get(dietKey);
-    const cachedWorkout = workoutCache.get(workoutKey);
-    const cachedStress = stressCache.get(stressKey);
+    const cachedDiet = skipCache ? null : dietCache.get(dietKey);
+    const cachedWorkout = skipCache ? null : workoutCache.get(workoutKey);
+    const cachedStress = skipCache ? null : stressCache.get(stressKey);
 
     // Fetch missing recommendations from Flask in parallel
     const promises = [];
