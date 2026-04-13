@@ -20,6 +20,7 @@ import mentalHealthRoutes from './routes/mentalHealthRoutes.js';
 import gamificationRoutes from './routes/gamificationRoutes.js';
 import aiRoutes from './routes/aiRoutes.js';
 import syncRoutes from './routes/syncRoutes.js';
+import legalRoutes from './routes/legalRoutes.js';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -179,6 +180,7 @@ app.use('/api/mentalhealth', mentalHealthRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/sync', syncRoutes);
+app.use('/api/legal', legalRoutes);
 
 // Socket.IO connection handling
 io.on('connection', (socket) => {
