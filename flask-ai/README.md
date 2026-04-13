@@ -70,6 +70,20 @@ Returns the health status of the service and loaded models.
 }
 ```
 
+### Keep-Alive Ping
+```
+GET /api/ping
+```
+Lightweight endpoint for keep-alive pings. Does not trigger model loading - useful for preventing cold starts on Render free tier.
+
+**Response:**
+```json
+{
+  "status": "alive",
+  "time": "2024-01-15T10:30:00.123456"
+}
+```
+
 ### Diet Recommendations
 ```
 POST /api/diet
