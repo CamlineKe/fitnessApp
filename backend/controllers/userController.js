@@ -124,17 +124,6 @@ export const registerUser = async (req, res) => {
 // Initialize Default Data for New Users
 const initializeDefaultData = async (userId) => {
   try {
-    // Default workout plan
-    await Workout.create({
-      userId,
-      date: new Date(),
-      activityType: "Not Started",
-      duration: 1,  // Set minimum duration since it's required
-      caloriesBurned: 0,
-      heartRate: 0,
-      feedback: "",
-    });
-
     // Default gamification data with complete achievement structure
     const defaultAchievements = [
       {
