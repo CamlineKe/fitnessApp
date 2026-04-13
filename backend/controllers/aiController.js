@@ -337,6 +337,7 @@ export const getAllRecommendations = async (req, res) => {
     // Prepare all request data
     const dietData = {
       user_id: req.user._id,  // Enable per-user caching in Flask-AI
+      skip_cache: skipCache,   // Pass skip flag to Flask AI for fresh data
       user_data: { dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null, gender: user.gender },
       daily_intake: todayIntake,
       nutrition_logs: nutritionLogs.map(log => ({ calories: log.calories, macronutrients: log.macronutrients, timestamp: log.date, meals: log.meals }))
@@ -352,6 +353,7 @@ export const getAllRecommendations = async (req, res) => {
 
     const stressData = {
       user_id: req.user._id,  // Enable per-user caching in Flask-AI
+      skip_cache: skipCache,   // Pass skip flag to Flask AI for fresh data
       user_data: { dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null, gender: user.gender },
       daily_logs: mentalHealthLogs.map(log => ({ date: log.date, mood: log.mood, stressLevel: log.stressLevel, sleepQuality: log.sleepQuality, notes: log.notes })),
       current_check_in: currentMental ? { mood: currentMental.mood, stressLevel: currentMental.stressLevel, sleepQuality: currentMental.sleepQuality, notes: currentMental.notes } : null
