@@ -81,7 +81,15 @@ fitnessApp/
 │   │   ├── Nutrition.js
 │   │   ├── User.js
 │   │   └── Workout.js
-│   ├── routes/              # API routes
+│   ├── routes/              # 8 API route modules
+│   │   ├── aiRoutes.js
+│   │   ├── gamificationRoutes.js
+│   │   ├── legalRoutes.js     # Privacy policy & terms
+│   │   ├── mentalHealthRoutes.js
+│   │   ├── nutritionRoutes.js
+│   │   ├── syncRoutes.js
+│   │   ├── userRoutes.js
+│   │   └── workoutRoutes.js
 │   ├── services/            # External service integrations
 │   │   ├── fitbitService.js
 │   │   └── googleFitService.js
