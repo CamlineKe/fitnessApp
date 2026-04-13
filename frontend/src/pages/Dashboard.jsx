@@ -434,9 +434,8 @@ const Dashboard = () => {
                 <EmptyState
                   icon="fa-calendar-plus"
                   title="No activities logged today"
-                  subtitle="Start your wellness journey!"
+                  subtitle="Use Quick Actions above to get started!"
                   variant="default"
-                  action={{ label: "Log Workout", to: "/workout", icon: "fa-dumbbell" }}
                 />
               ) : (
                 <div className="activity-list">
