@@ -58,7 +58,6 @@ VITE_API_URL=http://localhost:5000  # or your deployed backend URL
 The Vite dev server proxies `/api` requests to the backend automatically.
 
 ### API Service Layer (`src/services/`)
-- `AppleHealthService.js` - Apple HealthKit integration
 - `DietRecommendationService.js` - AI diet recommendation API
 - `FitbitService.js` - Fitbit OAuth and data sync
 - `GamificationService.js` - Achievements and badges API
