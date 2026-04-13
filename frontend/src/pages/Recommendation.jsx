@@ -393,6 +393,11 @@ const Recommendation = () => {
                     {workoutRecommendations.analysis?.current_workout && (
                       <div className="current-workout">
                         <h3>Today's Workout</h3>
+                        {workoutRecommendations.analysis.current_workout.workout_count > 1 && (
+                          <p className="workout-count">
+                            {workoutRecommendations.analysis.current_workout.workout_count} workouts logged
+                          </p>
+                        )}
                         <p>Activity: {workoutRecommendations.analysis.current_workout.activity_type || 'N/A'}</p>
                         <p>Duration: {workoutRecommendations.analysis.current_workout.duration || 0} min</p>
                         <p>Calories: {workoutRecommendations.analysis.current_workout.calories_burned || 0} kcal</p>

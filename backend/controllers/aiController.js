@@ -36,6 +36,39 @@ const calculateTodayIntake = (nutritionLogs) => {
   });
 };
 
+// ✅ Helper to calculate today's total workout stats from all workout logs
+const calculateTodayWorkout = (workoutLogs) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const todaysLogs = workoutLogs.filter(log => {
+    const logDate = new Date(log.date);
+    return logDate.setHours(0, 0, 0, 0) === today.getTime();
+  });
+
+  if (todaysLogs.length === 0) {
+    return { activityType: '', duration: 0, caloriesBurned: 0, heartRate: 0 };
+  }
+
+  // Aggregate stats
+  const totalDuration = todaysLogs.reduce((acc, log) => acc + (log.duration || 0), 0);
+  const totalCalories = todaysLogs.reduce((acc, log) => acc + (log.caloriesBurned || 0), 0);
+  const avgHeartRate = Math.round(
+    todaysLogs.reduce((acc, log) => acc + (log.heartRate || 0), 0) / todaysLogs.length
+  );
+
+  // Use most recent activity type as primary activity
+  const primaryActivity = todaysLogs[0]?.activityType || 'Mixed';
+
+  return {
+    activityType: todaysLogs.length > 1 ? 'Mixed' : primaryActivity,
+    duration: totalDuration,
+    caloriesBurned: totalCalories,
+    heartRate: avgHeartRate,
+    workoutCount: todaysLogs.length
+  };
+};
+
 // ✅ Configure axios instance with timeout and keep-alive for Flask AI
 const flaskAxios = axios.create({
   timeout: 180000, // 180 second timeout for model loading on cold start
@@ -146,6 +179,9 @@ export const getWorkoutRecommendations = async (req, res) => {
       Logger.info('[AI] Fresh workout data requested - skipping Flask cache');
     }
 
+    // ✅ Calculate today's total workout stats from all of today's workout logs
+    const todayWorkout = calculateTodayWorkout(workoutLogs);
+
     // Format the data to match Flask API expectations
     const requestData = {
       user_id: req.user._id,  // Enable per-user caching in Flask-AI
@@ -161,12 +197,7 @@ export const getWorkoutRecommendations = async (req, res) => {
         caloriesBurned: log.caloriesBurned,
         date: log.date
       })),
-      current_stats: workoutLogs[0] ? {
-        activityType: workoutLogs[0].activityType,
-        duration: workoutLogs[0].duration,
-        heartRate: workoutLogs[0].heartRate,
-        caloriesBurned: workoutLogs[0].caloriesBurned
-      } : {}
+      current_stats: todayWorkout
     };
 
     // Generate cache key for caching fresh response
@@ -299,7 +330,8 @@ export const getAllRecommendations = async (req, res) => {
 
     // ✅ Calculate today's total intake from all of today's nutrition logs
     const todayIntake = calculateTodayIntake(nutritionLogs);
-    const currentWorkout = workoutLogs[0] || {};
+    // ✅ Calculate today's total workout stats from all of today's workout logs
+    const todayWorkout = calculateTodayWorkout(workoutLogs);
     const currentMental = mentalHealthLogs[0] || null;
 
     // Prepare all request data
@@ -315,7 +347,7 @@ export const getAllRecommendations = async (req, res) => {
       skip_cache: skipCache,   // Pass skip flag to Flask AI for fresh data
       user_data: { dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : null, gender: user.gender },
       workout_history: workoutLogs.map(log => ({ activityType: log.activityType, duration: log.duration, heartRate: log.heartRate, caloriesBurned: log.caloriesBurned, date: log.date })),
-      current_stats: workoutLogs[0] ? { activityType: currentWorkout.activityType, duration: currentWorkout.duration, heartRate: currentWorkout.heartRate, caloriesBurned: currentWorkout.caloriesBurned } : {}
+      current_stats: todayWorkout
     };
 
     const stressData = {

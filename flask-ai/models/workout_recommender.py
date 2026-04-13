@@ -152,6 +152,7 @@ def get_workout_recommendations(data):
         duration = current_stats.get('duration', 0)
         heart_rate = current_stats.get('heartRate', 0)
         calories_burned = current_stats.get('caloriesBurned', 0)
+        workout_count = current_stats.get('workoutCount', 1)
 
         # Try to get ML-based recommendation
         ml_result = get_ml_recommendation(activity_type, duration, calories_burned, heart_rate)
@@ -159,7 +160,7 @@ def get_workout_recommendations(data):
         # Analyze workout patterns
         weekly_volume = sum(w.get('duration', 0) for w in workout_history[-7:])
         workout_frequency = len(workout_history[-7:])
-        
+
         # Generate recommendations
         recommendations = []
         analysis = {
@@ -167,7 +168,8 @@ def get_workout_recommendations(data):
                 'activity_type': activity_type,
                 'duration': duration,
                 'heart_rate': heart_rate,
-                'calories_burned': calories_burned
+                'calories_burned': calories_burned,
+                'workout_count': workout_count
             },
             'weekly_stats': {
                 'total_volume': weekly_volume,
