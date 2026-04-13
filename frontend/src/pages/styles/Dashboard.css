@@ -384,41 +384,6 @@
     color: #f59e0b;
 }
 
-/* Stat Card Empty States */
-.stat-empty-state {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 2rem 1rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-radius: 12px;
-  border: 2px dashed #cbd5e1;
-  min-height: 160px;
-}
-
-.stat-empty-state i {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-  color: #94a3b8;
-}
-
-.stat-empty-state p {
-  font-size: 1rem;
-  color: #64748b;
-  margin: 0;
-  max-width: 160px;
-  line-height: 1.5;
-}
-
-.stat-empty-state .empty-label {
-  font-size: 0.875rem;
-  color: #94a3b8;
-  margin-top: 0.5rem;
-}
-
 /* Streak Info Styles */
 .streak-info {
     text-align: center;
