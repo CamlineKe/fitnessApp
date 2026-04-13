@@ -338,9 +338,57 @@ const Recommendation = () => {
                     {stressAnalysis?.analysis?.patterns && (
                       <div className="stress-patterns">
                         <h3>Trends</h3>
-                        <p>Stress: {stressAnalysis.analysis.patterns.stress_trend}</p>
-                        <p>Sleep: {stressAnalysis.analysis.patterns.sleep_trend}</p>
-                        <p>Mood: {stressAnalysis.analysis.patterns.mood_trend}</p>
+                        {!stressAnalysis.analysis.patterns.data_sufficient && (
+                          <p className="trend-note"><i className="fas fa-chart-bar"></i> Log 3+ check-ins for accurate trends</p>
+                        )}
+                        <p className="trend-item">
+                          <span className="trend-label">Stress:</span>
+                          <span className={`trend-value trend-${stressAnalysis.analysis.patterns.stress_trend}`}>
+                            {stressAnalysis.analysis.patterns.stress_trend === 'increasing' && <><i className="fas fa-arrow-trend-up"></i> Increasing</>}
+                            {stressAnalysis.analysis.patterns.stress_trend === 'decreasing' && <><i className="fas fa-arrow-trend-down"></i> Decreasing</>}
+                            {stressAnalysis.analysis.patterns.stress_trend === 'stable' && <><i className="fas fa-arrow-right"></i> Stable</>}
+                            {stressAnalysis.analysis.patterns.stress_trend === 'neutral' && <><i className="fas fa-arrow-right"></i> Neutral</>}
+                          </span>
+                          {stressAnalysis.analysis.patterns.stress_volatility && stressAnalysis.analysis.patterns.stress_volatility !== 'unknown' && (
+                            <span className={`volatility-badge vol-${stressAnalysis.analysis.patterns.stress_volatility}`}>
+                              {stressAnalysis.analysis.patterns.stress_volatility === 'consistent' && <><i className="fas fa-check"></i> Consistent</>}
+                              {stressAnalysis.analysis.patterns.stress_volatility === 'moderate' && <><i className="fas fa-wave-square"></i> Moderate</>}
+                              {stressAnalysis.analysis.patterns.stress_volatility === 'fluctuating' && <><i className="fas fa-bolt"></i> Fluctuating</>}
+                            </span>
+                          )}
+                        </p>
+                        <p className="trend-item">
+                          <span className="trend-label">Sleep:</span>
+                          <span className={`trend-value trend-${stressAnalysis.analysis.patterns.sleep_trend}`}>
+                            {stressAnalysis.analysis.patterns.sleep_trend === 'improving' && <><i className="fas fa-arrow-trend-up"></i> Improving</>}
+                            {stressAnalysis.analysis.patterns.sleep_trend === 'declining' && <><i className="fas fa-arrow-trend-down"></i> Declining</>}
+                            {stressAnalysis.analysis.patterns.sleep_trend === 'stable' && <><i className="fas fa-arrow-right"></i> Stable</>}
+                            {stressAnalysis.analysis.patterns.sleep_trend === 'neutral' && <><i className="fas fa-arrow-right"></i> Neutral</>}
+                          </span>
+                          {stressAnalysis.analysis.patterns.sleep_volatility && stressAnalysis.analysis.patterns.sleep_volatility !== 'unknown' && (
+                            <span className={`volatility-badge vol-${stressAnalysis.analysis.patterns.sleep_volatility}`}>
+                              {stressAnalysis.analysis.patterns.sleep_volatility === 'consistent' && <><i className="fas fa-check"></i> Consistent</>}
+                              {stressAnalysis.analysis.patterns.sleep_volatility === 'moderate' && <><i className="fas fa-wave-square"></i> Moderate</>}
+                              {stressAnalysis.analysis.patterns.sleep_volatility === 'fluctuating' && <><i className="fas fa-bolt"></i> Fluctuating</>}
+                            </span>
+                          )}
+                        </p>
+                        <p className="trend-item">
+                          <span className="trend-label">Mood:</span>
+                          <span className={`trend-value trend-${stressAnalysis.analysis.patterns.mood_trend}`}>
+                            {stressAnalysis.analysis.patterns.mood_trend === 'improving' && <><i className="fas fa-arrow-trend-up"></i> Improving</>}
+                            {stressAnalysis.analysis.patterns.mood_trend === 'declining' && <><i className="fas fa-arrow-trend-down"></i> Declining</>}
+                            {stressAnalysis.analysis.patterns.mood_trend === 'stable' && <><i className="fas fa-arrow-right"></i> Stable</>}
+                            {stressAnalysis.analysis.patterns.mood_trend === 'neutral' && <><i className="fas fa-arrow-right"></i> Neutral</>}
+                          </span>
+                          {stressAnalysis.analysis.patterns.mood_volatility && stressAnalysis.analysis.patterns.mood_volatility !== 'unknown' && (
+                            <span className={`volatility-badge vol-${stressAnalysis.analysis.patterns.mood_volatility}`}>
+                              {stressAnalysis.analysis.patterns.mood_volatility === 'consistent' && <><i className="fas fa-check"></i> Consistent</>}
+                              {stressAnalysis.analysis.patterns.mood_volatility === 'moderate' && <><i className="fas fa-wave-square"></i> Moderate</>}
+                              {stressAnalysis.analysis.patterns.mood_volatility === 'fluctuating' && <><i className="fas fa-bolt"></i> Fluctuating</>}
+                            </span>
+                          )}
+                        </p>
                       </div>
                     )}
 

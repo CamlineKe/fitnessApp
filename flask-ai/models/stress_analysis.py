@@ -100,47 +100,159 @@ def get_ml_stress_category(mood, stress_level, sleep_quality):
         logger.error(f"Error getting ML stress category: {e}")
         return None
 
-def analyze_stress_pattern(logs):
-    """Analyze stress level patterns from logs"""
+def calculate_time_weights(logs, decay_factor=0.7):
+    """
+    Calculate time-decay weights for logs.
+    More recent logs get higher weights.
+    decay_factor: 0.0-1.0, higher = faster decay (more weight to recent)
+    """
     try:
         if not logs:
-            return {'trend': 'neutral'}
+            return []
+        
+        # Parse dates and find most recent
+        dates = []
+        for log in logs:
+            date_str = log.get('date', '')
+            try:
+                # Handle ISO format
+                date = datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+                dates.append(date)
+            except:
+                dates.append(datetime.now())
+        
+        if not dates:
+            return [1.0] * len(logs)
+        
+        most_recent = max(dates)
+        
+        # Calculate weights based on days ago
+        weights = []
+        for date in dates:
+            days_ago = (most_recent - date).days
+            # Exponential decay: weight = decay_factor ^ days_ago
+            weight = decay_factor ** max(0, days_ago)
+            weights.append(weight)
+        
+        # Normalize weights to sum to 1
+        total_weight = sum(weights)
+        if total_weight > 0:
+            weights = [w / total_weight for w in weights]
+        
+        return weights
+    except Exception as e:
+        logger.error("Error calculating time weights: %s", str(e))
+        return [1.0 / len(logs)] * len(logs) if logs else []
+
+
+def analyze_stress_pattern(logs):
+    """
+    Analyze stress level patterns with time-weighted analysis.
+    More recent check-ins have higher influence on trend.
+    """
+    try:
+        if not logs:
+            return {'trend': 'neutral', 'data_sufficient': False, 'volatility': 'unknown'}
+        
+        # Need at least 2 logs for any trend analysis
+        if len(logs) < 2:
+            return {'trend': 'neutral', 'data_sufficient': False, 'volatility': 'insufficient'}
         
         stress_levels = [log.get('stressLevel', 5) for log in logs]
-        if len(stress_levels) >= 3:
-            recent_trend = np.mean(stress_levels[-3:]) - np.mean(stress_levels[:-3])
-            if recent_trend > 1:
-                return {'trend': 'increasing'}
-            elif recent_trend < -1:
-                return {'trend': 'decreasing'}
-        return {'trend': 'stable'}
+        weights = calculate_time_weights(logs, decay_factor=0.8)
+        
+        # Calculate weighted average
+        weighted_avg = np.average(stress_levels, weights=weights)
+        
+        # Calculate trend using linear regression on weighted data
+        x = np.arange(len(stress_levels))
+        # Weight the recent points more in regression
+        slope = np.polyfit(x, stress_levels, 1, w=weights)[0]
+        
+        # Calculate volatility (consistency)
+        weighted_std = np.sqrt(np.average((np.array(stress_levels) - weighted_avg)**2, weights=weights))
+        if weighted_std < 0.8:
+            volatility = 'consistent'
+        elif weighted_std < 1.5:
+            volatility = 'moderate'
+        else:
+            volatility = 'fluctuating'
+        
+        # Determine trend with more nuanced thresholds
+        if slope > 0.5:
+            trend = 'increasing'
+        elif slope < -0.5:
+            trend = 'decreasing'
+        else:
+            trend = 'stable'
+        
+        return {
+            'trend': trend,
+            'data_sufficient': len(logs) >= 3,
+            'volatility': volatility,
+            'weighted_avg': round(weighted_avg, 1)
+        }
     except Exception as e:
         logger.error("Error analyzing stress pattern: %s", str(e))
-        return {'trend': 'neutral'}
+        return {'trend': 'neutral', 'data_sufficient': False, 'volatility': 'unknown'}
+
 
 def analyze_sleep_pattern(logs):
-    """Analyze sleep quality patterns from logs"""
+    """
+    Analyze sleep quality patterns with time-weighted analysis.
+    """
     try:
         if not logs:
-            return {'trend': 'neutral'}
+            return {'trend': 'neutral', 'data_sufficient': False, 'volatility': 'unknown'}
+        
+        if len(logs) < 2:
+            return {'trend': 'neutral', 'data_sufficient': False, 'volatility': 'insufficient'}
         
         sleep_quality = [log.get('sleepQuality', 5) for log in logs]
-        if len(sleep_quality) >= 3:
-            recent_trend = np.mean(sleep_quality[-3:]) - np.mean(sleep_quality[:-3])
-            if recent_trend > 1:
-                return {'trend': 'improving'}
-            elif recent_trend < -1:
-                return {'trend': 'declining'}
-        return {'trend': 'stable'}
+        weights = calculate_time_weights(logs, decay_factor=0.75)
+        
+        weighted_avg = np.average(sleep_quality, weights=weights)
+        
+        x = np.arange(len(sleep_quality))
+        slope = np.polyfit(x, sleep_quality, 1, w=weights)[0]
+        
+        weighted_std = np.sqrt(np.average((np.array(sleep_quality) - weighted_avg)**2, weights=weights))
+        if weighted_std < 0.8:
+            volatility = 'consistent'
+        elif weighted_std < 1.5:
+            volatility = 'moderate'
+        else:
+            volatility = 'fluctuating'
+        
+        # For sleep, higher is better, so positive slope = improving
+        if slope > 0.4:
+            trend = 'improving'
+        elif slope < -0.4:
+            trend = 'declining'
+        else:
+            trend = 'stable'
+        
+        return {
+            'trend': trend,
+            'data_sufficient': len(logs) >= 3,
+            'volatility': volatility,
+            'weighted_avg': round(weighted_avg, 1)
+        }
     except Exception as e:
         logger.error("Error analyzing sleep pattern: %s", str(e))
-        return {'trend': 'neutral'}
+        return {'trend': 'neutral', 'data_sufficient': False, 'volatility': 'unknown'}
+
 
 def analyze_mood_pattern(logs):
-    """Analyze mood patterns from logs"""
+    """
+    Analyze mood patterns with time-weighted analysis.
+    """
     try:
         if not logs:
-            return {'trend': 'neutral'}
+            return {'trend': 'neutral', 'data_sufficient': False, 'volatility': 'unknown'}
+        
+        if len(logs) < 2:
+            return {'trend': 'neutral', 'data_sufficient': False, 'volatility': 'insufficient'}
         
         mood_mapping = {
             'happy': 3,
@@ -150,16 +262,38 @@ def analyze_mood_pattern(logs):
         }
         
         moods = [mood_mapping.get(log.get('mood', 'neutral'), 2) for log in logs]
-        if len(moods) >= 3:
-            recent_trend = np.mean(moods[-3:]) - np.mean(moods[:-3])
-            if recent_trend > 0.5:
-                return {'trend': 'improving'}
-            elif recent_trend < -0.5:
-                return {'trend': 'declining'}
-        return {'trend': 'stable'}
+        weights = calculate_time_weights(logs, decay_factor=0.8)
+        
+        weighted_avg = np.average(moods, weights=weights)
+        
+        x = np.arange(len(moods))
+        slope = np.polyfit(x, moods, 1, w=weights)[0]
+        
+        weighted_std = np.sqrt(np.average((np.array(moods) - weighted_avg)**2, weights=weights))
+        if weighted_std < 0.5:
+            volatility = 'consistent'
+        elif weighted_std < 0.8:
+            volatility = 'moderate'
+        else:
+            volatility = 'fluctuating'
+        
+        # For mood, higher is better
+        if slope > 0.25:
+            trend = 'improving'
+        elif slope < -0.25:
+            trend = 'declining'
+        else:
+            trend = 'stable'
+        
+        return {
+            'trend': trend,
+            'data_sufficient': len(logs) >= 3,
+            'volatility': volatility,
+            'weighted_avg': round(weighted_avg, 2)
+        }
     except Exception as e:
         logger.error("Error analyzing mood pattern: %s", str(e))
-        return {'trend': 'neutral'}
+        return {'trend': 'neutral', 'data_sufficient': False, 'volatility': 'unknown'}
 
 def analyze_stress(data):
     """
@@ -340,7 +474,11 @@ def analyze_stress(data):
                 'patterns': {
                     'stress_trend': stress_pattern['trend'],
                     'sleep_trend': sleep_pattern['trend'],
-                    'mood_trend': mood_pattern['trend']
+                    'mood_trend': mood_pattern['trend'],
+                    'stress_volatility': stress_pattern.get('volatility', 'unknown'),
+                    'sleep_volatility': sleep_pattern.get('volatility', 'unknown'),
+                    'mood_volatility': mood_pattern.get('volatility', 'unknown'),
+                    'data_sufficient': stress_pattern.get('data_sufficient', False) and sleep_pattern.get('data_sufficient', False) and mood_pattern.get('data_sufficient', False)
                 },
                 'ml_used': ml_result is not None,
                 'ml_prediction': ml_result
@@ -363,7 +501,11 @@ def analyze_stress(data):
                 'patterns': {
                     'stress_trend': 'neutral',
                     'sleep_trend': 'neutral',
-                    'mood_trend': 'neutral'
+                    'mood_trend': 'neutral',
+                    'stress_volatility': 'unknown',
+                    'sleep_volatility': 'unknown',
+                    'mood_volatility': 'unknown',
+                    'data_sufficient': False
                 },
                 'ml_used': False,
                 'error': str(e)
