@@ -186,16 +186,16 @@ def analyze_stress(data):
         # Get current metrics - Use most recent log if available
         if current_check_in:
             # Use the provided current check-in data
-            mood = current_check_in.get('mood')
-            stress_level = current_check_in.get('stressLevel')
-            sleep_quality = current_check_in.get('sleepQuality')
+            mood = current_check_in.get('mood') or 'neutral'
+            stress_level = current_check_in.get('stressLevel') or 5
+            sleep_quality = current_check_in.get('sleepQuality') or 5
             notes = current_check_in.get('notes', '')
         elif daily_logs:
             # If no current check-in but we have logs, use the most recent log
             most_recent = daily_logs[0]
-            mood = most_recent.get('mood')
-            stress_level = most_recent.get('stressLevel')
-            sleep_quality = most_recent.get('sleepQuality')
+            mood = most_recent.get('mood') or 'neutral'
+            stress_level = most_recent.get('stressLevel') or 5
+            sleep_quality = most_recent.get('sleepQuality') or 5
             notes = most_recent.get('notes', '')
         else:
             # Only use defaults if we have no data at all
