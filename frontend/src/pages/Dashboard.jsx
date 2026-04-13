@@ -78,7 +78,7 @@ const Dashboard = () => {
   // Update activity feed from data
   const updateActivityFeed = (nutrition, workouts, mentalHealth) => {
     const allActivities = [
-      ...(nutrition?.mealLogs || [])
+      ...(nutrition?.data || [])
         .filter(log => isToday(log.date))
         .map(log => ({
           type: 'nutrition',
@@ -89,7 +89,7 @@ const Dashboard = () => {
           details: `${log.calories} calories`,
           category: log.mealType || 'Meal'
         })),
-      ...(Array.isArray(workouts) ? workouts : [])
+      ...(workouts?.data || [])
         .filter(log => isToday(log.date))
         .map(log => ({
           type: 'workout',
@@ -100,7 +100,7 @@ const Dashboard = () => {
           details: `${log.duration} minutes, ${log.caloriesBurned} calories burned`,
           category: 'Exercise'
         })),
-      ...(Array.isArray(mentalHealth) ? mentalHealth : [])
+      ...(mentalHealth?.logs || [])
         .filter(log => isToday(log.date))
         .map(log => ({
           type: 'mental',
