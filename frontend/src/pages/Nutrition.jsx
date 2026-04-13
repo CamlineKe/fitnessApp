@@ -310,6 +310,13 @@ const Nutrition = () => {
         }
       }));
 
+      // Refetch weekly stats to update charts immediately
+      const endDate = new Date().toISOString();
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - 7);
+      const statsResponse = await getNutritionStats('daily', startDate.toISOString(), endDate);
+      setWeeklyStats(statsResponse.data || []);
+
       // Update gamification for nutrition tracking
       await GamificationService.updatePoints('nutrition', {
         calories: mealData.calories,
@@ -408,6 +415,13 @@ const Nutrition = () => {
           }
         }));
         
+        // Refetch weekly stats to update charts immediately
+        const endDate = new Date().toISOString();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+        const statsResponse = await getNutritionStats('daily', startDate.toISOString(), endDate);
+        setWeeklyStats(statsResponse.data || []);
+        
         // Update gamification for nutrition tracking
         await GamificationService.updatePoints('nutrition', {
           calories: editFormData.calories,
@@ -452,6 +466,13 @@ const Nutrition = () => {
             fats: prev.macronutrients.fats - Number(mealToDelete.macronutrients?.fats || 0)
           }
         }));
+        
+        // Refetch weekly stats to update charts immediately
+        const endDate = new Date().toISOString();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 7);
+        const statsResponse = await getNutritionStats('daily', startDate.toISOString(), endDate);
+        setWeeklyStats(statsResponse.data || []);
         
         // Update gamification for nutrition tracking
         await GamificationService.updatePoints('nutrition', {
