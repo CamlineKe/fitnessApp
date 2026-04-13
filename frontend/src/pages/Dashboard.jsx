@@ -75,6 +75,24 @@ const Dashboard = () => {
     return isNaN(parsed.getTime()) ? new Date() : parsed;
   };
 
+  // ✅ Helper to calculate today's nutrition totals from logs array
+  const calculateTodayNutrition = (nutritionResponse) => {
+    const logs = nutritionResponse?.data || [];
+    const todayLogs = logs.filter(log => isToday(log.date));
+    
+    return todayLogs.reduce((acc, log) => ({
+      calories: acc.calories + (log.calories || 0),
+      macronutrients: {
+        protein: acc.macronutrients.protein + (log.macronutrients?.protein || 0),
+        carbohydrates: acc.macronutrients.carbohydrates + (log.macronutrients?.carbohydrates || 0),
+        fats: acc.macronutrients.fats + (log.macronutrients?.fats || 0)
+      }
+    }), {
+      calories: 0,
+      macronutrients: { protein: 0, carbohydrates: 0, fats: 0 }
+    });
+  };
+
   // Update activity feed from data
   const updateActivityFeed = (nutrition, workouts, mentalHealth) => {
     const allActivities = [
@@ -151,9 +169,11 @@ const Dashboard = () => {
       ]);
       
       // Update all state at once
-      setNutritionData(nutrition);
+      // ✅ Calculate today's nutrition totals from logs array
+      setNutritionData(calculateTodayNutrition(nutrition));
       setWorkoutData(todayWorkout || { activityType: 'No workout yet', duration: 0, caloriesBurned: 0 });
-      setMentalHealthData(mentalHealth);
+      // ✅ Mental health data comes as { logs: [...] }, store the logs array
+      setMentalHealthData(mentalHealth?.logs || []);
       setGamificationData(gamification);
       
       // Get all workouts for activity feed (not just today's)
@@ -169,9 +189,9 @@ const Dashboard = () => {
       
       // Cache all data
       saveCachedData({
-        nutritionData: nutrition,
+        nutritionData: calculateTodayNutrition(nutrition),
         workoutData: todayWorkout,
-        mentalHealthData: mentalHealth,
+        mentalHealthData: mentalHealth?.logs || [],
         gamificationData: gamification,
         activityFeed: activities
       });
@@ -233,14 +253,14 @@ const Dashboard = () => {
     EventEmitter.on(EventEmitter.Events.WORKOUT_UPDATED, handleWorkoutUpdate);
     EventEmitter.on(EventEmitter.Events.GAMIFICATION_UPDATED, handleGamificationUpdate);
     EventEmitter.on(EventEmitter.Events.NUTRITION_UPDATED, handleNutritionUpdate);
-    EventEmitter.on(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, handleMentalHealthUpdate);
+    EventEmitter.on(EventEmitter.Events.MENTAL_HEALTH_UPDATED, handleMentalHealthUpdate);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       EventEmitter.off(EventEmitter.Events.WORKOUT_UPDATED, handleWorkoutUpdate);
       EventEmitter.off(EventEmitter.Events.GAMIFICATION_UPDATED, handleGamificationUpdate);
       EventEmitter.off(EventEmitter.Events.NUTRITION_UPDATED, handleNutritionUpdate);
-      EventEmitter.off(EventEmitter.Events.MENTAL_HEALTH_RECOMMENDATIONS_UPDATED, handleMentalHealthUpdate);
+      EventEmitter.off(EventEmitter.Events.MENTAL_HEALTH_UPDATED, handleMentalHealthUpdate);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [isAuthenticated, userId]);
@@ -362,12 +382,12 @@ const Dashboard = () => {
                 {mentalHealthData?.[0]?.mood ? (
                   <div className="stat-content">
                     <p className="stat-value">
-                      {mentalHealthData[0].mood.charAt(0).toUpperCase() + mentalHealthData[0].mood.slice(1)}
+                      {mentalHealthData[0]?.mood?.charAt(0)?.toUpperCase() + mentalHealthData[0]?.mood?.slice(1)}
                     </p>
                     <p className="stat-label">today's mood</p>
                     <div className="stat-details">
-                      <span>Stress: {mentalHealthData[0].stressLevel || 0}/10</span>
-                      <span>Sleep: {mentalHealthData[0].sleepQuality || 0}/10</span>
+                      <span>Stress: {mentalHealthData[0]?.stressLevel || 0}/10</span>
+                      <span>Sleep: {mentalHealthData[0]?.sleepQuality || 0}/10</span>
                     </div>
                   </div>
                 ) : (
