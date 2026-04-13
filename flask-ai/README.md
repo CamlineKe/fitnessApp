@@ -14,6 +14,8 @@ This AI service provides machine learning-powered recommendations for diet, work
 - 💾 **Bounded LRU Cache**: 5-minute TTL with 100-entry limit prevents memory leaks
 - 🔌 **RESTful API**: Well-defined endpoints with input validation
 - 🔒 **CORS-Enabled**: Secure cross-origin request handling
+- ⏱️ **Time-Weighted Analysis**: Recent check-ins weighted higher using exponential decay
+- 📊 **Volatility Tracking**: Consistency indicators (consistent/moderate/fluctuating) for all patterns
 
 ## Technical Stack
 - **Framework:** Flask 2.0.1
@@ -144,7 +146,11 @@ Analyzes stress levels based on mood, sleep data, and patterns.
     "patterns": {
       "stress_trend": "stable",
       "sleep_trend": "stable",
-      "mood_trend": "stable"
+      "mood_trend": "stable",
+      "stress_volatility": "consistent",
+      "sleep_volatility": "moderate",
+      "mood_volatility": "fluctuating",
+      "data_sufficient": true
     },
     "ml_used": true,
     "ml_prediction": {
@@ -189,7 +195,8 @@ Provides workout recommendations based on activity metrics and history.
       "activity_type": "Running",
       "duration": 30,
       "heart_rate": 140,
-      "calories_burned": 300
+      "calories_burned": 300,
+      "workout_count": 2
     },
     "heart_rate_zones": {
       "recovery": [108, 126],
@@ -370,7 +377,13 @@ The service includes comprehensive error handling:
 MIT License - see LICENSE file for details
 
 ## Version History
-- **v1.2.0** (Current)
+- **v1.3.0** (Current)
+  - Time-weighted trend analysis with exponential decay weighting
+  - Volatility indicators (consistent/moderate/fluctuating) for stress, sleep, and mood patterns
+  - Data sufficiency flag for trend reliability
+  - Workout count tracking for multiple daily sessions
+  - Enhanced pattern analysis with weighted linear regression
+- **v1.2.0**
   - Bounded LRU cache (100 entries max) prevents memory leaks on free tier
   - Async model loading eliminates cold-start timeouts
   - Cache key optimization with value bucketing for better hit rates
