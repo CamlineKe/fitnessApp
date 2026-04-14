@@ -5,5 +5,5 @@ pymongo==3.12.0
 python-dotenv==0.19.0
 numpy==1.26.4  # Updated to support Python 3.12
 pandas==2.2.0  # Updated to work with numpy 1.26.4
-scikit-learn==1.4.0  # Updated to work with newer numpy/pandas
+scikit-learn==1.6.1  # Matches the version used to create the model pickle files
 gunicorn==20.1.0
