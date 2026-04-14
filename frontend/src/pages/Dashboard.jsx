@@ -379,26 +379,29 @@ const Dashboard = () => {
                   <h3>Mental Health</h3>
                   {loading.mentalHealth && <SectionLoader />}
                 </div>
-                {mentalHealthData?.[0]?.mood ? (
-                  <div className="stat-content">
-                    <p className="stat-value">
-                      {mentalHealthData[0]?.mood?.charAt(0)?.toUpperCase() + mentalHealthData[0]?.mood?.slice(1)}
-                    </p>
-                    <p className="stat-label">today's mood</p>
-                    <div className="stat-details">
-                      <span>Stress: {mentalHealthData[0]?.stressLevel || 0}/10</span>
-                      <span>Sleep: {mentalHealthData[0]?.sleepQuality || 0}/10</span>
+                {(() => {
+                  const todayLog = mentalHealthData?.find(log => isToday(log.date));
+                  return todayLog?.mood ? (
+                    <div className="stat-content">
+                      <p className="stat-value">
+                        {todayLog.mood.charAt(0).toUpperCase() + todayLog.mood.slice(1)}
+                      </p>
+                      <p className="stat-label">today's mood</p>
+                      <div className="stat-details">
+                        <span>Stress: {todayLog.stressLevel || 0}/10</span>
+                        <span>Sleep: {todayLog.sleepQuality || 0}/10</span>
+                      </div>
                     </div>
-                  </div>
-                ) : (
-                  <EmptyState
-                    icon="fa-brain"
-                    title="No check-in today"
-                    subtitle="Click to complete check-in"
-                    variant="compact"
-                    action={{ label: "Check In", to: "/mentalhealth", icon: "fa-plus" }}
-                  />
-                )}
+                  ) : (
+                    <EmptyState
+                      icon="fa-brain"
+                      title="No check-in today"
+                      subtitle="Click to complete check-in"
+                      variant="compact"
+                      action={{ label: "Check In", to: "/mentalhealth", icon: "fa-plus" }}
+                    />
+                  );
+                })()}
                 <div className="stat-footer">View Mental Health →</div>
               </Link>
 
