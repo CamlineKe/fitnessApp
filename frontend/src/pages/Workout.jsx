@@ -8,7 +8,7 @@ import GamificationService from "../services/GamificationService";
 import "./styles/Workout.css";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaClock, FaFire, FaHeartbeat, FaComment } from "react-icons/fa";
 import { EventEmitter } from '../utils/EventEmitter';
 import { Line, Pie } from 'react-chartjs-2';
 import Logger from '../utils/logger';
@@ -716,12 +716,12 @@ const Workout = () => {
                             <span className="log-type">{log.activityType}</span>
                           </div>
                           <div className="log-details">
-                            <span className="log-duration">⏱️ {log.duration} min</span>
-                            <span className="log-calories">🔥 {log.caloriesBurned} kcal</span>
-                            <span className="log-heartrate">❤️ {log.heartRate} bpm</span>
+                            <span className="log-duration"><FaClock className="log-icon" /> {log.duration} min</span>
+                            <span className="log-calories"><FaFire className="log-icon" /> {log.caloriesBurned} kcal</span>
+                            <span className="log-heartrate"><FaHeartbeat className="log-icon" /> {log.heartRate} bpm</span>
                           </div>
                           {log.feedback && (
-                            <div className="log-feedback">💬 {log.feedback}</div>
+                            <div className="log-feedback"><FaComment className="log-icon" /> {log.feedback}</div>
                           )}
                         </div>
                       ))}

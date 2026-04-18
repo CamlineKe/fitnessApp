@@ -986,7 +986,28 @@
 .log-details span {
     display: flex;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.35rem;
+}
+
+.log-icon {
+    font-size: 0.9rem;
+    color: var(--primary);
+}
+
+.log-duration .log-icon {
+    color: #3b82f6;
+}
+
+.log-calories .log-icon {
+    color: #f59e0b;
+}
+
+.log-heartrate .log-icon {
+    color: #ef4444;
+}
+
+.log-feedback .log-icon {
+    color: #8b5cf6;
 }
 
 .log-feedback {
