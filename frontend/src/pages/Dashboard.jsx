@@ -10,7 +10,7 @@ import WorkoutService from "../services/WorkoutService";
 import GamificationService from '../services/GamificationService';
 import { toast } from 'react-toastify';
 import { EventEmitter } from '../utils/EventEmitter';
-import { FaFire } from 'react-icons/fa';
+import { FaFire, FaRunning, FaBrain, FaAppleAlt } from 'react-icons/fa';
 import Logger from '../utils/logger';
 
 const CACHE_KEY = 'dashboard_cache';
@@ -422,6 +422,21 @@ const Dashboard = () => {
                         <FaFire style={{ color: '#ff6b6b' }} />
                         Keep it up!
                       </p>
+                    </div>
+                    {/* Category breakdown pills - NEW */}
+                    <div className="category-pills">
+                      <div className={`category-pill workout ${gamificationData?.effectiveStreaks?.workout?.status || 'new'}`}>
+                        <FaRunning />
+                        <span>{gamificationData?.effectiveStreaks?.workout?.value || 0}</span>
+                      </div>
+                      <div className={`category-pill mental ${gamificationData?.effectiveStreaks?.mental?.status || 'new'}`}>
+                        <FaBrain />
+                        <span>{gamificationData?.effectiveStreaks?.mental?.value || 0}</span>
+                      </div>
+                      <div className={`category-pill nutrition ${gamificationData?.effectiveStreaks?.nutrition?.status || 'new'}`}>
+                        <FaAppleAlt />
+                        <span>{gamificationData?.effectiveStreaks?.nutrition?.value || 0}</span>
+                      </div>
                     </div>
                     <div className="stat-details">
                       <span>Best Streak: {gamificationData.streaks?.bestStreak || 0} days</span>

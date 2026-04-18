@@ -327,6 +327,63 @@
     margin-bottom: 1rem;
 }
 
+/* Category Pills - NEW for streak breakdown */
+.category-pills {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.category-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.category-pill svg {
+    font-size: 0.9rem;
+}
+
+/* Active status - Green */
+.category-pill.active {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.4);
+    color: #059669;
+}
+
+/* At-risk status - Orange */
+.category-pill.at-risk {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.4);
+    color: #d97706;
+}
+
+/* Broken status - Red/Gray */
+.category-pill.broken {
+    background: rgba(244, 63, 94, 0.1);
+    border-color: rgba(244, 63, 94, 0.3);
+    color: #e11d48;
+}
+
+/* New status - Gray */
+.category-pill.new {
+    background: rgba(148, 163, 184, 0.15);
+    border-color: rgba(148, 163, 184, 0.3);
+    color: #64748b;
+}
+
+/* Category-specific icon colors */
+.category-pill.workout.active svg { color: #059669; }
+.category-pill.mental.active svg { color: #6366f1; }
+.category-pill.nutrition.active svg { color: #10b981; }
+
 .stat-details {
     margin-top: auto;
     padding-top: 1rem;
