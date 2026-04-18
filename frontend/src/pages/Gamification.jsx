@@ -5,11 +5,7 @@ import { UserContext } from '../components/UserContext';
 import EmptyState from '../components/EmptyState';
 import './styles/Gamification.css';
 import { Tab, Tabs, ProgressBar } from 'react-bootstrap';
-import {
-  FaTrophy, FaMedal, FaStar, FaFire, FaRunning, FaDumbbell,
-  FaSwimmer, FaHeart, FaBolt, FaStopwatch, FaBrain, FaAppleAlt,
-  FaCalendarCheck, FaClock, FaCrown, FaUsers
-} from 'react-icons/fa';
+import { FaRunning, FaAppleAlt, FaFire, FaStar, FaTrophy, FaMedal, FaCrown, FaUsers, FaSnowflake, FaExclamationTriangle, FaDumbbell, FaSmile, FaFrown, FaMeh, FaGrimace, FaBolt, FaClock, FaHeart, FaBrain, FaCalendarCheck } from 'react-icons/fa';
 import { GiMeditation } from 'react-icons/gi';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -17,18 +13,18 @@ import { EventEmitter } from '../utils/EventEmitter';
 import Logger from '../utils/logger';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
-const getMoodEmoji = (mood) => {
+const getMoodIcon = (mood) => {
   switch (mood?.toLowerCase()) {
     case 'happy':
-      return '😊';
+      return <FaSmile className="mood-icon happy" />;
     case 'sad':
-      return '😢';
+      return <FaFrown className="mood-icon sad" />;
     case 'anxious':
-      return '😰';
+      return <FaGrimace className="mood-icon anxious" />;
     case 'neutral':
-      return '😐';
+      return <FaMeh className="mood-icon neutral" />;
     default:
-      return '❓';
+      return <FaMeh className="mood-icon" />;
   }
 };
 
@@ -306,20 +302,20 @@ const Gamification = () => {
     const getStatusMessage = () => {
       switch (streakStatus) {
         case 'active':
-          return <p className="streak-status active">Active Today! 🔥</p>;
+          return <p className="streak-status active">Active Today! <FaFire /></p>;
         case 'at-risk':
-          return <p className="streak-status at-risk">Log today to keep your {storedStreak}-day streak! ⚠️</p>;
+          return <p className="streak-status at-risk">Log today to keep your {storedStreak}-day streak! <FaExclamationTriangle /></p>;
         case 'broken':
           return (
             <div className="streak-status broken">
-              <p>Streak broken. Start fresh today! 💪</p>
+              <p>Streak broken. Start fresh today! <FaDumbbell /></p>
               {canUseFreeze && (
                 <button
                   className="freeze-button"
                   onClick={() => handleUseFreeze(category)}
                   title="Use a streak freeze to restore your streak"
                 >
-                  ❄️ Use Freeze ({gamificationData.streakFreezes} left)
+                  <FaSnowflake /> Use Freeze ({gamificationData.streakFreezes} left)
                 </button>
               )}
             </div>
@@ -493,7 +489,7 @@ const Gamification = () => {
                   className="mood-emoji"
                   style={{ backgroundColor: getMoodColor(log.mood) + '20' }}
                 >
-                  {getMoodEmoji(log.mood)}
+                  {getMoodIcon(log.mood)}
                 </span>
                 <span className="mood-label">{log.mood}</span>
               </div>
@@ -622,7 +618,7 @@ const Gamification = () => {
               </div>
               {gamificationData?.streakFreezes > 0 && (
                 <div className="header-stat freeze-indicator">
-                  <span className="header-icon">❄️</span>
+                  <span className="header-icon"><FaSnowflake /></span>
                   <span className="header-stat-label">{gamificationData.streakFreezes} Freeze{gamificationData.streakFreezes !== 1 ? 's' : ''}</span>
                 </div>
               )}

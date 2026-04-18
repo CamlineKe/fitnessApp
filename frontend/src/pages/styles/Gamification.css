@@ -550,9 +550,22 @@
 
 .mood-emoji {
     font-size: 2rem;
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     line-height: 1;
 }
+
+.mood-emoji svg {
+    width: 2rem;
+    height: 2rem;
+}
+
+/* Mood icon colors */
+.mood-icon.happy { color: #4CAF50; }
+.mood-icon.sad { color: #2196F3; }
+.mood-icon.anxious { color: #f59e0b; }
+.mood-icon.neutral { color: #64748b; }
 
 /* Mood-specific colors */
 .mood-day.mood-happy {
@@ -825,8 +838,9 @@
         padding: 1.25rem;
     }
     
-    .mood-emoji {
-        font-size: 1.75rem;
+    .mood-emoji svg {
+        width: 1.75rem;
+        height: 1.75rem;
     }
     
     .streak-card,

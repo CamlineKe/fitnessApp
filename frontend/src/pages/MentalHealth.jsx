@@ -7,6 +7,7 @@ import GamificationService from "../services/GamificationService";
 import { EventEmitter } from '../utils/EventEmitter';
 import Swal from 'sweetalert2';
 import "./styles/MentalHealth.css";
+import { FaSmile, FaMeh, FaFrown, FaGrimace } from 'react-icons/fa';
 import { Line } from "react-chartjs-2";
 import "chart.js/auto";
 import Logger from '../utils/logger';
@@ -364,10 +365,10 @@ const MentalHealth = () => {
                   {mentalLogs.length > 0 && new Date(mentalLogs[0]?.date).toDateString() === new Date().toDateString() ? (
                     <>
                       <div className="mood-emoji">
-                        {mentalLogs[0].mood === 'happy' && '😊'}
-                        {mentalLogs[0].mood === 'sad' && '😢'}
-                        {mentalLogs[0].mood === 'anxious' && '😰'}
-                        {mentalLogs[0].mood === 'neutral' && '😐'}
+                        {mentalLogs[0].mood === 'happy' && <FaSmile className="mood-icon" />}
+                        {mentalLogs[0].mood === 'sad' && <FaFrown className="mood-icon" />}
+                        {mentalLogs[0].mood === 'anxious' && <FaGrimace className="mood-icon" />}
+                        {mentalLogs[0].mood === 'neutral' && <FaMeh className="mood-icon" />}
                       </div>
                       <div className="mood-stats">
                         <div className="mood-stat-item">
@@ -408,28 +409,28 @@ const MentalHealth = () => {
                       className={`mood-chip ${dailyCheckInData.mood === 'happy' ? 'selected' : ''}`}
                       onClick={() => setDailyCheckInData(prev => ({ ...prev, mood: 'happy' }))}
                     >
-                      <span>😊</span> Happy
+                      <FaSmile className="mood-btn-icon" /> Happy
                     </button>
                     <button
                       type="button"
                       className={`mood-chip ${dailyCheckInData.mood === 'neutral' ? 'selected' : ''}`}
                       onClick={() => setDailyCheckInData(prev => ({ ...prev, mood: 'neutral' }))}
                     >
-                      <span>😐</span> Neutral
+                      <FaMeh className="mood-btn-icon" /> Neutral
                     </button>
                     <button
                       type="button"
                       className={`mood-chip ${dailyCheckInData.mood === 'anxious' ? 'selected' : ''}`}
                       onClick={() => setDailyCheckInData(prev => ({ ...prev, mood: 'anxious' }))}
                     >
-                      <span>😰</span> Anxious
+                      <FaGrimace className="mood-btn-icon" /> Anxious
                     </button>
                     <button
                       type="button"
                       className={`mood-chip ${dailyCheckInData.mood === 'sad' ? 'selected' : ''}`}
                       onClick={() => setDailyCheckInData(prev => ({ ...prev, mood: 'sad' }))}
                     >
-                      <span>😢</span> Sad
+                      <FaFrown className="mood-btn-icon" /> Sad
                     </button>
                   </div>
                 </div>

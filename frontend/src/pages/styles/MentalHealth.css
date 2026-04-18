@@ -496,6 +496,18 @@
 .mood-emoji {
     font-size: 4rem;
     margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mood-emoji svg {
+    width: 4rem;
+    height: 4rem;
+}
+
+.mood-emoji .mood-icon {
+    color: var(--primary);
 }
 
 .mood-stats {
@@ -574,15 +586,62 @@
     border-color: var(--primary);
     color: white;
     box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    transform: scale(1.05);
 }
 
-.mood-chip.selected span {
+.mood-chip.selected .mood-btn-icon {
     color: white;
 }
 
-.mood-chip span {
+/* Mood-specific selected states */
+.mood-chip.selected[data-mood="happy"],
+.mood-chip:nth-child(1).selected {
+    background: #10b981;
+    border-color: #10b981;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.mood-chip.selected[data-mood="neutral"],
+.mood-chip:nth-child(2).selected {
+    background: #64748b;
+    border-color: #64748b;
+    box-shadow: 0 2px 8px rgba(100, 116, 139, 0.3);
+}
+
+.mood-chip.selected[data-mood="anxious"],
+.mood-chip:nth-child(3).selected {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.mood-chip.selected[data-mood="sad"],
+.mood-chip:nth-child(4).selected {
+    background: #8b5cf6;
+    border-color: #8b5cf6;
+    box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.mood-chip .mood-btn-icon {
     font-size: 1.2rem;
     line-height: 1;
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+/* Mood button icon colors */
+.mood-chip .mood-btn-icon {
+    color: inherit;
+}
+
+/* Pulse animation for selected state */
+@keyframes pulse-selected {
+    0%, 100% { box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3); }
+    50% { box-shadow: 0 2px 12px rgba(99, 102, 241, 0.5); }
+}
+
+.mood-chip.selected {
+    animation: pulse-selected 2s infinite;
 }
 
 /* Range slider labels (Low/High, Poor/Excellent) */
@@ -793,17 +852,20 @@
         padding: 1rem;
     }
 
-    .mood-emoji {
-        font-size: 3rem;
+    .mood-emoji svg {
+        width: 3rem;
+        height: 3rem;
     }
-    
+
     .mood-chip {
         padding: 4px 10px;
         font-size: 0.8rem;
     }
-    
-    .mood-chip span {
+
+    .mood-chip .mood-btn-icon {
         font-size: 1rem;
+        width: 1rem;
+        height: 1rem;
     }
 }
 
