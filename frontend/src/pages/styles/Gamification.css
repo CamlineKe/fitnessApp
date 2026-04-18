@@ -240,6 +240,46 @@
     opacity: 0.4;
 }
 
+/* Freeze Button Styling - NEW for Issue #3 */
+.freeze-button {
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #4fc3f7 0%, #29b6f6 100%);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    box-shadow: 0 4px 12px rgba(41, 182, 246, 0.3);
+}
+
+.freeze-button:hover {
+    background: linear-gradient(135deg, #29b6f6 0%, #039be5 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(41, 182, 246, 0.4);
+}
+
+.freeze-button:active {
+    transform: translateY(0);
+}
+
+/* Streak Freeze Indicator in Header */
+.header-stat.freeze-indicator {
+    background: linear-gradient(135deg, rgba(79, 195, 247, 0.15) 0%, rgba(41, 182, 246, 0.1) 100%);
+    border: 1px solid rgba(41, 182, 246, 0.3);
+    border-radius: 12px;
+    padding: 0.5rem 1rem;
+}
+
+.header-stat.freeze-indicator .header-icon {
+    color: #29b6f6;
+}
+
 .streak-card:hover {
     transform: translateY(-4px);
     box-shadow: var(--shadow-xl);

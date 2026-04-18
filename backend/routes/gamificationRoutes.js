@@ -7,7 +7,8 @@ import {
   updateStreak,
   logMood,
   checkAchievements,
-  getLeaderboard
+  getLeaderboard,
+  useStreakFreeze
 } from '../controllers/gamificationController.js';
 
 const router = express.Router();
@@ -32,5 +33,8 @@ router.get('/achievements', checkAchievements);
 
 // Get leaderboard
 router.get('/leaderboard', getLeaderboard);
+
+// Use streak freeze (rate limited)
+router.post('/freeze', streakLimiter, useStreakFreeze);
 
 export default router;

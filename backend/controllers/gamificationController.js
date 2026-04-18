@@ -15,7 +15,9 @@ const initializeGamificationData = async (userId) => {
       bestStreak: 0,
       lastWorkoutDate: null,
       lastMentalDate: null,
-      lastNutritionDate: null
+      lastNutritionDate: null,
+      streakFreezes: 1, // Give new users 1 freeze to start
+      lastFreezeUsed: null
     },
     achievements: [],
     challenges: [
@@ -99,10 +101,25 @@ export const getGamificationData = async (req, res) => {
       effectiveStreaks.nutrition.value
     );
 
+    // Calculate freeze availability for each category (can only use if diffDays > 1)
+    const freezeAvailability = {
+      workout: gamificationData.streaks.streakFreezes > 0 &&
+        gamificationData.streaks.lastWorkoutDate &&
+        calculateEffectiveStreak(gamificationData.streaks.workoutStreak, gamificationData.streaks.lastWorkoutDate).status === 'broken',
+      mental: gamificationData.streaks.streakFreezes > 0 &&
+        gamificationData.streaks.lastMentalDate &&
+        calculateEffectiveStreak(gamificationData.streaks.mentalStreak, gamificationData.streaks.lastMentalDate).status === 'broken',
+      nutrition: gamificationData.streaks.streakFreezes > 0 &&
+        gamificationData.streaks.lastNutritionDate &&
+        calculateEffectiveStreak(gamificationData.streaks.nutritionStreak, gamificationData.streaks.lastNutritionDate).status === 'broken'
+    };
+
     const responseData = {
       ...gamificationData.toObject(),
       effectiveStreaks,
-      effectiveCurrentStreak: overallCurrentStreak
+      effectiveCurrentStreak: overallCurrentStreak,
+      freezeAvailability,
+      streakFreezes: gamificationData.streaks.streakFreezes || 0
     };
 
     res.json(responseData);
@@ -507,13 +524,26 @@ export const checkAchievements = async (req, res) => {
       });
     }
 
-    // Add new achievements
+    // Award streak freezes for new achievements (1 freeze per achievement)
+    let freezesAwarded = 0;
     if (newAchievements.length > 0) {
       gamificationData.achievements.push(...newAchievements);
+      // Award 1 freeze per new achievement
+      gamificationData.streaks.streakFreezes += newAchievements.length;
+      freezesAwarded = newAchievements.length;
       await gamificationData.save();
+
+      Logger.info(`Awarded ${freezesAwarded} streak freeze(s) for achievements`, {
+        userId: req.user._id,
+        achievements: newAchievements.map(a => a.id)
+      });
     }
 
-    res.json({ newAchievements });
+    res.json({
+      newAchievements,
+      freezesAwarded,
+      totalFreezes: gamificationData.streaks.streakFreezes
+    });
   } catch (error) {
     Logger.error('Error checking achievements:', error);
     res.status(500).json({ message: 'Server error' });
@@ -562,6 +592,144 @@ export const getLeaderboard = async (req, res) => {
   }
 };
 
+// Use streak freeze to protect a streak
+export const useStreakFreeze = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const { category, autoApply } = req.body;
+
+    if (!['workout', 'mental', 'nutrition'].includes(category)) {
+      return res.status(400).json({
+        message: 'Invalid category',
+        details: `Category must be one of: workout, mental, nutrition. Received: ${category}`
+      });
+    }
+
+    let gamificationData = await Gamification.findOne({ userId: req.user._id });
+    if (!gamificationData) {
+      gamificationData = await initializeGamificationData(req.user._id);
+    }
+
+    // Check if user has freezes available
+    if (gamificationData.streaks.streakFreezes <= 0) {
+      return res.status(400).json({
+        message: 'No streak freezes available',
+        details: 'Complete achievements or level up to earn more freezes'
+      });
+    }
+
+    const categoryCapitalized = category.charAt(0).toUpperCase() + category.slice(1);
+    const streakKey = `${category}Streak`;
+    const lastDateKey = `last${categoryCapitalized}Date`;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const lastActivityDate = gamificationData.streaks[lastDateKey];
+
+    // Can only use freeze if there's a break in streak (diffDays > 1)
+    if (!lastActivityDate) {
+      return res.status(400).json({
+        message: 'No streak to protect',
+        details: 'Start a streak first before using a freeze'
+      });
+    }
+
+    const lastDate = new Date(lastActivityDate);
+    lastDate.setHours(0, 0, 0, 0);
+    const diffDays = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+
+    // Freeze only works for breaks (diffDays > 1)
+    // For at-risk (diffDays === 1), user should just log activity
+    if (diffDays <= 1) {
+      return res.status(400).json({
+        message: 'Cannot use freeze',
+        details: diffDays === 0
+          ? 'Already logged today - no need for freeze'
+          : 'Streak not at risk yet - just log an activity to maintain it'
+      });
+    }
+
+    // Apply the freeze - update last activity date to yesterday so streak continues
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    const streakUpdate = {
+      [lastDateKey]: yesterday,
+      streakFreezes: gamificationData.streaks.streakFreezes - 1,
+      lastFreezeUsed: new Date()
+    };
+
+    // Atomic update
+    gamificationData = await Gamification.findOneAndUpdate(
+      { userId: req.user._id },
+      { $set: streakUpdate },
+      { new: true }
+    );
+
+    // Calculate effective streaks for response
+    const effectiveStreaks = {
+      workout: calculateEffectiveStreak(
+        gamificationData.streaks.workoutStreak,
+        gamificationData.streaks.lastWorkoutDate
+      ),
+      mental: calculateEffectiveStreak(
+        gamificationData.streaks.mentalStreak,
+        gamificationData.streaks.lastMentalDate
+      ),
+      nutrition: calculateEffectiveStreak(
+        gamificationData.streaks.nutritionStreak,
+        gamificationData.streaks.lastNutritionDate
+      )
+    };
+
+    Logger.info(`Streak freeze used for ${category}`, {
+      userId: req.user._id,
+      remainingFreezes: gamificationData.streaks.streakFreezes
+    });
+
+    res.json({
+      success: true,
+      message: `❄️ Streak freeze used! Your ${category} streak is protected.`,
+      streaks: gamificationData.streaks,
+      effectiveStreaks,
+      freezeUsed: {
+        category,
+        remainingFreezes: gamificationData.streaks.streakFreezes
+      }
+    });
+  } catch (error) {
+    Logger.error('Error using streak freeze:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Award streak freezes (called from achievement unlocks, level ups, etc.)
+export const awardStreakFreezes = async (userId, amount = 1, reason = 'achievement') => {
+  try {
+    const gamificationData = await Gamification.findOneAndUpdate(
+      { userId },
+      { $inc: { 'streaks.streakFreezes': amount } },
+      { new: true }
+    );
+
+    Logger.info(`Awarded ${amount} streak freeze(s) to user ${userId}`, { reason });
+
+    return {
+      success: true,
+      totalFreezes: gamificationData.streaks.streakFreezes,
+      awarded: amount,
+      reason
+    };
+  } catch (error) {
+    Logger.error('Error awarding streak freezes:', error);
+    return { success: false, error: error.message };
+  }
+};
+
 export default {
   getGamificationData,
   initializeGamification,
@@ -569,5 +737,7 @@ export default {
   updateStreak,
   logMood,
   checkAchievements,
-  getLeaderboard
+  getLeaderboard,
+  useStreakFreeze,
+  awardStreakFreezes
 };

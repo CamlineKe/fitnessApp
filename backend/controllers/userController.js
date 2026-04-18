@@ -216,7 +216,9 @@ const initializeDefaultData = async (userId) => {
         bestStreak: 0,
         lastWorkoutDate: null,
         lastMentalDate: null,
-        lastNutritionDate: null
+        lastNutritionDate: null,
+        streakFreezes: 1, // Give new users 1 freeze to start
+        lastFreezeUsed: null
       },
       achievements: defaultAchievements,
       challenges: [],

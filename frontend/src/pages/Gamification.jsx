@@ -65,6 +65,12 @@ const Gamification = () => {
       nutrition: { value: 0, status: 'new' }
     },
     effectiveCurrentStreak: 0,
+    streakFreezes: 0,
+    freezeAvailability: {
+      workout: false,
+      mental: false,
+      nutrition: false
+    },
     stats: {
       totalWorkoutTime: 0,
       totalCaloriesBurned: 0,
@@ -247,6 +253,32 @@ const Gamification = () => {
     </div>
   );
 
+  const handleUseFreeze = async (category) => {
+    try {
+      const response = await GamificationService.useStreakFreeze(category);
+
+      // Update local state with new freeze count and effective streaks
+      setGamificationData(prev => ({
+        ...prev,
+        streaks: response.streaks,
+        effectiveStreaks: response.effectiveStreaks,
+        streakFreezes: response.streaks.streakFreezes,
+        freezeAvailability: {
+          ...prev.freezeAvailability,
+          [category]: false // Freeze used, no longer available for this category
+        }
+      }));
+
+      toast.success(response.message);
+
+      // Emit event to update other components
+      EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, response.effectiveStreaks);
+    } catch (error) {
+      Logger.error('Failed to use streak freeze:', error);
+      toast.error(error.message || 'Failed to use streak freeze');
+    }
+  };
+
   const renderStreakCard = (category) => {
     const effectiveStreak = gamificationData?.effectiveStreaks?.[category] || { value: 0, status: 'new' };
     const storedStreak = gamificationData?.streaks?.[`${category}Streak`] || 0;
@@ -269,6 +301,8 @@ const Gamification = () => {
       }
     };
 
+    const canUseFreeze = gamificationData?.freezeAvailability?.[category] && gamificationData?.streakFreezes > 0;
+
     const getStatusMessage = () => {
       switch (streakStatus) {
         case 'active':
@@ -276,7 +310,20 @@ const Gamification = () => {
         case 'at-risk':
           return <p className="streak-status at-risk">Log today to keep your {storedStreak}-day streak! ⚠️</p>;
         case 'broken':
-          return <p className="streak-status broken">Streak broken. Start fresh today! 💪</p>;
+          return (
+            <div className="streak-status broken">
+              <p>Streak broken. Start fresh today! 💪</p>
+              {canUseFreeze && (
+                <button
+                  className="freeze-button"
+                  onClick={() => handleUseFreeze(category)}
+                  title="Use a streak freeze to restore your streak"
+                >
+                  ❄️ Use Freeze ({gamificationData.streakFreezes} left)
+                </button>
+              )}
+            </div>
+          );
         default:
           return <p className="streak-status new">Start your streak today!</p>;
       }
@@ -573,6 +620,12 @@ const Gamification = () => {
                 <FaTrophy className="header-icon" />
                 <span className="header-stat-label">{totalPoints} Total Points</span>
               </div>
+              {gamificationData?.streakFreezes > 0 && (
+                <div className="header-stat freeze-indicator">
+                  <span className="header-icon">❄️</span>
+                  <span className="header-stat-label">{gamificationData.streakFreezes} Freeze{gamificationData.streakFreezes !== 1 ? 's' : ''}</span>
+                </div>
+              )}
             </div>
           </div>
           <div className="content-wrapper">

@@ -20,7 +20,9 @@ const gamificationSchema = new mongoose.Schema({
     bestStreak: { type: Number, default: 0 },
     lastWorkoutDate: { type: Date },
     lastMentalDate: { type: Date },
-    lastNutritionDate: { type: Date }
+    lastNutritionDate: { type: Date },
+    streakFreezes: { type: Number, default: 0 },
+    lastFreezeUsed: { type: Date }
   },
   achievements: [{
     id: String,

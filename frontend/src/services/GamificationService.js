@@ -174,6 +174,28 @@ class GamificationService {
     if (percentage >= 20) return '#e67e22';
     return '#e74c3c';
   }
+
+  static async useStreakFreeze(category) {
+    try {
+      const response = await requestHandler('post', `${API_URL}/freeze`, { category });
+      Logger.info('Streak freeze used:', response);
+      return response;
+    } catch (error) {
+      Logger.error('Error using streak freeze:', error);
+
+      if (error.response?.status === 429) {
+        const errorMessage = error.response?.data?.message || 'Too many freeze requests. Please slow down.';
+        throw new Error(errorMessage);
+      }
+
+      if (error.response?.status === 400) {
+        const errorMessage = error.response?.data?.message || error.response?.data?.details || 'Cannot use freeze.';
+        throw new Error(errorMessage);
+      }
+
+      throw new Error(error.response?.data?.message || 'Failed to use streak freeze. Please try again.');
+    }
+  }
 }
 
 export default GamificationService;
