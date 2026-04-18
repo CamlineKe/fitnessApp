@@ -59,6 +59,12 @@ const Gamification = () => {
       mentalStreak: 0,
       nutritionStreak: 0
     },
+    effectiveStreaks: {
+      workout: { value: 0, status: 'new' },
+      mental: { value: 0, status: 'new' },
+      nutrition: { value: 0, status: 'new' }
+    },
+    effectiveCurrentStreak: 0,
     stats: {
       totalWorkoutTime: 0,
       totalCaloriesBurned: 0,
@@ -242,11 +248,11 @@ const Gamification = () => {
   );
 
   const renderStreakCard = (category) => {
-    const streak = gamificationData?.streaks?.[`${category}Streak`] || 0;
+    const effectiveStreak = gamificationData?.effectiveStreaks?.[category] || { value: 0, status: 'new' };
+    const storedStreak = gamificationData?.streaks?.[`${category}Streak`] || 0;
     const lastActivityDate = gamificationData?.streaks?.[`last${category.charAt(0).toUpperCase() + category.slice(1)}Date`];
-    const today = new Date();
-    const isActiveStreak = lastActivityDate && 
-      new Date(lastActivityDate).toDateString() === today.toDateString();
+    const streakStatus = effectiveStreak.status;
+    const displayStreak = effectiveStreak.value;
 
     const icons = {
       workout: <FaRunning className="streak-icon" />,
@@ -254,26 +260,49 @@ const Gamification = () => {
       nutrition: <FaAppleAlt className="streak-icon" />
     };
 
+    const getFlameColor = () => {
+      switch (streakStatus) {
+        case 'active': return '#ff6b6b';
+        case 'at-risk': return '#ffa726';
+        case 'broken': return '#9e9e9e';
+        default: return '#9e9e9e';
+      }
+    };
+
+    const getStatusMessage = () => {
+      switch (streakStatus) {
+        case 'active':
+          return <p className="streak-status active">Active Today! 🔥</p>;
+        case 'at-risk':
+          return <p className="streak-status at-risk">Log today to keep your {storedStreak}-day streak! ⚠️</p>;
+        case 'broken':
+          return <p className="streak-status broken">Streak broken. Start fresh today! 💪</p>;
+        default:
+          return <p className="streak-status new">Start your streak today!</p>;
+      }
+    };
+
     return (
-      <div className={`streak-card ${isActiveStreak ? 'active-streak' : ''}`}>
+      <div className={`streak-card ${streakStatus} ${streakStatus === 'active' ? 'active-streak' : ''}`}>
         {icons[category]}
         <h3>{category.charAt(0).toUpperCase() + category.slice(1)} Streak</h3>
-        <p className="streak-count">{streak} {streak === 1 ? 'day' : 'days'}</p>
+        <p className="streak-count">
+          {streakStatus === 'broken' ? '0' : displayStreak} {displayStreak === 1 ? 'day' : 'days'}
+          {streakStatus === 'broken' && storedStreak > 0 && (
+            <span className="previous-streak"> (was {storedStreak})</span>
+          )}
+        </p>
         <div className="streak-flame">
-          {streak > 0 && (
+          {displayStreak > 0 ? (
             <FaFire
-              className={`flame ${streak > 2 ? 'flame-hot' : ''} ${isActiveStreak ? 'active' : ''}`}
-              style={{ color: isActiveStreak ? '#ff6b6b' : '#999' }}
+              className={`flame ${displayStreak > 2 ? 'flame-hot' : ''} ${streakStatus}`}
+              style={{ color: getFlameColor() }}
             />
+          ) : (
+            <FaFire className="flame broken" style={{ color: '#e0e0e0', opacity: 0.3 }} />
           )}
         </div>
-        {isActiveStreak ? (
-          <p className="streak-status active">Active Today! 🔥</p>
-        ) : lastActivityDate ? (
-          <p className="streak-status inactive">Last active: {GamificationService.formatDate(lastActivityDate)}</p>
-        ) : (
-          <p className="streak-status new">Start your streak today!</p>
-        )}
+        {getStatusMessage()}
       </div>
     );
   };
@@ -538,7 +567,7 @@ const Gamification = () => {
               </div>
               <div className="header-stat">
                 <FaFire className="header-icon" />
-                <span className="header-stat-label">{gamificationData?.streaks?.currentStreak || 0} Day Streak</span>
+                <span className="header-stat-label">{gamificationData?.effectiveCurrentStreak || 0} Day Streak</span>
               </div>
               <div className="header-stat">
                 <FaTrophy className="header-icon" />

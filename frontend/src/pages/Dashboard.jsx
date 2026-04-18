@@ -411,11 +411,11 @@ const Dashboard = () => {
                   <h3>Progress</h3>
                   {loading.gamification && <SectionLoader />}
                 </div>
-                {gamificationData?.streaks?.currentStreak > 0 ? (
+                {gamificationData?.effectiveCurrentStreak > 0 ? (
                   <div className="stat-content">
                     <div className="streak-info">
                       <p className="stat-value">
-                        {gamificationData.streaks.currentStreak}
+                        {gamificationData.effectiveCurrentStreak}
                         <span className="streak-label"> day streak</span>
                       </p>
                       <p className="stat-label">
@@ -424,7 +424,7 @@ const Dashboard = () => {
                       </p>
                     </div>
                     <div className="stat-details">
-                      <span>Best Streak: {gamificationData.streaks.bestStreak || 0} days</span>
+                      <span>Best Streak: {gamificationData.streaks?.bestStreak || 0} days</span>
                       <span>Total Points: {
                         (gamificationData.points?.workout || 0) +
                         (gamificationData.points?.mental || 0) +

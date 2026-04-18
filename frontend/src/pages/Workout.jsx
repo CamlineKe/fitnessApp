@@ -369,10 +369,11 @@ const Workout = () => {
         EventEmitter.emit(EventEmitter.Events.WORKOUT_UPDATED, workoutEventData);
         EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, streakResponse?.streaks);
 
-        // Show success message with streak info
-        const streakMsg = streakResponse?.streaks?.currentStreak > 1 
-          ? `${streakResponse.streaks.currentStreak} day streak! 🔥` 
-          : '';
+        // Show success message with streak info - use effective streak value
+        const effectiveStreak = streakResponse?.effectiveStreaks?.workout?.value || 0;
+        const streakMsg = effectiveStreak > 1
+          ? `${effectiveStreak} day streak! 🔥`
+          : effectiveStreak === 1 ? 'Streak started! 🔥' : '';
         handleSuccess(`Workout logged successfully! ${streakMsg}`);
       } catch (error) {
         Logger.error("Failed to update gamification:", error);

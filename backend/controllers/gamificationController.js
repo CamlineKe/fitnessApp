@@ -41,6 +41,27 @@ const initializeGamificationData = async (userId) => {
   });
 };
 
+// Helper function to calculate effective streak status
+const calculateEffectiveStreak = (streakValue, lastActivityDate) => {
+  if (!lastActivityDate) {
+    return { value: 0, status: 'new' };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const lastDate = new Date(lastActivityDate);
+  lastDate.setHours(0, 0, 0, 0);
+  const diffDays = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    return { value: streakValue, status: 'active' };
+  } else if (diffDays === 1) {
+    return { value: streakValue, status: 'at-risk' };
+  } else {
+    return { value: 0, status: 'broken' };
+  }
+};
+
 // Get gamification data
 export const getGamificationData = async (req, res) => {
   try {
@@ -49,13 +70,42 @@ export const getGamificationData = async (req, res) => {
     }
 
     let gamificationData = await Gamification.findOne({ userId: req.user._id });
-    
+
     // Initialize if not exists
     if (!gamificationData) {
       gamificationData = await initializeGamificationData(req.user._id);
     }
 
-    res.json(gamificationData);
+    // Calculate effective streaks for real-time status
+    const effectiveStreaks = {
+      workout: calculateEffectiveStreak(
+        gamificationData.streaks.workoutStreak,
+        gamificationData.streaks.lastWorkoutDate
+      ),
+      mental: calculateEffectiveStreak(
+        gamificationData.streaks.mentalStreak,
+        gamificationData.streaks.lastMentalDate
+      ),
+      nutrition: calculateEffectiveStreak(
+        gamificationData.streaks.nutritionStreak,
+        gamificationData.streaks.lastNutritionDate
+      )
+    };
+
+    // Calculate overall effective current streak (max of all effective streaks)
+    const overallCurrentStreak = Math.max(
+      effectiveStreaks.workout.value,
+      effectiveStreaks.mental.value,
+      effectiveStreaks.nutrition.value
+    );
+
+    const responseData = {
+      ...gamificationData.toObject(),
+      effectiveStreaks,
+      effectiveCurrentStreak: overallCurrentStreak
+    };
+
+    res.json(responseData);
   } catch (error) {
     Logger.error('Error getting gamification data:', error);
     res.status(500).json({ message: 'Server error' });
@@ -329,8 +379,25 @@ export const updateStreak = async (req, res) => {
       { new: true, upsert: true }
     );
 
+    // Calculate effective streaks for response
+    const effectiveStreaks = {
+      workout: calculateEffectiveStreak(
+        gamificationData.streaks.workoutStreak,
+        gamificationData.streaks.lastWorkoutDate
+      ),
+      mental: calculateEffectiveStreak(
+        gamificationData.streaks.mentalStreak,
+        gamificationData.streaks.lastMentalDate
+      ),
+      nutrition: calculateEffectiveStreak(
+        gamificationData.streaks.nutritionStreak,
+        gamificationData.streaks.lastNutritionDate
+      )
+    };
+
     res.json({
       streaks: gamificationData.streaks,
+      effectiveStreaks,
       message: `${category} streak updated successfully`
     });
   } catch (error) {

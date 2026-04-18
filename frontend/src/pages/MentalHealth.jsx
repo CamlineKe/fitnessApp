@@ -217,16 +217,16 @@ const MentalHealth = () => {
             stressLevel: dailyCheckInData.stressLevel,
             sleepQuality: dailyCheckInData.sleepQuality
           });
-          await GamificationService.updateStreak('mental');
+          const streakResponse = await GamificationService.updateStreak('mental');
           await GamificationService.logMood(dailyCheckInData.mood);
           await GamificationService.checkAchievements();
 
           // Refresh data - this will trigger a new stress analysis and emit the event
           await fetchMentalHealthData(userId);
-          
+
           // Emit events for dashboard update and streak notifications
           EventEmitter.emit(EventEmitter.Events.MENTAL_HEALTH_UPDATED, { mood: dailyCheckInData.mood });
-          EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, { type: 'mental' });
+          EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, streakResponse?.effectiveStreaks);
           
           // Reset form
           setDailyCheckInData({

@@ -323,13 +323,13 @@ const Nutrition = () => {
         macronutrients: mealData.nutrients,
         mealType: mealData.type
       });
-      await GamificationService.updateStreak('nutrition');
+      const streakResponse = await GamificationService.updateStreak('nutrition');
       await GamificationService.checkAchievements();
 
       // Emit events for dashboard update using EventEmitter constants
       EventEmitter.emit(EventEmitter.Events.NUTRITION_UPDATED, { meal: mealData });
       EventEmitter.emit(EventEmitter.Events.MEAL_ADDED, { meal: mealData });
-      EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, { type: 'nutrition' });
+      EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, streakResponse?.effectiveStreaks);
 
       // Show success toast
       notifySuccess('Meal added successfully! 🍽️');
@@ -428,13 +428,13 @@ const Nutrition = () => {
           macronutrients: editFormData.nutrients,
           mealType: editFormData.type
         });
-        await GamificationService.updateStreak('nutrition');
+        const streakResponse = await GamificationService.updateStreak('nutrition');
         await GamificationService.checkAchievements();
-        
+
         // Emit events for dashboard update using EventEmitter constants
         EventEmitter.emit(EventEmitter.Events.NUTRITION_UPDATED, { meal: updatedLog });
         EventEmitter.emit(EventEmitter.Events.MEAL_UPDATED, { meal: updatedLog });
-        EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, { type: 'nutrition' });
+        EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, streakResponse?.effectiveStreaks);
 
         setEditMeal(null); // Clear edit mode after saving
         notifySuccess('Meal updated successfully! 🔄');
@@ -480,13 +480,13 @@ const Nutrition = () => {
           macronutrients: mealToDelete.macronutrients,
           mealType: mealToDelete.mealType
         });
-        await GamificationService.updateStreak('nutrition');
+        const streakResponse = await GamificationService.updateStreak('nutrition');
         await GamificationService.checkAchievements();
-        
+
         // Emit events for dashboard update using EventEmitter constants
         EventEmitter.emit(EventEmitter.Events.NUTRITION_UPDATED, { deletedId: id });
         EventEmitter.emit(EventEmitter.Events.MEAL_DELETED, { deletedId: id });
-        EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, { type: 'nutrition' });
+        EventEmitter.emit(EventEmitter.Events.GAMIFICATION_UPDATED, streakResponse?.effectiveStreaks);
         
         notifySuccess('Meal deleted successfully! 🗑️');
       }
