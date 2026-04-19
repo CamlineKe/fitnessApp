@@ -368,9 +368,16 @@ const Dashboard = () => {
                   <div className="stat-content">
                     <p className="stat-value">{workoutData.duration}</p>
                     <p className="stat-label">minutes today</p>
-                    <div className="stat-details">
-                      <span>{workoutData.activityType}</span>
-                      <span>{workoutData.caloriesBurned || 0} calories burned</span>
+                    <div className="workout-pills">
+                      <div className="workout-pill activity">
+                        <i className={`fas fa-${workoutData.activityType?.toLowerCase().includes('run') ? 'running' : workoutData.activityType?.toLowerCase().includes('cycle') || workoutData.activityType?.toLowerCase().includes('bike') ? 'bicycle' : 'dumbbell'}`}></i>
+                        <span className="workout-pill-value">{workoutData.activityType}</span>
+                      </div>
+                      <div className="workout-pill calories-burned">
+                        <i className="fas fa-fire"></i>
+                        <span className="workout-pill-value">{workoutData.caloriesBurned || 0}</span>
+                        <span className="workout-pill-label">calories</span>
+                      </div>
                     </div>
                   </div>
                 ) : (
