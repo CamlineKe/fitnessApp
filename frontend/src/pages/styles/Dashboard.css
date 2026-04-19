@@ -406,6 +406,104 @@
     opacity: 0.7;
 }
 
+/* Macro Pills - NEW for nutrition breakdown */
+.macro-pills {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.macro-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    min-width: 70px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.macro-pill i {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.macro-pill .macro-value {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.macro-pill .macro-name {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Protein - Blue theme */
+.macro-pill.protein {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.macro-pill.protein i,
+.macro-pill.protein .macro-value {
+    color: #2563eb;
+}
+
+.macro-pill.protein .macro-name {
+    color: #3b82f6;
+}
+
+.macro-pill.protein:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Carbs - Amber/Orange theme */
+.macro-pill.carbs {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.macro-pill.carbs i,
+.macro-pill.carbs .macro-value {
+    color: #d97706;
+}
+
+.macro-pill.carbs .macro-name {
+    color: #f59e0b;
+}
+
+.macro-pill.carbs:hover {
+    background: rgba(245, 158, 11, 0.2);
+    transform: translateY(-2px);
+}
+
+/* Fat - Rose/Red theme */
+.macro-pill.fat {
+    background: rgba(244, 63, 94, 0.12);
+    border-color: rgba(244, 63, 94, 0.3);
+}
+
+.macro-pill.fat i,
+.macro-pill.fat .macro-value {
+    color: #e11d48;
+}
+
+.macro-pill.fat .macro-name {
+    color: #f43f5e;
+}
+
+.macro-pill.fat:hover {
+    background: rgba(244, 63, 94, 0.2);
+    transform: translateY(-2px);
+}
+
 .stat-footer {
     color: var(--primary);
     font-size: 0.95rem;

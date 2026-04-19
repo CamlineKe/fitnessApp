@@ -328,10 +328,22 @@ const Dashboard = () => {
                       <p className="stat-value">{nutritionData.calories}</p>
                       <p className="stat-label">Calories Consumed</p>
                     </div>
-                    <div className="stat-details">
-                      <span>Protein: {nutritionData.macronutrients?.protein || 0}g</span>
-                      <span>Carbs: {nutritionData.macronutrients?.carbohydrates || 0}g</span>
-                      <span>Fat: {nutritionData.macronutrients?.fats || 0}g</span>
+                    <div className="macro-pills">
+                      <div className="macro-pill protein">
+                        <i className="fas fa-drumstick-bite"></i>
+                        <span className="macro-value">{nutritionData.macronutrients?.protein || 0}g</span>
+                        <span className="macro-name">Protein</span>
+                      </div>
+                      <div className="macro-pill carbs">
+                        <i className="fas fa-bread-slice"></i>
+                        <span className="macro-value">{nutritionData.macronutrients?.carbohydrates || 0}g</span>
+                        <span className="macro-name">Carbs</span>
+                      </div>
+                      <div className="macro-pill fat">
+                        <i className="fas fa-droplet"></i>
+                        <span className="macro-value">{nutritionData.macronutrients?.fats || 0}g</span>
+                        <span className="macro-name">Fat</span>
+                      </div>
                     </div>
                   </>
                 ) : (
