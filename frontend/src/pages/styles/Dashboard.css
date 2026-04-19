@@ -583,6 +583,134 @@
     transform: translateY(-2px);
 }
 
+/* Mental Health Pills - NEW for wellness metrics */
+.mental-pills {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.mental-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    min-width: 70px;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.mental-pill i {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.mental-pill .mental-pill-value {
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.mental-pill .mental-pill-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Stress pill - Red theme (high stress = high severity, inverse scale) */
+.mental-pill.stress.high {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.mental-pill.stress.high i,
+.mental-pill.stress.high .mental-pill-value {
+    color: #dc2626;
+}
+
+.mental-pill.stress.high .mental-pill-label {
+    color: #ef4444;
+}
+
+.mental-pill.stress.medium {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.mental-pill.stress.medium i,
+.mental-pill.stress.medium .mental-pill-value {
+    color: #d97706;
+}
+
+.mental-pill.stress.medium .mental-pill-label {
+    color: #f59e0b;
+}
+
+.mental-pill.stress.low {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.mental-pill.stress.low i,
+.mental-pill.stress.low .mental-pill-value {
+    color: #059669;
+}
+
+.mental-pill.stress.low .mental-pill-label {
+    color: #10b981;
+}
+
+/* Sleep pill - Purple/Indigo theme */
+.mental-pill.sleep.low {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.mental-pill.sleep.low i,
+.mental-pill.sleep.low .mental-pill-value {
+    color: #dc2626;
+}
+
+.mental-pill.sleep.low .mental-pill-label {
+    color: #ef4444;
+}
+
+.mental-pill.sleep.medium {
+    background: rgba(245, 158, 11, 0.12);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.mental-pill.sleep.medium i,
+.mental-pill.sleep.medium .mental-pill-value {
+    color: #d97706;
+}
+
+.mental-pill.sleep.medium .mental-pill-label {
+    color: #f59e0b;
+}
+
+.mental-pill.sleep.high {
+    background: rgba(99, 102, 241, 0.12);
+    border-color: rgba(99, 102, 241, 0.3);
+}
+
+.mental-pill.sleep.high i,
+.mental-pill.sleep.high .mental-pill-value {
+    color: #4f46e5;
+}
+
+.mental-pill.sleep.high .mental-pill-label {
+    color: #6366f1;
+}
+
+.mental-pill:hover {
+    transform: translateY(-2px);
+}
+
 .stat-footer {
     color: var(--primary);
     font-size: 0.95rem;

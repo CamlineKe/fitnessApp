@@ -400,15 +400,30 @@ const Dashboard = () => {
                 </div>
                 {(() => {
                   const todayLog = mentalHealthData?.find(log => isToday(log.date));
+                  const stressLevel = todayLog?.stressLevel || 0;
+                  const sleepQuality = todayLog?.sleepQuality || 0;
+                  // Stress is inverse (higher = worse)
+                  const stressSeverity = stressLevel >= 8 ? 'high' : stressLevel >= 5 ? 'medium' : 'low';
+                  // Sleep is normal (higher = better)
+                  const sleepSeverity = sleepQuality >= 7 ? 'high' : sleepQuality >= 5 ? 'medium' : 'low';
+
                   return todayLog?.mood ? (
                     <div className="stat-content">
                       <p className="stat-value">
                         {todayLog.mood.charAt(0).toUpperCase() + todayLog.mood.slice(1)}
                       </p>
                       <p className="stat-label">today's mood</p>
-                      <div className="stat-details">
-                        <span>Stress: {todayLog.stressLevel || 0}/10</span>
-                        <span>Sleep: {todayLog.sleepQuality || 0}/10</span>
+                      <div className="mental-pills">
+                        <div className={`mental-pill stress ${stressSeverity}`}>
+                          <i className="fas fa-heart-pulse"></i>
+                          <span className="mental-pill-value">{stressLevel}/10</span>
+                          <span className="mental-pill-label">Stress</span>
+                        </div>
+                        <div className={`mental-pill sleep ${sleepSeverity}`}>
+                          <i className="fas fa-bed"></i>
+                          <span className="mental-pill-value">{sleepQuality}/10</span>
+                          <span className="mental-pill-label">Sleep</span>
+                        </div>
                       </div>
                     </div>
                   ) : (
