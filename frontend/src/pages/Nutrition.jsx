@@ -840,9 +840,12 @@ const Nutrition = () => {
               ))}
             </ul>
           ) : (
-            <div className="no-recommendations">
-              <p>No diet recommendations available at the moment.</p>
-            </div>
+            <EmptyState
+              icon="fa-apple-alt"
+              title="No recommendations available"
+              subtitle="Start logging meals to get personalized diet advice!"
+              variant="default"
+            />
           )}
         </div>
 
