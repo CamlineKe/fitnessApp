@@ -657,10 +657,12 @@ const Workout = () => {
                     ))}
                   </ul>
                 ) : (
-                  <div className="no-recommendations">
-                    <p>No workout recommendations available at the moment.</p>
-                    <p className="recommendation-note">Keep logging your workouts to receive personalized recommendations!</p>
-                  </div>
+                  <EmptyState
+                    icon="fa-dumbbell"
+                    title="No recommendations available"
+                    subtitle="Keep logging your workouts to receive personalized recommendations!"
+                    variant="default"
+                  />
                 )}
               </div>
 

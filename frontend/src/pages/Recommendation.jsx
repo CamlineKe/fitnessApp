@@ -10,6 +10,7 @@ import { EventEmitter } from '../utils/EventEmitter';
 import Logger from '../utils/logger';
 import { getCachedRecommendations, setCachedRecommendations, clearRecommendationsCache } from '../utils/recommendationsCache';
 import './styles/Recommendation.css';
+import EmptyState from '../components/EmptyState';
 
 const Recommendation = () => {
   const { user, getUserId, isAuthenticated } = useContext(UserContext);
@@ -303,10 +304,12 @@ const Recommendation = () => {
                           ))}
                         </ul>
                       ) : (
-                        <div className="no-recommendations">
-                          <p>No diet recommendations available at the moment.</p>
-                          <p className="recommendation-note">Log your meals to receive personalized diet advice!</p>
-                        </div>
+                        <EmptyState
+                          icon="fa-apple-alt"
+                          title="No diet recommendations available"
+                          subtitle="Log your meals to receive personalized diet advice!"
+                          variant="compact"
+                        />
                       )}
                     </div>
                   </div>
@@ -413,10 +416,12 @@ const Recommendation = () => {
                           ))}
                         </ul>
                       ) : (
-                        <div className="no-recommendations">
-                          <p>No stress analysis recommendations available at the moment.</p>
-                          <p className="recommendation-note">Complete daily check-ins to get personalized stress management tips!</p>
-                        </div>
+                        <EmptyState
+                          icon="fa-brain"
+                          title="No stress recommendations available"
+                          subtitle="Complete daily check-ins to get personalized stress management tips!"
+                          variant="compact"
+                        />
                       )}
                     </div>
                   </div>
@@ -499,10 +504,12 @@ const Recommendation = () => {
                           ))}
                         </ul>
                       ) : (
-                        <div className="no-recommendations">
-                          <p>No workout recommendations available at the moment.</p>
-                          <p>Continue logging your workouts to receive personalized recommendations.</p>
-                        </div>
+                        <EmptyState
+                          icon="fa-dumbbell"
+                          title="No workout recommendations available"
+                          subtitle="Continue logging your workouts to receive personalized recommendations."
+                          variant="compact"
+                        />
                       )}
                     </div>
                   </div>

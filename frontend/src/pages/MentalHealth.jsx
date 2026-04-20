@@ -521,10 +521,12 @@ const MentalHealth = () => {
                     ))}
                   </ul>
                 ) : (
-                  <div className="no-recommendations">
-                    <p>No recommendations available at the moment.</p>
-                    <p>Continue logging your daily check-ins to receive personalized recommendations.</p>
-                  </div>
+                  <EmptyState
+                    icon="fa-brain"
+                    title="No recommendations available"
+                    subtitle="Continue logging your daily check-ins to receive personalized recommendations."
+                    variant="default"
+                  />
                 )}
               </div>
             </div>
