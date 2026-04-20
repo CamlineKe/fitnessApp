@@ -323,11 +323,13 @@ const Dashboard = () => {
                   {loading.nutrition && <SectionLoader />}
                 </div>
                 {nutritionData?.calories > 0 ? (
-                  <>
-                    <div className="stat-content">
-                      <p className="stat-value">{nutritionData.calories}</p>
-                      <p className="stat-label">Calories Consumed</p>
+                  <div className="stat-content">
+                    <div className="calories-pill">
+                      <i className="fas fa-fire"></i>
+                      <span className="calories-value">{nutritionData.calories}</span>
+                      <span className="calories-label">Calories Today</span>
                     </div>
+                    <p className="pills-label">Today's Macronutrients</p>
                     <div className="macro-pills">
                       <div className="macro-pill protein">
                         <i className="fas fa-drumstick-bite"></i>
@@ -345,7 +347,7 @@ const Dashboard = () => {
                         <span className="macro-name">Fat</span>
                       </div>
                     </div>
-                  </>
+                  </div>
                 ) : (
                   <EmptyState
                     icon="fa-utensils"

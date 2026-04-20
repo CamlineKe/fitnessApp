@@ -327,6 +327,49 @@
     margin-bottom: 1rem;
 }
 
+.pills-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    margin: 0.5rem 0 0.15rem;
+}
+
+/* Calories Pill - Primary metric for nutrition card */
+.calories-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 1rem 1.5rem;
+    border-radius: 14px;
+    background: rgba(244, 63, 94, 0.1);
+    border: 2px solid rgba(244, 63, 94, 0.25);
+    margin-bottom: 0.5rem;
+    align-self: flex-start;
+}
+
+.calories-pill i {
+    font-size: 1.25rem;
+    color: #f43f5e;
+    margin-bottom: 0.25rem;
+}
+
+.calories-pill .calories-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #e11d48;
+    line-height: 1;
+}
+
+.calories-pill .calories-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #f43f5e;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
 /* Category Pills - NEW for streak breakdown */
 .category-pills {
     display: flex;
@@ -409,8 +452,8 @@
 /* Macro Pills - NEW for nutrition breakdown */
 .macro-pills {
     display: flex;
-    gap: 0.75rem;
-    margin-top: 1rem;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
     flex-wrap: wrap;
 }
 
@@ -418,10 +461,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
-    min-width: 70px;
+    gap: 0.2rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 10px;
+    min-width: 60px;
+    flex: 1;
+    max-width: 80px;
     transition: all 0.3s ease;
     border: 2px solid transparent;
 }
@@ -1150,6 +1195,28 @@
         width: 100%;
         justify-content: center;
     }
+    
+    .macro-pills {
+        gap: 0.4rem;
+    }
+    
+    .macro-pill {
+        padding: 0.5rem 0.6rem;
+        min-width: 55px;
+    }
+    
+    .calories-pill {
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+    }
+    
+    .calories-pill .calories-value {
+        font-size: 1.75rem;
+    }
+    
+    .calories-pill .calories-label {
+        font-size: 0.7rem;
+    }
 }
 
 /* Small Mobile */
@@ -1175,6 +1242,47 @@
     
     .activity-item {
         padding: 1rem;
+    }
+    
+    .pills-label {
+        font-size: 0.65rem;
+        margin: 0.4rem 0 0.1rem;
+    }
+    
+    .macro-pills {
+        gap: 0.35rem;
+    }
+    
+    .macro-pill {
+        padding: 0.5rem 0.4rem;
+        min-width: 50px;
+        max-width: 70px;
+        border-radius: 8px;
+    }
+    
+    .macro-pill i {
+        font-size: 0.9rem;
+    }
+    
+    .macro-pill .macro-value {
+        font-size: 0.85rem;
+    }
+    
+    .macro-pill .macro-name {
+        font-size: 0.6rem;
+    }
+    
+    .calories-pill {
+        padding: 0.6rem 0.8rem;
+        border-radius: 10px;
+    }
+    
+    .calories-pill .calories-value {
+        font-size: 1.5rem;
+    }
+    
+    .calories-pill .calories-label {
+        font-size: 0.65rem;
     }
 }
 
